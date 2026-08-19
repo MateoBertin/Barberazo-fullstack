@@ -1,0 +1,26 @@
+# Dependencias
+node_modules/
+
+# Build de Vite
+dist/
+dist-ssr/
+
+# Variables de entorno
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editor / SO
+.vscode/
+.DS_Store
+
+# Antigravity / IA (cache o config local, si genera alguna)
+.antigravity/
+
+# Vite cache
+.vite/
+

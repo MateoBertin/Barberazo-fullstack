@@ -18,11 +18,7 @@ git clone https://github.com/tu-usuario/nombre-repo.git
 cd Desarrollo (o el nombre de la carpeta)
 npm install
 
-3. Copiá el archivo de variables de entorno de ejemplo:
-cp .env.example .env
-Nota: todavia no tenemos un .env
-
-4. Corré el proyecto en modo desarrollo:
+3. Corré el proyecto en modo desarrollo:
 npm run dev
 
 ## Estructura del proyecto

@@ -1,12 +1,18 @@
 # Dependencias
 node_modules/
+api/node_modules/
+web/node_modules/
 
-# Build de Vite
+# Builds
 dist/
+web/dist/
 dist-ssr/
 
-# Variables de entorno
+# Variables de entorno locales
 .env
+api/.env
+web/.env
+*.env
 .env.local
 .env.*.local
 
@@ -14,13 +20,9 @@ dist-ssr/
 *.log
 npm-debug.log*
 
-# Editor / SO
+# Editores y Sistema
 .vscode/
+.idea/
 .DS_Store
-
-# Antigravity / IA (cache o config local, si genera alguna)
-.antigravity/
-
-# Vite cache
+Thumbs.db
 .vite/
-

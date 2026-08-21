@@ -37,13 +37,13 @@ export const LoginPage = () => {
 
   const from = location.state?.from?.pathname;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
     try {
-      const loggedUser = login(email, password);
+      const loggedUser = await login(email, password);
       const targetPath =
         from ||
         (loggedUser.rol === 'dueno'
@@ -61,7 +61,7 @@ export const LoginPage = () => {
 
   const handleSelectMock = (mockUser) => {
     setEmail(mockUser.email);
-    setPassword(mockUser.password);
+    setPassword('123456');
     setError('');
   };
 
@@ -179,7 +179,7 @@ export const LoginPage = () => {
 
           <Divider sx={{ my: 2.5 }}>
             <Typography variant="caption" color="text.secondary">
-              O probar credenciales demo
+              O probar credenciales demo (clave: 123456)
             </Typography>
           </Divider>
 

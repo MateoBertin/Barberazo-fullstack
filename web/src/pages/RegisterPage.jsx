@@ -45,6 +45,7 @@ export const RegisterPage = () => {
   const [inputCode, setInputCode] = useState('');
   const [timeLeft, setTimeLeft] = useState(300); // 5 minutos = 300s
   const [verifyError, setVerifyError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   // Temporizador de 5 minutos
   useEffect(() => {
@@ -70,8 +71,8 @@ export const RegisterPage = () => {
       return;
     }
 
-    if (formData.password.length < 3) {
-      setError('La contraseña debe tener al menos 3 caracteres.');
+    if (formData.password.length < 6) {
+      setError('La contraseña debe tener al menos 6 caracteres.');
       return;
     }
 
@@ -92,16 +93,19 @@ export const RegisterPage = () => {
     }
   };
 
-  const handleVerifySubmit = (e) => {
+  const handleVerifySubmit = async (e) => {
     e.preventDefault();
     setVerifyError('');
+    setLoading(true);
 
     try {
-      verifyRegistrationCode(inputCode);
+      await verifyRegistrationCode(inputCode);
       setOpenVerifyModal(false);
       navigate('/cliente/home', { replace: true });
     } catch (err) {
       setVerifyError(err.message || 'Error de verificación.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -213,6 +217,7 @@ export const RegisterPage = () => {
                   value={formData.password}
                   onChange={handleChange}
                   required
+                  helperText="Mínimo 6 caracteres"
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
@@ -325,11 +330,11 @@ export const RegisterPage = () => {
             variant="contained"
             color="primary"
             size="large"
-            disabled={timeLeft === 0}
+            disabled={timeLeft === 0 || loading}
             fullWidth
             sx={{ fontWeight: 700 }}
           >
-            {timeLeft > 0 ? 'Confirmar Registro' : 'Código Expirado'}
+            {loading ? <CircularProgress size={24} color="inherit" /> : timeLeft > 0 ? 'Confirmar Registro' : 'Código Expirado'}
           </Button>
         </DialogActions>
       </Dialog>

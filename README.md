@@ -1,29 +1,46 @@
-# Barberazo
+# 💈 Barberazo - Sistema Fullstack de Gestión de Turnos
 
-Proyecto de la materia Desarrollo de Software — Ingeniería en Sistemas.
+Sistema integral para la gestión de turnos, clientes, empleados y servicios de barbería desarrollado para la cátedra de Desarrollo de Software (2026).
 
-## Estado actual
-Frontend en desarrollo (no está completo, faltan algunas pantallas/funcionalidades).
-Falta todo el Backend.
+---
 
-## Tecnologías
-- Front: React + Vite
-- Back: MySQL/PosgreSQL + Node.js + Express 
-## Instalación
+## 📁 Estructura del Repositorio
 
-1. Cloná el repositorio:
-git clone https://github.com/tu-usuario/nombre-repo.git
+- **`/api`**: Backend desarrollado en Node.js, Express y MySQL siguiendo el patrón arquitectónico MVC.
+- **`/web`**: Frontend desarrollado en React.js, Vite, Material UI y React Router.
 
-2. Entrá a la carpeta e instalá las dependencias:
-cd Desarrollo (o el nombre de la carpeta)
+---
+
+## 🚀 Puesta en Marcha Rápida
+
+### 1. Base de Datos (MySQL)
+1. Abrir MySQL Workbench y ejecutar el script [api/database/init_barberazo.sql](api/database/init_barberazo.sql).
+2. Se creará la base de datos `dsw` con todas las tablas y usuarios de prueba.
+
+### 2. Backend (`/api`)
+```bash
+cd api
 npm install
-
-3. Corré el proyecto en modo desarrollo:
+# Configurar api/.env con las credenciales de tu MySQL
 npm run dev
+```
+El servidor arrancará en `http://localhost:3000`.
 
-## Estructura del proyecto
-- `src/pages/` — Vistas por rol (owner, employee, client)
-- `src/components/` — Componentes reutilizables
-- `src/context/` — Contextos de autenticación y datos
-- `otro/` — contiene todo el contexto: casos de uso, minutas, mapa de navegación, interfaces de usuario, modelo de dominio, tablas sql (falta terminarlas), etc.
+### 3. Frontend (`/web`)
+```bash
+cd web
+npm install
+npm run dev
+```
+La aplicación web se abrirá en `http://localhost:5173`.
 
+---
+
+## 🔑 Usuarios de Prueba
+
+| Rol | Email | Contraseña |
+| :--- | :--- | :--- |
+| **Dueño / Admin** | `dueno@barberazo.com` | `123456` |
+| **Empleado** | `empleado@barberazo.com` | `123456` |
+| **Cliente Activo** | `cliente@barberazo.com` | `123456` |
+| **Cliente Multado** | `multado@barberazo.com` | `123456` |

@@ -10,6 +10,7 @@ import { useData } from '../../context/DataContext';
 import { useNavigate } from 'react-router-dom';
 import { BookingWizard } from '../../components/booking/BookingWizard';
 import { ReviewModal } from '../../components/reviews/ReviewModal';
+import { BRAND_COLORS, withAlpha } from '../../theme';
 
 export const ClientDashboard = () => {
   const { user } = useAuth();
@@ -38,8 +39,8 @@ export const ClientDashboard = () => {
         sx={{
           p: { xs: 2.5, sm: 4 },
           borderRadius: 4,
-          background: 'linear-gradient(135deg, #181b20 0%, #22262f 100%)',
-          border: '1px solid rgba(212, 175, 55, 0.2)',
+          background: `linear-gradient(135deg, ${BRAND_COLORS.card} 0%, ${BRAND_COLORS.neutralTint} 100%)`,
+          border: `1px solid ${withAlpha(BRAND_COLORS.gold, 0.2)}`,
           mb: 4,
         }}
       >
@@ -96,9 +97,9 @@ export const ClientDashboard = () => {
 
       {/* ─── HISTORIAL DE TURNOS + CALIFICACIÓN (CUU1.4) ─── */}
       {pastAppointments.length > 0 && (
-        <Paper sx={{ p: 3, borderRadius: 3, background: '#181b20', mt: 4 }}>
+        <Paper sx={{ p: 3, borderRadius: 3, background: BRAND_COLORS.card, mt: 4 }}>
           <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}>
-            <HistoryIcon sx={{ color: '#d4af37' }} />
+            <HistoryIcon sx={{ color: BRAND_COLORS.gold }} />
             <Typography variant="h6" sx={{ fontWeight: 700 }}>
               Mis Turnos Anteriores
             </Typography>
@@ -110,7 +111,7 @@ export const ClientDashboard = () => {
               return (
                 <Paper
                   key={appointment.id}
-                  sx={{ p: 2, background: 'rgba(255,255,255,0.03)', borderRadius: 2 }}
+                  sx={{ p: 2, background: withAlpha(BRAND_COLORS.white, 0.03), borderRadius: 2 }}
                 >
                   <Stack
                     direction={{ xs: 'column', sm: 'row' }}

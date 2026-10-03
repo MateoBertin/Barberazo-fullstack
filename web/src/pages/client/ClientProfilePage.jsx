@@ -26,6 +26,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useData } from '../../context/DataContext';
 import { useSnackbar } from 'notistack';
+import { BRAND_COLORS, withAlpha } from '../../theme';
 
 export const ClientProfilePage = () => {
   const { user, updateProfile, deleteAccount } = useAuth();
@@ -82,13 +83,13 @@ export const ClientProfilePage = () => {
         sx={{
           p: { xs: 2.5, sm: 4 },
           borderRadius: 4,
-          background: 'linear-gradient(135deg, #181b20 0%, #22262f 100%)',
-          border: '1px solid rgba(212, 175, 55, 0.3)',
+          background: `linear-gradient(135deg, ${BRAND_COLORS.card} 0%, ${BRAND_COLORS.neutralTint} 100%)`,
+          border: `1px solid ${withAlpha(BRAND_COLORS.gold, 0.3)}`,
           mb: 4,
         }}
       >
         <Stack direction="row" spacing={1.5} alignItems="center">
-          <ProfileIcon sx={{ color: '#d4af37', fontSize: 32 }} />
+          <ProfileIcon sx={{ color: BRAND_COLORS.gold, fontSize: 32, flexShrink: 0 }} />
           <Box>
             <Typography variant="h4" sx={{ fontWeight: 800, fontSize: { xs: '1.5rem', sm: '2.125rem' } }}>
               Mi Perfil
@@ -101,7 +102,7 @@ export const ClientProfilePage = () => {
       </Paper>
 
       {/* ─── CUU9.1: Edición de datos ─── */}
-      <Paper sx={{ p: 3, borderRadius: 3, background: '#181b20', mb: 3 }}>
+      <Paper sx={{ p: 3, borderRadius: 3, background: BRAND_COLORS.card, mb: 3 }}>
         <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
           Datos Personales
         </Typography>
@@ -147,10 +148,10 @@ export const ClientProfilePage = () => {
       </Paper>
 
       {/* ─── CUU9.2: Zona de peligro ─── */}
-      <Paper sx={{ p: 3, borderRadius: 3, background: '#181b20', border: '1px solid rgba(239,68,68,0.4)' }}>
+      <Paper sx={{ p: 3, borderRadius: 3, background: BRAND_COLORS.card, border: `1px solid ${withAlpha(BRAND_COLORS.danger, 0.4)}` }}>
         <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
-          <WarningIcon sx={{ color: '#ef4444' }} />
-          <Typography variant="h6" sx={{ fontWeight: 700, color: '#ef4444' }}>
+          <WarningIcon sx={{ color: BRAND_COLORS.danger }} />
+          <Typography variant="h6" sx={{ fontWeight: 700, color: BRAND_COLORS.danger }}>
             Zona de Peligro
           </Typography>
         </Stack>
@@ -170,7 +171,7 @@ export const ClientProfilePage = () => {
 
       {/* ─── Diálogo de confirmación de eliminación ─── */}
       <Dialog open={isDeleteDialogOpen} onClose={() => setIsDeleteDialogOpen(false)}>
-        <DialogTitle sx={{ fontWeight: 700, color: '#ef4444' }}>
+        <DialogTitle sx={{ fontWeight: 700, color: BRAND_COLORS.danger }}>
           ¿Eliminar tu cuenta?
         </DialogTitle>
         <DialogContent>

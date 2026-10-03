@@ -26,6 +26,7 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { useData } from '../../context/DataContext';
 import { MercadoPagoModal } from '../../components/fines/MercadoPagoModal';
+import { BRAND_COLORS, withAlpha } from '../../theme';
 
 export const ClientFinesPage = () => {
   const { user } = useAuth();
@@ -58,15 +59,15 @@ export const ClientFinesPage = () => {
         sx={{
           p: { xs: 2.5, sm: 4 },
           borderRadius: 4,
-          background: 'linear-gradient(135deg, #181b20 0%, #20252e 100%)',
-          border: '1px solid rgba(255,255,255,0.08)',
+          background: `linear-gradient(135deg, ${BRAND_COLORS.card} 0%, ${BRAND_COLORS.steelTint} 100%)`,
+          border: `1px solid ${withAlpha(BRAND_COLORS.white, 0.08)}`,
           mb: 4,
         }}
       >
         <Grid container spacing={3} alignItems="center">
           <Grid item xs={12} md={8}>
             <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 1 }}>
-              <WarningIcon sx={{ color: currentStrikes >= 3 ? '#ef4444' : '#f59e0b', fontSize: 32 }} />
+              <WarningIcon sx={{ color: currentStrikes >= 3 ? BRAND_COLORS.danger : BRAND_COLORS.warningAmber, fontSize: 32, flexShrink: 0 }} />
               <Typography variant="h4" sx={{ fontWeight: 800, fontSize: { xs: '1.5rem', sm: '2.125rem' } }}>
                 Control de Strikes y Multas
               </Typography>
@@ -89,7 +90,7 @@ export const ClientFinesPage = () => {
       {/* ─── PANEL DE ESTADO DE STRIKES ─── */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
         <Grid item xs={12} md={5}>
-          <Paper sx={{ p: 3, borderRadius: 3, background: '#181b20', border: '1px solid rgba(255,255,255,0.08)' }}>
+          <Paper sx={{ p: 3, borderRadius: 3, background: BRAND_COLORS.card, border: `1px solid ${withAlpha(BRAND_COLORS.white, 0.08)}` }}>
             <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1 }}>
               Contador de Strikes
             </Typography>
@@ -106,7 +107,7 @@ export const ClientFinesPage = () => {
                   variant="body2"
                   sx={{
                     fontWeight: 800,
-                    color: currentStrikes >= 3 ? '#ef4444' : currentStrikes > 0 ? '#f59e0b' : '#10b981',
+                    color: currentStrikes >= 3 ? BRAND_COLORS.danger : currentStrikes > 0 ? BRAND_COLORS.warningAmber : BRAND_COLORS.successGreen,
                   }}
                 >
                   {currentStrikes} / 3 Strikes
@@ -135,7 +136,7 @@ export const ClientFinesPage = () => {
         </Grid>
 
         <Grid item xs={12} md={7}>
-          <Paper sx={{ p: 3, borderRadius: 3, background: '#181b20', border: '1px solid rgba(255,255,255,0.08)', height: '100%' }}>
+          <Paper sx={{ p: 3, borderRadius: 3, background: BRAND_COLORS.card, border: `1px solid ${withAlpha(BRAND_COLORS.white, 0.08)}`, height: '100%' }}>
             <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 2 }}>
               Reglas del Sistema de Turnos
             </Typography>
@@ -165,7 +166,7 @@ export const ClientFinesPage = () => {
           action={
             <Button
               variant="contained"
-              sx={{ background: '#009ee3', '&:hover': { background: '#0081ba' }, fontWeight: 700 }}
+              sx={{ background: BRAND_COLORS.mercadoPago, '&:hover': { background: BRAND_COLORS.mercadoPagoDark }, fontWeight: 700 }}
               onClick={() => handleOpenPayment(pendingFine)}
               startIcon={<PaymentIcon />}
             >
@@ -187,9 +188,9 @@ export const ClientFinesPage = () => {
         Historial de Multas
       </Typography>
 
-      <TableContainer component={Paper} sx={{ borderRadius: 3, background: '#181b20', border: '1px solid rgba(255,255,255,0.08)' }}>
+      <TableContainer component={Paper} sx={{ borderRadius: 3, background: BRAND_COLORS.card, border: `1px solid ${withAlpha(BRAND_COLORS.white, 0.08)}` }}>
         <Table>
-          <TableHead sx={{ background: '#1e2229' }}>
+          <TableHead sx={{ background: BRAND_COLORS.darkPanel }}>
             <TableRow>
               <TableCell sx={{ fontWeight: 700 }}>Fecha Emisión</TableCell>
               <TableCell sx={{ fontWeight: 700 }}>Motivo</TableCell>
@@ -236,7 +237,7 @@ export const ClientFinesPage = () => {
                         <Button
                           size="small"
                           variant="contained"
-                          sx={{ background: '#009ee3', '&:hover': { background: '#0081ba' }, fontWeight: 700 }}
+                          sx={{ background: BRAND_COLORS.mercadoPago, '&:hover': { background: BRAND_COLORS.mercadoPagoDark }, fontWeight: 700 }}
                           onClick={() => handleOpenPayment(fine)}
                         >
                           Pagar

@@ -32,6 +32,7 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { useData } from '../../context/DataContext';
 import { useSnackbar } from 'notistack';
+import { BRAND_COLORS, withAlpha } from '../../theme';
 
 // Franjas horarias de 1 hora para los turnos de atención
 // Regla de negocio: todos los turnos duran 1 hora y empiezan en punto
@@ -186,11 +187,11 @@ export const BookingWizard = () => {
   // ─── CASO 1: CLIENTE BLOQUEADO O MULTADO ───
   if (user?.estado === 'Bloqueado') {
     return (
-      <Paper sx={{ p: { xs: 2.5, sm: 4 }, borderRadius: 3, background: '#1e2229', border: '1px solid #ef4444' }}>
+      <Paper sx={{ p: { xs: 2.5, sm: 4 }, borderRadius: 3, background: BRAND_COLORS.darkPanel, border: `1px solid ${BRAND_COLORS.danger}` }}>
         <Stack direction="row" spacing={2} alignItems="center">
-          <CancelIcon sx={{ color: '#ef4444', fontSize: 40 }} />
+          <CancelIcon sx={{ color: BRAND_COLORS.danger, fontSize: 40 }} />
           <Box>
-            <Typography variant="h6" sx={{ fontWeight: 700, color: '#ef4444' }}>
+            <Typography variant="h6" sx={{ fontWeight: 700, color: BRAND_COLORS.danger }}>
               Cuenta Bloqueada
             </Typography>
             <Typography variant="body2" color="text.secondary">
@@ -204,11 +205,11 @@ export const BookingWizard = () => {
 
   if (user?.estado === 'Multado') {
     return (
-      <Paper sx={{ p: { xs: 2.5, sm: 4 }, borderRadius: 3, background: '#1e2229', border: '1px solid #f59e0b' }}>
+      <Paper sx={{ p: { xs: 2.5, sm: 4 }, borderRadius: 3, background: BRAND_COLORS.darkPanel, border: `1px solid ${BRAND_COLORS.warningAmber}` }}>
         <Stack direction="row" spacing={2} alignItems="center">
-          <WarningIcon sx={{ color: '#f59e0b', fontSize: 40 }} />
+          <WarningIcon sx={{ color: BRAND_COLORS.warningAmber, fontSize: 40 }} />
           <Box>
-            <Typography variant="h6" sx={{ fontWeight: 700, color: '#f59e0b' }}>
+            <Typography variant="h6" sx={{ fontWeight: 700, color: BRAND_COLORS.warningAmber }}>
               Cuenta Multada por Acumulación de Strikes
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
@@ -239,13 +240,13 @@ export const BookingWizard = () => {
           sx={{
             p: { xs: 2.5, sm: 4 },
             borderRadius: 4,
-            background: 'linear-gradient(135deg, #181b20 0%, #20252e 100%)',
-            border: '1px solid rgba(212, 175, 55, 0.4)',
+            background: `linear-gradient(135deg, ${BRAND_COLORS.card} 0%, ${BRAND_COLORS.steelTint} 100%)`,
+            border: `1px solid ${withAlpha(BRAND_COLORS.gold, 0.4)}`,
             mb: 3,
           }}
         >
           <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-            <Typography variant="h5" sx={{ fontWeight: 800, color: '#d4af37' }}>
+            <Typography variant="h5" sx={{ fontWeight: 800, color: BRAND_COLORS.gold }}>
               Tu Turno Agendado
             </Typography>
             <Chip label="Turno Activo" color="success" sx={{ fontWeight: 700 }} />
@@ -257,14 +258,14 @@ export const BookingWizard = () => {
 
           <Grid container spacing={3} sx={{ mb: 3 }}>
             <Grid item xs={12} sm={6} md={3}>
-              <Paper sx={{ p: 2, background: 'rgba(255,255,255,0.03)', borderRadius: 2 }}>
+              <Paper sx={{ p: 2, background: withAlpha(BRAND_COLORS.white, 0.03), borderRadius: 2 }}>
                 <Typography variant="caption" color="text.secondary">
                   Servicio
                 </Typography>
-                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#fff' }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: BRAND_COLORS.white }}>
                   {activeAppointment.serviceName}
                 </Typography>
-                <Typography variant="body2" sx={{ color: '#10b981', fontWeight: 600 }}>
+                <Typography variant="body2" sx={{ color: BRAND_COLORS.successGreen, fontWeight: 600 }}>
                   ${activeAppointment.servicePrice?.toLocaleString()} (
                   {activeAppointment.serviceDuration} min)
                 </Typography>
@@ -272,33 +273,33 @@ export const BookingWizard = () => {
             </Grid>
 
             <Grid item xs={12} sm={6} md={3}>
-              <Paper sx={{ p: 2, background: 'rgba(255,255,255,0.03)', borderRadius: 2 }}>
+              <Paper sx={{ p: 2, background: withAlpha(BRAND_COLORS.white, 0.03), borderRadius: 2 }}>
                 <Typography variant="caption" color="text.secondary">
                   Fecha
                 </Typography>
-                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#fff' }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: BRAND_COLORS.white }}>
                   {activeAppointment.date}
                 </Typography>
               </Paper>
             </Grid>
 
             <Grid item xs={12} sm={6} md={3}>
-              <Paper sx={{ p: 2, background: 'rgba(255,255,255,0.03)', borderRadius: 2 }}>
+              <Paper sx={{ p: 2, background: withAlpha(BRAND_COLORS.white, 0.03), borderRadius: 2 }}>
                 <Typography variant="caption" color="text.secondary">
                   Horario
                 </Typography>
-                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#fff' }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: BRAND_COLORS.white }}>
                   {activeAppointment.time} hs
                 </Typography>
               </Paper>
             </Grid>
 
             <Grid item xs={12} sm={6} md={3}>
-              <Paper sx={{ p: 2, background: 'rgba(255,255,255,0.03)', borderRadius: 2 }}>
+              <Paper sx={{ p: 2, background: withAlpha(BRAND_COLORS.white, 0.03), borderRadius: 2 }}>
                 <Typography variant="caption" color="text.secondary">
                   Barbero Asignado
                 </Typography>
-                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#fff' }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: BRAND_COLORS.white }}>
                   {activeAppointment.employeeName}
                 </Typography>
               </Paper>
@@ -328,7 +329,7 @@ export const BookingWizard = () => {
 
         {/* Modal de confirmación de cancelación */}
         <Dialog open={isCancelDialogOpen} onClose={() => setIsCancelDialogOpen(false)}>
-          <DialogTitle sx={{ fontWeight: 700, color: '#ef4444' }}>¿Deseas cancelar tu turno?</DialogTitle>
+          <DialogTitle sx={{ fontWeight: 700, color: BRAND_COLORS.danger }}>¿Deseas cancelar tu turno?</DialogTitle>
           <DialogContent>
             <DialogContentText sx={{ color: 'text.secondary', mb: 2 }}>
               {cancelWithPenalty
@@ -356,11 +357,11 @@ export const BookingWizard = () => {
       sx={{
         p: { xs: 2, md: 4 },
         borderRadius: 4,
-        background: '#181b20',
-        border: '1px solid rgba(255,255,255,0.08)',
+        background: BRAND_COLORS.card,
+        border: `1px solid ${withAlpha(BRAND_COLORS.white, 0.08)}`,
       }}
     >
-      <Typography variant="h5" sx={{ fontWeight: 800, mb: 1, color: '#d4af37' }}>
+      <Typography variant="h5" sx={{ fontWeight: 800, mb: 1, color: BRAND_COLORS.gold }}>
         Reservar Nuevo Turno
       </Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
@@ -390,14 +391,14 @@ export const BookingWizard = () => {
                   <Card
                     sx={{
                       height: '100%',
-                      background: isSelected ? 'rgba(212, 175, 55, 0.12)' : '#1e2229',
-                      border: isSelected ? '2px solid #d4af37' : '1px solid rgba(255,255,255,0.06)',
+                      background: isSelected ? withAlpha(BRAND_COLORS.gold, 0.12) : BRAND_COLORS.darkPanel,
+                      border: isSelected ? `2px solid ${BRAND_COLORS.gold}` : `1px solid ${withAlpha(BRAND_COLORS.white, 0.06)}`,
                       transition: 'all 0.2s',
                     }}
                   >
                     <CardActionArea onClick={() => handleSelectService(service)} sx={{ p: 2, height: '100%' }}>
                       <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
-                        <ScissorsIcon sx={{ color: '#d4af37' }} />
+                        <ScissorsIcon sx={{ color: BRAND_COLORS.gold }} />
                         <Chip
                           label={`$${service.price?.toLocaleString()}`}
                           color="primary"
@@ -443,13 +444,13 @@ export const BookingWizard = () => {
                 <Grid item xs={6} sm={4} md={3} key={day.id}>
                   <Card
                     sx={{
-                      background: isSelected ? 'rgba(16, 185, 129, 0.15)' : '#1e2229',
-                      border: isSelected ? '2px solid #10b981' : '1px solid rgba(255,255,255,0.06)',
+                      background: isSelected ? withAlpha(BRAND_COLORS.successGreen, 0.15) : BRAND_COLORS.darkPanel,
+                      border: isSelected ? `2px solid ${BRAND_COLORS.successGreen}` : `1px solid ${withAlpha(BRAND_COLORS.white, 0.06)}`,
                       textAlign: 'center',
                     }}
                   >
                     <CardActionArea onClick={() => handleSelectDate(day)} sx={{ p: 2 }}>
-                      <Typography variant="caption" sx={{ color: '#d4af37', fontWeight: 700, textTransform: 'uppercase' }}>
+                      <Typography variant="caption" sx={{ color: BRAND_COLORS.gold, fontWeight: 700, textTransform: 'uppercase' }}>
                         {dayOfWeek}
                       </Typography>
                       <Typography variant="h6" sx={{ fontWeight: 800 }}>
@@ -482,13 +483,13 @@ export const BookingWizard = () => {
             <Grid item xs={12} sm={6} md={4}>
               <Card
                 sx={{
-                  background: selectedEmployee === null ? 'rgba(59, 130, 246, 0.15)' : '#1e2229',
-                  border: selectedEmployee === null ? '2px solid #3b82f6' : '1px solid rgba(255,255,255,0.06)',
+                  background: selectedEmployee === null ? withAlpha(BRAND_COLORS.infoBlue, 0.15) : BRAND_COLORS.darkPanel,
+                  border: selectedEmployee === null ? `2px solid ${BRAND_COLORS.infoBlue}` : `1px solid ${withAlpha(BRAND_COLORS.white, 0.06)}`,
                   height: '100%',
                 }}
               >
                 <CardActionArea onClick={() => handleSelectEmployee(null)} sx={{ p: 2.5, height: '100%' }}>
-                  <Avatar sx={{ bgcolor: '#3b82f6', mb: 1 }}>✨</Avatar>
+                  <Avatar sx={{ bgcolor: BRAND_COLORS.infoBlue, mb: 1 }}>✨</Avatar>
                   <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
                     Cualquier Barbero Disponible
                   </Typography>
@@ -508,13 +509,13 @@ export const BookingWizard = () => {
                 <Grid item xs={12} sm={6} md={4} key={employee.id}>
                   <Card
                     sx={{
-                      background: isSelected ? 'rgba(212, 175, 55, 0.15)' : '#1e2229',
-                      border: isSelected ? '2px solid #d4af37' : '1px solid rgba(255,255,255,0.06)',
+                      background: isSelected ? withAlpha(BRAND_COLORS.gold, 0.15) : BRAND_COLORS.darkPanel,
+                      border: isSelected ? `2px solid ${BRAND_COLORS.gold}` : `1px solid ${withAlpha(BRAND_COLORS.white, 0.06)}`,
                       height: '100%',
                     }}
                   >
                     <CardActionArea onClick={() => handleSelectEmployee(employee)} sx={{ p: 2.5, height: '100%' }}>
-                      <Avatar sx={{ bgcolor: '#d4af37', color: '#121212', fontWeight: 'bold', mb: 1 }}>
+                      <Avatar sx={{ bgcolor: BRAND_COLORS.gold, color: BRAND_COLORS.ink, fontWeight: 'bold', mb: 1 }}>
                         {employeeName.charAt(0)}
                       </Avatar>
                       <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
@@ -579,7 +580,7 @@ export const BookingWizard = () => {
             5. Revisa y Confirma tu Reserva
           </Typography>
 
-          <Paper sx={{ p: 3, background: 'rgba(255,255,255,0.03)', borderRadius: 3, mb: 3 }}>
+          <Paper sx={{ p: 3, background: withAlpha(BRAND_COLORS.white, 0.03), borderRadius: 3, mb: 3 }}>
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6}>
                 <Typography variant="caption" color="text.secondary">
@@ -641,7 +642,7 @@ export const BookingWizard = () => {
       )}
 
       {/* Controles de Navegación de Pasos (Atrás / Siguiente) */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4, pt: 2, borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4, pt: 2, borderTop: `1px solid ${withAlpha(BRAND_COLORS.white, 0.08)}` }}>
         <Button
           disabled={activeStep === 0}
           onClick={handleBack}

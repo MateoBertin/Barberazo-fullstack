@@ -18,6 +18,11 @@ export const BRAND_COLORS = {
   blueTint: '#172433', // Degradado oscuro azul (empleados)
   greenTint: '#1c2b20', // Degradado oscuro verde (clientes)
   neutralTint: '#22262f', // Degradado oscuro neutro (servicios y reseñas)
+  steelTint: '#20252e', // Degradado acero (multas y reserva)
+  warningAmber: '#f59e0b', // Ámbar (advertencias)
+  mercadoPago: '#009ee3', // Azul oficial de Mercado Pago
+  mercadoPagoDark: '#0081ba', // Azul oscuro (hover de Mercado Pago)
+  ink: '#121212', // Texto sobre fondos dorados
 };
 
 // Agrega transparencia a un color hexadecimal ('#22c55e' + 0.28 => 'rgba(34,197,94,0.28)')

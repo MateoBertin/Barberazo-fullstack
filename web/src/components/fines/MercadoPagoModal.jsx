@@ -23,6 +23,7 @@ import {
 } from '@mui/icons-material';
 import { useData } from '../../context/DataContext';
 import { useSnackbar } from 'notistack';
+import { BRAND_COLORS, withAlpha } from '../../theme';
 
 export const MercadoPagoModal = ({ open, onClose, fine, clientId }) => {
   const { payFine } = useData();
@@ -62,7 +63,7 @@ export const MercadoPagoModal = ({ open, onClose, fine, clientId }) => {
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="xs" fullWidth>
       {/* ─── ENCABEZADO ESTILO MERCADO PAGO ─── */}
-      <Box sx={{ background: '#009ee3', p: 3, color: '#fff', textAlign: 'center' }}>
+      <Box sx={{ background: BRAND_COLORS.mercadoPago, p: 3, color: BRAND_COLORS.white, textAlign: 'center' }}>
         <Typography variant="h6" sx={{ fontWeight: 800, letterSpacing: 0.5 }}>
           Mercado Pago
         </Typography>
@@ -75,14 +76,14 @@ export const MercadoPagoModal = ({ open, onClose, fine, clientId }) => {
         {isPaymentApproved ? (
           // ─── PANTALLA DE PAGO APROBADO ───
           <Box sx={{ textAlign: 'center', py: 2 }}>
-            <CheckIcon sx={{ color: '#10b981', fontSize: 64, mb: 1 }} />
-            <Typography variant="h5" sx={{ fontWeight: 800, mb: 1, color: '#10b981' }}>
+            <CheckIcon sx={{ color: BRAND_COLORS.successGreen, fontSize: 64, mb: 1 }} />
+            <Typography variant="h5" sx={{ fontWeight: 800, mb: 1, color: BRAND_COLORS.successGreen }}>
               ¡Pago Aprobado!
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
               Operación #{Math.floor(100000000 + Math.random() * 900000000)}
             </Typography>
-            <Paper sx={{ p: 2, background: 'rgba(255,255,255,0.03)', borderRadius: 2, mb: 3 }}>
+            <Paper sx={{ p: 2, background: withAlpha(BRAND_COLORS.white, 0.03), borderRadius: 2, mb: 3 }}>
               <Typography variant="caption" color="text.secondary">
                 Monto abonado
               </Typography>
@@ -97,7 +98,7 @@ export const MercadoPagoModal = ({ open, onClose, fine, clientId }) => {
         ) : isProcessing ? (
           // ─── PANTALLA DE PROCESANDO PAGO ───
           <Box sx={{ textAlign: 'center', py: 6 }}>
-            <CircularProgress sx={{ color: '#009ee3', mb: 3 }} size={48} />
+            <CircularProgress sx={{ color: BRAND_COLORS.mercadoPago, mb: 3 }} size={48} />
             <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
               Procesando tu pago...
             </Typography>
@@ -108,7 +109,7 @@ export const MercadoPagoModal = ({ open, onClose, fine, clientId }) => {
         ) : (
           // ─── SELECCIÓN DE MÉTODO DE PAGO ───
           <Box>
-            <Paper sx={{ p: 2, background: 'rgba(255,255,255,0.03)', borderRadius: 2, mb: 3 }}>
+            <Paper sx={{ p: 2, background: withAlpha(BRAND_COLORS.white, 0.03), borderRadius: 2, mb: 3 }}>
               <Typography variant="caption" color="text.secondary">
                 Detalle del Cobro
               </Typography>
@@ -123,7 +124,7 @@ export const MercadoPagoModal = ({ open, onClose, fine, clientId }) => {
                 <Typography variant="body2" sx={{ fontWeight: 600 }}>
                   Total a pagar:
                 </Typography>
-                <Typography variant="h6" sx={{ fontWeight: 800, color: '#009ee3' }}>
+                <Typography variant="h6" sx={{ fontWeight: 800, color: BRAND_COLORS.mercadoPago }}>
                   ${fineAmount?.toLocaleString()} ARS
                 </Typography>
               </Stack>
@@ -135,14 +136,14 @@ export const MercadoPagoModal = ({ open, onClose, fine, clientId }) => {
 
             <FormControl component="fieldset" fullWidth>
               <RadioGroup value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
-                <Paper sx={{ p: 1.5, mb: 1, borderRadius: 2, border: '1px solid rgba(255,255,255,0.08)' }}>
+                <Paper sx={{ p: 1.5, mb: 1, borderRadius: 2, border: `1px solid ${withAlpha(BRAND_COLORS.white, 0.08)}` }}>
                   <FormControlLabel
                     value="account_money"
                     control={<Radio color="primary" />}
                     label={
                       <Box>
                         <Stack direction="row" spacing={1} alignItems="center">
-                          <WalletIcon sx={{ fontSize: 20, color: '#009ee3' }} />
+                          <WalletIcon sx={{ fontSize: 20, color: BRAND_COLORS.mercadoPago }} />
                           <Typography variant="body2" sx={{ fontWeight: 700 }}>
                             Dinero en cuenta Mercado Pago
                           </Typography>
@@ -155,14 +156,14 @@ export const MercadoPagoModal = ({ open, onClose, fine, clientId }) => {
                   />
                 </Paper>
 
-                <Paper sx={{ p: 1.5, borderRadius: 2, border: '1px solid rgba(255,255,255,0.08)' }}>
+                <Paper sx={{ p: 1.5, borderRadius: 2, border: `1px solid ${withAlpha(BRAND_COLORS.white, 0.08)}` }}>
                   <FormControlLabel
                     value="debit_card"
                     control={<Radio color="primary" />}
                     label={
                       <Box>
                         <Stack direction="row" spacing={1} alignItems="center">
-                          <CardIcon sx={{ fontSize: 20, color: '#10b981' }} />
+                          <CardIcon sx={{ fontSize: 20, color: BRAND_COLORS.successGreen }} />
                           <Typography variant="body2" sx={{ fontWeight: 700 }}>
                             Tarjeta de Débito
                           </Typography>
@@ -178,7 +179,7 @@ export const MercadoPagoModal = ({ open, onClose, fine, clientId }) => {
             </FormControl>
 
             <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 2, opacity: 0.7 }}>
-              <SecurityIcon fontSize="small" sx={{ color: '#10b981' }} />
+              <SecurityIcon fontSize="small" sx={{ color: BRAND_COLORS.successGreen }} />
               <Typography variant="caption" color="text.secondary">
                 Pago protegido y encriptado por Mercado Pago Sandbox
               </Typography>
@@ -203,8 +204,8 @@ export const MercadoPagoModal = ({ open, onClose, fine, clientId }) => {
                 variant="contained"
                 onClick={handlePay}
                 sx={{
-                  background: '#009ee3',
-                  '&:hover': { background: '#0081ba' },
+                  background: BRAND_COLORS.mercadoPago,
+                  '&:hover': { background: BRAND_COLORS.mercadoPagoDark },
                   fontWeight: 700,
                   py: 1.2,
                 }}

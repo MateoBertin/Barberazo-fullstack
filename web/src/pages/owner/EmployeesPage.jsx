@@ -62,7 +62,7 @@ export const EmployeesPage = () => {
       name: '',
       email: '',
       phone: '',
-      specialties: services.map((s) => s.name || s.nombre),
+      specialties: services.map((s) => s.name),
       enabledDays: ['Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
       morningStart: '08:00',
       morningEnd: '12:00',
@@ -75,23 +75,22 @@ export const EmployeesPage = () => {
   const handleOpenEdit = (employee) => {
     setSelectedEmployee(employee);
     const schedule = employee.schedule || {};
-    const horarios = employee.horarios || {};
     setFormData({
-      name: employee.name || employee.nombre,
+      name: employee.name,
       email: employee.email,
-      phone: employee.phone || employee.telefono || '',
-      specialties: employee.specialties || employee.especialidades || [],
-      enabledDays: schedule.enabledDays || horarios.diasHabilitados || ['Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
-      morningStart: schedule.morningShift?.startTime || horarios.turnoManana?.inicio || '08:00',
-      morningEnd: schedule.morningShift?.endTime || horarios.turnoManana?.fin || '12:00',
-      afternoonStart: schedule.afternoonShift?.startTime || horarios.turnoTarde?.inicio || '14:00',
-      afternoonEnd: schedule.afternoonShift?.endTime || horarios.turnoTarde?.fin || '20:00',
+      phone: employee.phone || '',
+      specialties: employee.specialties || [],
+      enabledDays: schedule.enabledDays || ['Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
+      morningStart: schedule.morningShift?.startTime || '08:00',
+      morningEnd: schedule.morningShift?.endTime || '12:00',
+      afternoonStart: schedule.afternoonShift?.startTime || '14:00',
+      afternoonEnd: schedule.afternoonShift?.endTime || '20:00',
     });
     setOpenModal(true);
   };
 
   const handleDelete = (employee) => {
-    const employeeName = employee.name || employee.nombre;
+    const employeeName = employee.name;
     if (window.confirm(`¿Estás seguro de eliminar al empleado ${employeeName}?`)) {
       deleteEmployee(employee.id);
       enqueueSnackbar(`Empleado ${employeeName} eliminado.`, { variant: 'warning' });
@@ -120,21 +119,13 @@ export const EmployeesPage = () => {
 
     const payload = {
       name: formData.name,
-      nombre: formData.name,
       email: formData.email,
       phone: formData.phone,
-      telefono: formData.phone,
       specialties: formData.specialties,
-      especialidades: formData.specialties,
       schedule: {
         enabledDays: formData.enabledDays,
         morningShift: { startTime: formData.morningStart, endTime: formData.morningEnd },
         afternoonShift: { startTime: formData.afternoonStart, endTime: formData.afternoonEnd },
-      },
-      horarios: {
-        diasHabilitados: formData.enabledDays,
-        turnoManana: { inicio: formData.morningStart, fin: formData.morningEnd },
-        turnoTarde: { inicio: formData.afternoonStart, fin: formData.afternoonEnd },
       },
     };
 
@@ -190,16 +181,15 @@ export const EmployeesPage = () => {
       {/* Grilla de Empleados */}
       <Grid container spacing={3}>
         {employees.map((employee) => {
-          const employeeName = employee.name || employee.nombre;
-          const employeePhone = employee.phone || employee.telefono;
-          const employeeSpecialties = employee.specialties || employee.especialidades || [];
+          const employeeName = employee.name;
+          const employeePhone = employee.phone;
+          const employeeSpecialties = employee.specialties || [];
           const schedule = employee.schedule || {};
-          const horarios = employee.horarios || {};
-          const enabledDays = schedule.enabledDays || horarios.diasHabilitados || [];
-          const morningStart = schedule.morningShift?.startTime || horarios.turnoManana?.inicio || '08:00';
-          const morningEnd = schedule.morningShift?.endTime || horarios.turnoManana?.fin || '12:00';
-          const afternoonStart = schedule.afternoonShift?.startTime || horarios.turnoTarde?.inicio || '14:00';
-          const afternoonEnd = schedule.afternoonShift?.endTime || horarios.turnoTarde?.fin || '20:00';
+          const enabledDays = schedule.enabledDays || [];
+          const morningStart = schedule.morningShift?.startTime || '08:00';
+          const morningEnd = schedule.morningShift?.endTime || '12:00';
+          const afternoonStart = schedule.afternoonShift?.startTime || '14:00';
+          const afternoonEnd = schedule.afternoonShift?.endTime || '20:00';
           return (
           <Grid item xs={12} md={6} key={employee.id}>
             <Card sx={{ borderRadius: 3, background: '#181b20', border: '1px solid rgba(255,255,255,0.08)' }}>
@@ -385,7 +375,7 @@ export const EmployeesPage = () => {
             </Typography>
             <FormGroup row>
               {services.map((service) => {
-                const serviceName = service.name || service.nombre;
+                const serviceName = service.name;
                 return (
                 <FormControlLabel
                   key={service.id}

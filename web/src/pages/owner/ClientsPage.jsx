@@ -43,8 +43,8 @@ export const ClientsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredClients = clients.filter((client) => {
-    const clientName = client.name || client.nombre || '';
-    const clientPhone = client.phone || client.telefono || '';
+    const clientName = client.name || '';
+    const clientPhone = client.phone || '';
     return (
       clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       client.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -55,8 +55,8 @@ export const ClientsPage = () => {
   const handleToggleClientBlock = (client) => {
     if (isEmpleado) return;
 
-    const clientName = client.name || client.nombre;
-    const currentStatus = client.status || client.estado;
+    const clientName = client.name;
+    const currentStatus = client.status;
     toggleClientBlock(client.id);
     const nextStatus = currentStatus === 'Bloqueado' ? 'Activo' : 'Bloqueado';
     if (nextStatus === 'Bloqueado') {
@@ -149,10 +149,10 @@ export const ClientsPage = () => {
           </TableHead>
           <TableBody>
             {filteredClients.map((client) => {
-              const clientName = client.name || client.nombre;
-              const clientPhone = client.phone || client.telefono;
-              const clientStatus = client.status || client.estado;
-              const registrationDate = client.registrationDate || client.fechaRegistro || '2026-05-01';
+              const clientName = client.name;
+              const clientPhone = client.phone;
+              const clientStatus = client.status;
+              const registrationDate = client.registrationDate || '2026-05-01';
               const isBlocked = clientStatus === 'Bloqueado';
               return (
               <TableRow key={client.id} hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>

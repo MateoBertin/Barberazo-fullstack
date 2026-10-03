@@ -61,10 +61,10 @@ export const ServicesPage = () => {
   const handleOpenEdit = (service) => {
     setSelectedService(service);
     setFormData({
-      name: service.name || service.nombre,
-      durationMinutes: service.durationMinutes ?? service.duracionMinutos ?? 30,
-      price: service.price ?? service.precio ?? 0,
-      description: service.description || service.descripcion || '',
+      name: service.name,
+      durationMinutes: service.durationMinutes ?? 30,
+      price: service.price ?? 0,
+      description: service.description || '',
     });
     setOpenModal(true);
   };
@@ -86,8 +86,8 @@ export const ServicesPage = () => {
   const handleToggleStatus = (service) => {
     if (isEmpleado) return;
     toggleServiceStatus(service.id);
-    const serviceName = service.name || service.nombre;
-    const currentStatus = service.status || service.estado;
+    const serviceName = service.name;
+    const currentStatus = service.status;
     const nextStatus = currentStatus === 'Habilitado' ? 'Deshabilitado' : 'Habilitado';
     enqueueSnackbar(`Servicio "${serviceName}" cambiado a ${nextStatus}.`, { variant: 'info' });
   };
@@ -147,11 +147,11 @@ export const ServicesPage = () => {
       {/* Lista de Servicios en Grilla */}
       <Grid container spacing={3}>
         {services.map((service) => {
-          const serviceName = service.name || service.nombre;
-          const serviceDescription = service.description || service.descripcion;
-          const serviceDuration = service.durationMinutes ?? service.duracionMinutos ?? 30;
-          const servicePrice = service.price ?? service.precio ?? 0;
-          const serviceStatus = service.status || service.estado;
+          const serviceName = service.name;
+          const serviceDescription = service.description;
+          const serviceDuration = service.durationMinutes ?? 30;
+          const servicePrice = service.price ?? 0;
+          const serviceStatus = service.status;
           const isEnabled = serviceStatus === 'Habilitado';
           return (
           <Grid item xs={12} sm={6} md={4} key={service.id}>

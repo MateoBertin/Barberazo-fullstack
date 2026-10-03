@@ -55,9 +55,9 @@ export const TurnosManager = ({ mode = 'owner', modo = 'dueno' }) => {
 
   // Filtrado de turnos
   const filteredAppointments = appointments.filter((appointment) => {
-    const appointmentDate = appointment.date || appointment.fecha;
-    const appointmentEmployeeId = appointment.employeeId || appointment.empleadoId;
-    const appointmentClientName = appointment.clientName || appointment.clienteNombre || '';
+    const appointmentDate = appointment.date;
+    const appointmentEmployeeId = appointment.employeeId;
+    const appointmentClientName = appointment.clientName || '';
 
     // 1. Filtro por fecha
     if (dateFilter === 'today' && appointmentDate !== todayStr) return false;
@@ -81,10 +81,10 @@ export const TurnosManager = ({ mode = 'owner', modo = 'dueno' }) => {
 
   // Estadísticas rápidas para los indicadores superiores
   const stats = {
-    requested: appointments.filter((a) => (a.status === 'Solicitado' || a.estado === 'Solicitado')).length,
-    attended: appointments.filter((a) => (a.status === 'Asistido' || a.estado === 'Asistido')).length,
-    absent: appointments.filter((a) => (a.status === 'No-Asistido' || a.estado === 'No-Asistido')).length,
-    cancelled: appointments.filter((a) => (a.status === 'Cancelado' || a.estado === 'Cancelado')).length,
+    requested: appointments.filter((a) => a.status === 'Solicitado').length,
+    attended: appointments.filter((a) => a.status === 'Asistido').length,
+    absent: appointments.filter((a) => a.status === 'No-Asistido').length,
+    cancelled: appointments.filter((a) => a.status === 'Cancelado').length,
   };
 
   // --- MANEJADORES DE ACCIONES EN INGLÉS ---
@@ -93,7 +93,7 @@ export const TurnosManager = ({ mode = 'owner', modo = 'dueno' }) => {
   const handleConfirmAttendance = (appointment) => {
     updateAppointmentStatus(appointment.id, 'Asistido');
     enqueueSnackbar(
-      `Asistencia confirmada para ${appointment.clientName || appointment.clienteNombre}.`,
+      `Asistencia confirmada para ${appointment.clientName}.`,
       { variant: 'success' }
     );
   };
@@ -102,7 +102,7 @@ export const TurnosManager = ({ mode = 'owner', modo = 'dueno' }) => {
   const handleMarkAbsence = (appointment) => {
     updateAppointmentStatus(appointment.id, 'No-Asistido');
     enqueueSnackbar(
-      `Inasistencia registrada para ${appointment.clientName || appointment.clienteNombre}. Se le computó +1 Strike.`,
+      `Inasistencia registrada para ${appointment.clientName}. Se le computó +1 Strike.`,
       { variant: 'warning' }
     );
   };
@@ -241,7 +241,7 @@ export const TurnosManager = ({ mode = 'owner', modo = 'dueno' }) => {
               <MenuItem value="all">Todos los barberos</MenuItem>
               {employees.map((employee) => (
                 <MenuItem key={employee.id} value={employee.id}>
-                  {employee.name || employee.nombre}
+                  {employee.name}
                 </MenuItem>
               ))}
             </TextField>
@@ -271,16 +271,16 @@ export const TurnosManager = ({ mode = 'owner', modo = 'dueno' }) => {
               </TableRow>
             ) : (
               filteredAppointments.map((appointment) => {
-                const appointmentDate = appointment.date || appointment.fecha;
-                const appointmentTime = appointment.time || appointment.hora;
-                const appointmentClientName = appointment.clientName || appointment.clienteNombre;
-                const appointmentClientContact = appointment.clientPhone || appointment.clienteTelefono || appointment.clientEmail || appointment.clienteEmail;
-                const appointmentServiceName = appointment.serviceName || appointment.servicioNombre;
-                const appointmentServicePrice = appointment.servicePrice ?? appointment.servicioPrecio;
-                const appointmentServiceDuration = appointment.serviceDuration ?? appointment.servicioDuracion;
-                const appointmentEmployeeName = appointment.employeeName || appointment.empleadoNombre;
-                const appointmentStatus = appointment.status || appointment.estado;
-                const cancellationNote = appointment.cancellationReason || appointment.motivoCancelacion;
+                const appointmentDate = appointment.date;
+                const appointmentTime = appointment.time;
+                const appointmentClientName = appointment.clientName;
+                const appointmentClientContact = appointment.clientPhone || appointment.clientEmail;
+                const appointmentServiceName = appointment.serviceName;
+                const appointmentServicePrice = appointment.servicePrice;
+                const appointmentServiceDuration = appointment.serviceDuration;
+                const appointmentEmployeeName = appointment.employeeName;
+                const appointmentStatus = appointment.status;
+                const cancellationNote = appointment.cancellationReason;
 
                 return (
                   <TableRow key={appointment.id} hover sx={{ '&:hover': { background: 'rgba(255,255,255,0.02)' } }}>
@@ -380,9 +380,9 @@ export const TurnosManager = ({ mode = 'owner', modo = 'dueno' }) => {
         <DialogContent>
           <DialogContentText sx={{ mb: 2 }}>
             Indica el motivo de cancelación para el turno de{' '}
-            <strong>{appointmentToCancel?.clientName || appointmentToCancel?.clienteNombre}</strong> del día{' '}
-            <strong>{appointmentToCancel?.date || appointmentToCancel?.fecha}</strong> a las{' '}
-            <strong>{appointmentToCancel?.time || appointmentToCancel?.hora} hs</strong>.
+            <strong>{appointmentToCancel?.clientName}</strong> del día{' '}
+            <strong>{appointmentToCancel?.date}</strong> a las{' '}
+            <strong>{appointmentToCancel?.time} hs</strong>.
           </DialogContentText>
           <TextField
             autoFocus

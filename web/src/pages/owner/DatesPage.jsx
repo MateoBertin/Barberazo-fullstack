@@ -54,7 +54,7 @@ const getDayCellStyles = (dayInfo, isSelected) => {
     };
   }
 
-  const dayStatus = dayInfo.dayData?.status || dayInfo.dayData?.estado;
+  const dayStatus = dayInfo.dayData?.status;
   const isEnabled = !dayInfo.dayData || dayStatus === 'Habilitado';
 
   return {
@@ -135,7 +135,7 @@ export const DatesPage = () => {
       const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
       const isWorkday = dow !== 0 && dow !== 1;
       const isPast = date < today;
-      const dayData = workingDays.find((day) => (day.date || day.fecha) === dateStr) || null;
+      const dayData = workingDays.find((day) => day.date === dateStr) || null;
 
       grid.push({ day: d, date, dateStr, dow, isWorkday, isPast, dayData, isToday: dateStr === todayStr });
     }
@@ -148,19 +148,19 @@ export const DatesPage = () => {
     const year = viewDate.getFullYear();
     const month = viewDate.getMonth();
     const monthDays = workingDays.filter((day) => {
-      const d = new Date(day.date || day.fecha);
+      const d = new Date(day.date);
       return d.getFullYear() === year && d.getMonth() === month;
     });
     return {
-      enabledCount: monthDays.filter((d) => (d.status || d.estado) === 'Habilitado').length,
-      disabledCount: monthDays.filter((d) => (d.status || d.estado) === 'Deshabilitado').length,
+      enabledCount: monthDays.filter((d) => d.status === 'Habilitado').length,
+      disabledCount: monthDays.filter((d) => d.status === 'Deshabilitado').length,
       totalCount: monthDays.length,
     };
   }, [viewDate, workingDays]);
 
   // Actualiza el selectedDay con los datos más recientes de workingDays
   const refreshSelectedDay = (dateStr) => {
-    const dayData = workingDays.find((day) => (day.date || day.fecha) === dateStr) || null;
+    const dayData = workingDays.find((day) => day.date === dateStr) || null;
     setSelectedDay((prev) => (prev ? { ...prev, dayData } : null));
   };
 
@@ -174,7 +174,7 @@ export const DatesPage = () => {
   // Habilitar / iniciar flujo de deshabilitar
   const handleToggleDayStatus = () => {
     if (!selectedDay) return;
-    const currentStatus = selectedDay.dayData?.status || selectedDay.dayData?.estado || 'Habilitado';
+    const currentStatus = selectedDay.dayData?.status || 'Habilitado';
     if (currentStatus === 'Habilitado') {
       setIsConfirmOpen(true); // CUU6.2: pide confirmación antes de deshabilitar
     } else {
@@ -213,9 +213,9 @@ export const DatesPage = () => {
 
   // Helper: estado actual del día seleccionado (puede haber cambiado por toggleDayStatus)
   const selectedDayData = selectedDay
-    ? workingDays.find((day) => (day.date || day.fecha) === selectedDay.dateStr) || selectedDay.dayData
+    ? workingDays.find((day) => day.date === selectedDay.dateStr) || selectedDay.dayData
     : null;
-  const isSelectedDayEnabled = (selectedDayData?.status || selectedDayData?.estado) !== 'Deshabilitado';
+  const isSelectedDayEnabled = selectedDayData?.status !== 'Deshabilitado';
 
   return (
     <Container maxWidth="lg" sx={{ py: 6 }}>
@@ -361,7 +361,7 @@ export const DatesPage = () => {
                           ? 'Día no laborable (Dom/Lun)'
                           : dayInfo.isPast
                           ? 'Fecha pasada'
-                          : dayInfo.dayData?.status || dayInfo.dayData?.estado || 'Habilitado'
+                          : dayInfo.dayData?.status || 'Habilitado'
                       }
                       arrow
                       placement="top"
@@ -520,15 +520,15 @@ export const DatesPage = () => {
               {!isEditingSchedule ? (
                 <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
                   <Typography variant="body2" color="text.secondary">
-                    {selectedDayData?.startTime || selectedDayData?.horarioInicio || '08:00'} → {selectedDayData?.endTime || selectedDayData?.horarioFin || '20:00'} hs
+                    {selectedDayData?.startTime || '08:00'} → {selectedDayData?.endTime || '20:00'} hs
                   </Typography>
                   <Button
                     size="small"
                     startIcon={<EditIcon />}
                     onClick={() => {
                       setScheduleForm({
-                        startTime: selectedDayData?.startTime || selectedDayData?.horarioInicio || '08:00',
-                        endTime: selectedDayData?.endTime || selectedDayData?.horarioFin || '20:00',
+                        startTime: selectedDayData?.startTime || '08:00',
+                        endTime: selectedDayData?.endTime || '20:00',
                       });
                       setIsEditingSchedule(true);
                     }}

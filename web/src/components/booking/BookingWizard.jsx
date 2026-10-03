@@ -59,31 +59,31 @@ export const BookingWizard = () => {
 
   // 1. Verificar si el usuario actual ya tiene un turno activo ('Solicitado')
   const activeAppointment = appointments.find(
-    (a) => String(a.clientId || a.clienteId) === String(user?.id) && (a.status === 'Solicitado' || a.estado === 'Solicitado')
+    (a) => String(a.clientId) === String(user?.id) && a.status === 'Solicitado'
   );
 
   // Filtrar solo los servicios habilitados
-  const enabledServices = services.filter((s) => (s.status || s.estado) === 'Habilitado');
+  const enabledServices = services.filter((s) => s.status === 'Habilitado');
 
   // Filtrar solo los días habilitados a partir de hoy
   const todayStr = new Date().toISOString().split('T')[0];
   const availableDays = (workingDays || []).filter(
-    (d) => (d.status || d.estado) === 'Habilitado' && (d.date || d.fecha) >= todayStr
+    (d) => d.status === 'Habilitado' && d.date >= todayStr
   ).slice(0, 14);
 
   // Filtrar solo empleados activos
-  const activeEmployees = employees.filter((e) => (e.status || e.estado) === 'Activo');
+  const activeEmployees = employees.filter((e) => e.status === 'Activo');
 
   // Horarios ocupados para la fecha seleccionada y el barbero seleccionado
-  const selectedDateStr = selectedDate?.date || selectedDate?.fecha;
+  const selectedDateStr = selectedDate?.date;
   const occupiedTimeSlots = appointments
     .filter(
       (a) =>
-        (a.date || a.fecha) === selectedDateStr &&
-        (a.status === 'Solicitado' || a.estado === 'Solicitado') &&
-        (!selectedEmployee || (a.employeeId || a.empleadoId) === selectedEmployee.id)
+        a.date === selectedDateStr &&
+        a.status === 'Solicitado' &&
+        (!selectedEmployee || a.employeeId === selectedEmployee.id)
     )
-    .map((a) => a.time || a.hora);
+    .map((a) => a.time);
 
   // --- MANEJADORES DE EVENTOS EN INGLÉS ---
 
@@ -138,12 +138,12 @@ export const BookingWizard = () => {
       clientEmail: user.email,
       clientPhone: user.phone || user.telefono || 'Sin teléfono',
       employeeId: assignedEmployee ? assignedEmployee.id : 'e1',
-      employeeName: assignedEmployee ? (assignedEmployee.name || assignedEmployee.nombre) : 'Barbero de Turno',
+      employeeName: assignedEmployee ? assignedEmployee.name : 'Barbero de Turno',
       serviceId: selectedService.id,
-      serviceName: selectedService.name || selectedService.nombre,
-      servicePrice: selectedService.price ?? selectedService.precio,
-      serviceDuration: selectedService.durationMinutes ?? selectedService.duracionMinutos,
-      date: selectedDate.date || selectedDate.fecha,
+      serviceName: selectedService.name,
+      servicePrice: selectedService.price,
+      serviceDuration: selectedService.durationMinutes,
+      date: selectedDate.date,
       time: selectedTime,
     };
 
@@ -163,7 +163,7 @@ export const BookingWizard = () => {
     const result = cancelClientAppointment(activeAppointment.id, 'Cancelado por el cliente desde su panel');
     setIsCancelDialogOpen(false);
 
-    if (result && (result.isLessThan24Hours || result.esConMenosDe24Hs)) {
+    if (result && result.isLessThan24Hours) {
       enqueueSnackbar('Turno cancelado con menos de 24 hs de anticipación. Se te aplicó +1 Strike.', {
         variant: 'warning',
       });
@@ -214,8 +214,8 @@ export const BookingWizard = () => {
 
   // ─── CASO 2: CLIENTE YA TIENE TURNO ACTIVO ('Solicitado') ───
   if (activeAppointment) {
-    const appointmentDateStr = activeAppointment.date || activeAppointment.fecha;
-    const appointmentTimeStr = activeAppointment.time || activeAppointment.hora || '10:00';
+    const appointmentDateStr = activeAppointment.date;
+    const appointmentTimeStr = activeAppointment.time || '10:00';
     const appointmentDateTime = new Date(`${appointmentDateStr}T${appointmentTimeStr}:00`);
     const now = new Date();
     const diffHours = (appointmentDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
@@ -251,11 +251,11 @@ export const BookingWizard = () => {
                   Servicio
                 </Typography>
                 <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#fff' }}>
-                  {activeAppointment.serviceName || activeAppointment.servicioNombre}
+                  {activeAppointment.serviceName}
                 </Typography>
                 <Typography variant="body2" sx={{ color: '#10b981', fontWeight: 600 }}>
-                  ${(activeAppointment.servicePrice ?? activeAppointment.servicioPrecio)?.toLocaleString()} (
-                  {activeAppointment.serviceDuration || activeAppointment.servicioDuracion} min)
+                  ${activeAppointment.servicePrice?.toLocaleString()} (
+                  {activeAppointment.serviceDuration} min)
                 </Typography>
               </Paper>
             </Grid>
@@ -266,7 +266,7 @@ export const BookingWizard = () => {
                   Fecha
                 </Typography>
                 <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#fff' }}>
-                  {activeAppointment.date || activeAppointment.fecha}
+                  {activeAppointment.date}
                 </Typography>
               </Paper>
             </Grid>
@@ -277,7 +277,7 @@ export const BookingWizard = () => {
                   Horario
                 </Typography>
                 <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#fff' }}>
-                  {activeAppointment.time || activeAppointment.hora} hs
+                  {activeAppointment.time} hs
                 </Typography>
               </Paper>
             </Grid>
@@ -288,7 +288,7 @@ export const BookingWizard = () => {
                   Barbero Asignado
                 </Typography>
                 <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#fff' }}>
-                  {activeAppointment.employeeName || activeAppointment.empleadoNombre}
+                  {activeAppointment.employeeName}
                 </Typography>
               </Paper>
             </Grid>
@@ -388,20 +388,20 @@ export const BookingWizard = () => {
                       <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
                         <ScissorsIcon sx={{ color: '#d4af37' }} />
                         <Chip
-                          label={`$${(service.price ?? service.precio)?.toLocaleString()}`}
+                          label={`$${service.price?.toLocaleString()}`}
                           color="primary"
                           size="small"
                           sx={{ fontWeight: 700 }}
                         />
                       </Stack>
                       <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 0.5 }}>
-                        {service.name || service.nombre}
+                        {service.name}
                       </Typography>
                       <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
-                        ⏱ Duración: {service.durationMinutes ?? service.duracionMinutos} minutos
+                        ⏱ Duración: {service.durationMinutes} minutos
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        {service.description || service.descripcion}
+                        {service.description}
                       </Typography>
                     </CardActionArea>
                   </Card>
@@ -423,10 +423,10 @@ export const BookingWizard = () => {
           </Typography>
           <Grid container spacing={1.5}>
             {availableDays.map((day) => {
-              const dayDate = day.date || day.fecha;
-              const dayOfWeek = day.dayOfWeek || day.diaSemana;
-              const startTime = day.startTime || day.horarioInicio;
-              const endTime = day.endTime || day.horarioFin;
+              const dayDate = day.date;
+              const dayOfWeek = day.dayOfWeek;
+              const startTime = day.startTime;
+              const endTime = day.endTime;
               const isSelected = selectedDateStr === dayDate;
               return (
                 <Grid item xs={6} sm={4} md={3} key={day.id}>
@@ -491,8 +491,8 @@ export const BookingWizard = () => {
             {/* Barberos específicos */}
             {activeEmployees.map((employee) => {
               const isSelected = selectedEmployee?.id === employee.id;
-              const employeeName = employee.name || employee.nombre;
-              const employeeSpecialties = employee.specialties || employee.especialidades;
+              const employeeName = employee.name;
+              const employeeSpecialties = employee.specialties;
               return (
                 <Grid item xs={12} sm={6} md={4} key={employee.id}>
                   <Card
@@ -528,8 +528,8 @@ export const BookingWizard = () => {
             4. Elige el Horario
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            Día seleccionado: <strong>{selectedDate?.dayOfWeek || selectedDate?.diaSemana} {selectedDateStr}</strong>
-            {selectedEmployee ? ` con ${selectedEmployee.name || selectedEmployee.nombre}` : ' (Cualquier barbero)'}
+            Día seleccionado: <strong>{selectedDate?.dayOfWeek} {selectedDateStr}</strong>
+            {selectedEmployee ? ` con ${selectedEmployee.name}` : ' (Cualquier barbero)'}
           </Typography>
 
           <Grid container spacing={1.5}>
@@ -574,10 +574,10 @@ export const BookingWizard = () => {
                   Servicio
                 </Typography>
                 <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-                  {selectedService?.name || selectedService?.nombre}
+                  {selectedService?.name}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Duración: {selectedService?.durationMinutes ?? selectedService?.duracionMinutos} min — Precio: ${(selectedService?.price ?? selectedService?.precio)?.toLocaleString()}
+                  Duración: {selectedService?.durationMinutes} min — Precio: ${selectedService?.price?.toLocaleString()}
                 </Typography>
               </Grid>
 
@@ -586,7 +586,7 @@ export const BookingWizard = () => {
                   Fecha y Hora
                 </Typography>
                 <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-                  {selectedDate?.dayOfWeek || selectedDate?.diaSemana}, {selectedDateStr} a las {selectedTime} hs
+                  {selectedDate?.dayOfWeek}, {selectedDateStr} a las {selectedTime} hs
                 </Typography>
               </Grid>
 
@@ -595,7 +595,7 @@ export const BookingWizard = () => {
                   Barbero
                 </Typography>
                 <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-                  {selectedEmployee ? (selectedEmployee.name || selectedEmployee.nombre) : 'Cualquier barbero disponible (Asignación automática)'}
+                  {selectedEmployee ? selectedEmployee.name : 'Cualquier barbero disponible (Asignación automática)'}
                 </Typography>
               </Grid>
 

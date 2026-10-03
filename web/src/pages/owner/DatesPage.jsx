@@ -237,23 +237,24 @@ export const DatesPage = () => {
   const isSelectedDayEnabled = selectedDayData?.status !== 'Deshabilitado';
 
   return (
-    <Container maxWidth="lg" sx={{ py: 6 }}>
+    <Container maxWidth="lg" sx={{ py: { xs: 3, sm: 6 } }}>
       {/* ─── Header ─── */}
       <Paper
         elevation={4}
         sx={{
-          p: 4,
+          p: { xs: 2.5, sm: 4 },
           borderRadius: 4,
           background: `linear-gradient(135deg, ${BRAND_COLORS.deepGreen} 0%, ${BRAND_COLORS.card} 100%)`,
           border: `1px solid ${withAlpha(BRAND_COLORS.brightGreen, 0.3)}`,
           mb: 4,
+          overflow: 'hidden',
         }}
       >
         <Grid container spacing={2} alignItems="center" justifyContent="space-between">
           <Grid item xs={12} sm={7}>
             <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 1 }}>
-              <CalendarIcon sx={{ color: BRAND_COLORS.brightGreen, fontSize: 32 }} />
-              <Typography variant="h4" sx={{ fontWeight: 800 }}>
+              <CalendarIcon sx={{ color: BRAND_COLORS.brightGreen, fontSize: 32, flexShrink: 0 }} />
+              <Typography variant="h4" sx={{ fontWeight: 800, fontSize: { xs: '1.5rem', sm: '2.125rem' } }}>
                 Habilitación de Calendario
               </Typography>
             </Stack>
@@ -265,7 +266,9 @@ export const DatesPage = () => {
           <Grid item xs={12} sm={5}>
             <Stack
               direction="row"
-              spacing={3}
+              spacing={{ xs: 2, sm: 3 }}
+              flexWrap="wrap"
+              rowGap={1.5}
               justifyContent={{ xs: 'flex-start', sm: 'flex-end' }}
             >
               <Box sx={{ textAlign: 'center' }}>
@@ -302,10 +305,11 @@ export const DatesPage = () => {
         <Grid item xs={12} md={selectedDay ? 7 : 12}>
           <Paper
             sx={{
-              p: 3,
+              p: { xs: 1.5, sm: 3 },
               borderRadius: 3,
               background: BRAND_COLORS.card,
               border: `1px solid ${withAlpha(BRAND_COLORS.white, 0.08)}`,
+              overflow: 'hidden',
             }}
           >
             {/* Navegación de mes */}
@@ -322,7 +326,7 @@ export const DatesPage = () => {
               >
                 <ChevronLeft />
               </IconButton>
-              <Typography variant="h5" sx={{ fontWeight: 700 }}>
+              <Typography variant="h5" sx={{ fontWeight: 700, fontSize: { xs: '1.1rem', sm: '1.5rem' } }}>
                 {MONTH_NAMES[viewDate.getMonth()]} {viewDate.getFullYear()}
               </Typography>
               <IconButton
@@ -334,38 +338,48 @@ export const DatesPage = () => {
               </IconButton>
             </Stack>
 
-            {/* Encabezados de días */}
-            <Grid container sx={{ mb: 0.5 }}>
+            {/* Encabezados de días: 7 columnas iguales en cualquier ancho */}
+            <Box
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(7, 1fr)',
+                gap: 0.5,
+                mb: 0.5,
+              }}
+            >
               {DAY_HEADERS.map((d, i) => (
-                <Grid item key={d} xs={12 / 7}>
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      display: 'block',
-                      textAlign: 'center',
-                      fontWeight: 700,
-                      py: 0.5,
-                      color:
-                        i === 0 || i === 1
-                          ? withAlpha(BRAND_COLORS.white, 0.18)
-                          : BRAND_COLORS.gold,
-                      letterSpacing: '0.05em',
-                    }}
-                  >
-                    {d}
-                  </Typography>
-                </Grid>
+                <Typography
+                  key={d}
+                  variant="caption"
+                  sx={{
+                    display: 'block',
+                    textAlign: 'center',
+                    fontWeight: 700,
+                    py: 0.5,
+                    color:
+                      i === 0 || i === 1
+                        ? withAlpha(BRAND_COLORS.white, 0.18)
+                        : BRAND_COLORS.gold,
+                    letterSpacing: '0.05em',
+                  }}
+                >
+                  {d}
+                </Typography>
               ))}
-            </Grid>
+            </Box>
 
-            {/* Grilla de días */}
-            <Grid container>
+            {/* Grilla de días: 7 columnas iguales en cualquier ancho */}
+            <Box
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(7, 1fr)',
+                gap: 0.5,
+              }}
+            >
               {calendarDays.map((dayInfo, idx) => {
                 if (!dayInfo) {
                   return (
-                    <Grid item key={`empty-${idx}`} xs={12 / 7} sx={{ p: 0.25 }}>
-                      <Box sx={{ aspectRatio: '1', borderRadius: 2 }} />
-                    </Grid>
+                    <Box key={`empty-${idx}`} sx={{ aspectRatio: '1', borderRadius: 2 }} />
                   );
                 }
 
@@ -373,7 +387,7 @@ export const DatesPage = () => {
                 const styles = getDayCellStyles(dayInfo, isSelected);
 
                 return (
-                  <Grid item key={dayInfo.dateStr} xs={12 / 7} sx={{ p: 0.25 }}>
+                  <Box key={dayInfo.dateStr} sx={{ minWidth: 0 }}>
                     <Tooltip
                       title={
                         !dayInfo.isWorkday
@@ -431,14 +445,14 @@ export const DatesPage = () => {
                         )}
                       </Box>
                     </Tooltip>
-                  </Grid>
+                  </Box>
                 );
               })}
-            </Grid>
+            </Box>
 
             {/* Leyenda */}
             <Divider sx={{ my: 3 }} />
-            <Stack direction="row" spacing={3} flexWrap="wrap" gap={1.5}>
+            <Stack direction="row" spacing={3} flexWrap="wrap" rowGap={1}>
               <Stack direction="row" spacing={1} alignItems="center">
                 <Box
                   sx={{

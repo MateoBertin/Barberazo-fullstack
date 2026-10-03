@@ -24,3 +24,6 @@ npm-debug.log*
 # Vite cache
 .vite/
 
+# Planes y memoria interna (documentación local, no se commitea)
+plans/
+

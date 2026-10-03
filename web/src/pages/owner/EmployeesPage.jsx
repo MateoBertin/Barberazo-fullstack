@@ -42,93 +42,104 @@ export const EmployeesPage = () => {
   const { enqueueSnackbar } = useSnackbar();
 
   const [openModal, setOpenModal] = useState(false);
-  const [editingEmployee, setEditingEmployee] = useState(null);
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
 
   const [formData, setFormData] = useState({
-    nombre: '',
+    name: '',
     email: '',
-    telefono: '',
-    especialidades: [],
-    diasHabilitados: ['Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
-    mananaInicio: '08:00',
-    mananaFin: '12:00',
-    tardeInicio: '14:00',
-    tardeFin: '20:00',
+    phone: '',
+    specialties: [],
+    enabledDays: ['Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
+    morningStart: '08:00',
+    morningEnd: '12:00',
+    afternoonStart: '14:00',
+    afternoonEnd: '20:00',
   });
 
   const handleOpenCreate = () => {
-    setEditingEmployee(null);
+    setSelectedEmployee(null);
     setFormData({
-      nombre: '',
+      name: '',
       email: '',
-      telefono: '',
-      especialidades: services.map((s) => s.nombre),
-      diasHabilitados: ['Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
-      mananaInicio: '08:00',
-      mananaFin: '12:00',
-      tardeInicio: '14:00',
-      tardeFin: '20:00',
+      phone: '',
+      specialties: services.map((s) => s.name || s.nombre),
+      enabledDays: ['Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
+      morningStart: '08:00',
+      morningEnd: '12:00',
+      afternoonStart: '14:00',
+      afternoonEnd: '20:00',
     });
     setOpenModal(true);
   };
 
-  const handleOpenEdit = (emp) => {
-    setEditingEmployee(emp);
+  const handleOpenEdit = (employee) => {
+    setSelectedEmployee(employee);
+    const schedule = employee.schedule || {};
+    const horarios = employee.horarios || {};
     setFormData({
-      nombre: emp.nombre,
-      email: emp.email,
-      telefono: emp.telefono,
-      especialidades: emp.especialidades || [],
-      diasHabilitados: emp.horarios?.diasHabilitados || ['Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
-      mananaInicio: emp.horarios?.turnoManana?.inicio || '08:00',
-      mananaFin: emp.horarios?.turnoManana?.fin || '12:00',
-      tardeInicio: emp.horarios?.turnoTarde?.inicio || '14:00',
-      tardeFin: emp.horarios?.turnoTarde?.fin || '20:00',
+      name: employee.name || employee.nombre,
+      email: employee.email,
+      phone: employee.phone || employee.telefono || '',
+      specialties: employee.specialties || employee.especialidades || [],
+      enabledDays: schedule.enabledDays || horarios.diasHabilitados || ['Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
+      morningStart: schedule.morningShift?.startTime || horarios.turnoManana?.inicio || '08:00',
+      morningEnd: schedule.morningShift?.endTime || horarios.turnoManana?.fin || '12:00',
+      afternoonStart: schedule.afternoonShift?.startTime || horarios.turnoTarde?.inicio || '14:00',
+      afternoonEnd: schedule.afternoonShift?.endTime || horarios.turnoTarde?.fin || '20:00',
     });
     setOpenModal(true);
   };
 
-  const handleDelete = (emp) => {
-    if (window.confirm(`¿Estás seguro de eliminar al empleado ${emp.nombre}?`)) {
-      deleteEmployee(emp.id);
-      enqueueSnackbar(`Empleado ${emp.nombre} eliminado.`, { variant: 'warning' });
+  const handleDelete = (employee) => {
+    const employeeName = employee.name || employee.nombre;
+    if (window.confirm(`¿Estás seguro de eliminar al empleado ${employeeName}?`)) {
+      deleteEmployee(employee.id);
+      enqueueSnackbar(`Empleado ${employeeName} eliminado.`, { variant: 'warning' });
     }
   };
 
-  const handleToggleDia = (dia) => {
+  const handleToggleDay = (day) => {
     setFormData((prev) => {
-      const exists = prev.diasHabilitados.includes(dia);
-      const next = exists ? prev.diasHabilitados.filter((d) => d !== dia) : [...prev.diasHabilitados, dia];
-      return { ...prev, diasHabilitados: next };
+      const exists = prev.enabledDays.includes(day);
+      const next = exists ? prev.enabledDays.filter((d) => d !== day) : [...prev.enabledDays, day];
+      return { ...prev, enabledDays: next };
     });
   };
 
-  const handleToggleEspecialidad = (nombreServicio) => {
+  const handleToggleSpecialty = (serviceName) => {
     setFormData((prev) => {
-      const exists = prev.especialidades.includes(nombreServicio);
-      const next = exists ? prev.especialidades.filter((e) => e !== nombreServicio) : [...prev.especialidades, nombreServicio];
-      return { ...prev, especialidades: next };
+      const exists = prev.specialties.includes(serviceName);
+      const next = exists ? prev.specialties.filter((e) => e !== serviceName) : [...prev.specialties, serviceName];
+      return { ...prev, specialties: next };
     });
   };
 
   const handleSave = (e) => {
     e.preventDefault();
-    if (!formData.nombre.trim() || !formData.email.trim()) return;
+    if (!formData.name.trim() || !formData.email.trim()) return;
 
     const payload = {
-      nombre: formData.nombre,
+      name: formData.name,
+      nombre: formData.name,
       email: formData.email,
-      telefono: formData.telefono,
-      especialidades: formData.especialidades,
+      phone: formData.phone,
+      telefono: formData.phone,
+      specialties: formData.specialties,
+      especialidades: formData.specialties,
+      schedule: {
+        enabledDays: formData.enabledDays,
+        morningShift: { startTime: formData.morningStart, endTime: formData.morningEnd },
+        afternoonShift: { startTime: formData.afternoonStart, endTime: formData.afternoonEnd },
+      },
       horarios: {
-        diasHabilitados: formData.diasHabilitados,
-        turnoManana: { inicio: formData.mananaInicio, fin: formData.mananaFin },
-        turnoTarde: { inicio: formData.tardeInicio, fin: formData.tardeFin },
+        diasHabilitados: formData.enabledDays,
+        turnoManana: { inicio: formData.morningStart, fin: formData.morningEnd },
+        turnoTarde: { inicio: formData.afternoonStart, fin: formData.afternoonEnd },
       },
     };
 
-    if (editingEmployee) {
-      updateEmployee(editingEmployee.id, payload);
+    if (selectedEmployee) {
+      updateEmployee(selectedEmployee.id, payload);
       enqueueSnackbar('Empleado actualizado con éxito.', { variant: 'success' });
     } else {
       addEmployee(payload);
@@ -178,24 +189,35 @@ export const EmployeesPage = () => {
 
       {/* Grilla de Empleados */}
       <Grid container spacing={3}>
-        {employees.map((emp) => (
-          <Grid item xs={12} md={6} key={emp.id}>
+        {employees.map((employee) => {
+          const employeeName = employee.name || employee.nombre;
+          const employeePhone = employee.phone || employee.telefono;
+          const employeeSpecialties = employee.specialties || employee.especialidades || [];
+          const schedule = employee.schedule || {};
+          const horarios = employee.horarios || {};
+          const enabledDays = schedule.enabledDays || horarios.diasHabilitados || [];
+          const morningStart = schedule.morningShift?.startTime || horarios.turnoManana?.inicio || '08:00';
+          const morningEnd = schedule.morningShift?.endTime || horarios.turnoManana?.fin || '12:00';
+          const afternoonStart = schedule.afternoonShift?.startTime || horarios.turnoTarde?.inicio || '14:00';
+          const afternoonEnd = schedule.afternoonShift?.endTime || horarios.turnoTarde?.fin || '20:00';
+          return (
+          <Grid item xs={12} md={6} key={employee.id}>
             <Card sx={{ borderRadius: 3, background: '#181b20', border: '1px solid rgba(255,255,255,0.08)' }}>
               <CardContent>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
                   <Box>
                     <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                      {emp.nombre}
+                      {employeeName}
                     </Typography>
                     <Stack direction="row" spacing={1} sx={{ mt: 0.5 }}>
                       <Chip label="Barbero Staff" color="info" size="small" sx={{ fontWeight: 700 }} />
                     </Stack>
                   </Box>
                   <Stack direction="row" spacing={0.5}>
-                    <IconButton color="primary" onClick={() => handleOpenEdit(emp)}>
+                    <IconButton color="primary" onClick={() => handleOpenEdit(employee)}>
                       <EditIcon fontSize="small" />
                     </IconButton>
-                    <IconButton color="error" onClick={() => handleDelete(emp)}>
+                    <IconButton color="error" onClick={() => handleDelete(employee)}>
                       <DeleteIcon fontSize="small" />
                     </IconButton>
                   </Stack>
@@ -204,11 +226,11 @@ export const EmployeesPage = () => {
                 <Stack spacing={1} sx={{ mb: 2 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <EmailIcon fontSize="small" sx={{ color: 'text.secondary' }} />
-                    <Typography variant="body2">{emp.email}</Typography>
+                    <Typography variant="body2">{employee.email}</Typography>
                   </Box>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <PhoneIcon fontSize="small" sx={{ color: 'text.secondary' }} />
-                    <Typography variant="body2">{emp.telefono || 'Sin teléfono'}</Typography>
+                    <Typography variant="body2">{employeePhone || 'Sin teléfono'}</Typography>
                   </Box>
                 </Stack>
 
@@ -219,30 +241,31 @@ export const EmployeesPage = () => {
                 </Typography>
 
                 <Stack direction="row" spacing={0.5} flexWrap="wrap" gap={0.5} sx={{ mb: 1.5 }}>
-                  {emp.horarios?.diasHabilitados?.map((dia) => (
-                    <Chip key={dia} label={dia} size="small" variant="outlined" color="primary" />
+                  {enabledDays?.map((day) => (
+                    <Chip key={day} label={day} size="small" variant="outlined" color="primary" />
                   ))}
                 </Stack>
 
                 <Typography variant="caption" color="text.secondary" display="block">
-                  • Mañana: {emp.horarios?.turnoManana?.inicio || '08:00'} a {emp.horarios?.turnoManana?.fin || '12:00'} hs
+                  • Mañana: {morningStart} a {morningEnd} hs
                 </Typography>
                 <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 2 }}>
-                  • Tarde: {emp.horarios?.turnoTarde?.inicio || '14:00'} a {emp.horarios?.turnoTarde?.fin || '20:00'} hs
+                  • Tarde: {afternoonStart} a {afternoonEnd} hs
                 </Typography>
 
                 <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>
                   Especialidades:
                 </Typography>
                 <Stack direction="row" spacing={0.5} flexWrap="wrap" gap={0.5}>
-                  {emp.especialidades?.map((esp) => (
-                    <Chip key={esp} label={esp} size="small" color="default" sx={{ fontSize: '0.75rem' }} />
+                  {employeeSpecialties?.map((specialty) => (
+                    <Chip key={specialty} label={specialty} size="small" color="default" sx={{ fontSize: '0.75rem' }} />
                   ))}
                 </Stack>
               </CardContent>
             </Card>
           </Grid>
-        ))}
+          );
+        })}
       </Grid>
 
       {/* Modal de Alta / Edición de Empleado */}
@@ -256,7 +279,7 @@ export const EmployeesPage = () => {
         }}
       >
         <DialogTitle sx={{ fontWeight: 700 }}>
-          {editingEmployee ? 'Editar Empleado' : 'Asignar Nuevo Empleado'}
+          {selectedEmployee ? 'Editar Empleado' : 'Asignar Nuevo Empleado'}
         </DialogTitle>
         <form onSubmit={handleSave}>
           <DialogContent>
@@ -265,8 +288,8 @@ export const EmployeesPage = () => {
                 <TextField
                   fullWidth
                   label="Nombre Completo"
-                  value={formData.nombre}
-                  onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   required
                 />
               </Grid>
@@ -284,8 +307,8 @@ export const EmployeesPage = () => {
                 <TextField
                   fullWidth
                   label="Teléfono"
-                  value={formData.telefono}
-                  onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                   required
                 />
               </Grid>
@@ -297,17 +320,17 @@ export const EmployeesPage = () => {
               Configuración de Días de Trabajo
             </Typography>
             <FormGroup row sx={{ mb: 2 }}>
-              {DIAS_SEMANA.map((dia) => (
+              {DIAS_SEMANA.map((day) => (
                 <FormControlLabel
-                  key={dia}
+                  key={day}
                   control={
                     <Checkbox
-                      checked={formData.diasHabilitados.includes(dia)}
-                      onChange={() => handleToggleDia(dia)}
+                      checked={formData.enabledDays.includes(day)}
+                      onChange={() => handleToggleDay(day)}
                       color="info"
                     />
                   }
-                  label={dia}
+                  label={day}
                 />
               ))}
             </FormGroup>
@@ -318,8 +341,8 @@ export const EmployeesPage = () => {
                   fullWidth
                   label="Mañana Inicio"
                   type="time"
-                  value={formData.mananaInicio}
-                  onChange={(e) => setFormData({ ...formData, mananaInicio: e.target.value })}
+                  value={formData.morningStart}
+                  onChange={(e) => setFormData({ ...formData, morningStart: e.target.value })}
                   InputLabelProps={{ shrink: true }}
                 />
               </Grid>
@@ -328,8 +351,8 @@ export const EmployeesPage = () => {
                   fullWidth
                   label="Mañana Fin"
                   type="time"
-                  value={formData.mananaFin}
-                  onChange={(e) => setFormData({ ...formData, mananaFin: e.target.value })}
+                  value={formData.morningEnd}
+                  onChange={(e) => setFormData({ ...formData, morningEnd: e.target.value })}
                   InputLabelProps={{ shrink: true }}
                 />
               </Grid>
@@ -338,8 +361,8 @@ export const EmployeesPage = () => {
                   fullWidth
                   label="Tarde Inicio"
                   type="time"
-                  value={formData.tardeInicio}
-                  onChange={(e) => setFormData({ ...formData, tardeInicio: e.target.value })}
+                  value={formData.afternoonStart}
+                  onChange={(e) => setFormData({ ...formData, afternoonStart: e.target.value })}
                   InputLabelProps={{ shrink: true }}
                 />
               </Grid>
@@ -348,8 +371,8 @@ export const EmployeesPage = () => {
                   fullWidth
                   label="Tarde Fin"
                   type="time"
-                  value={formData.tardeFin}
-                  onChange={(e) => setFormData({ ...formData, tardeFin: e.target.value })}
+                  value={formData.afternoonEnd}
+                  onChange={(e) => setFormData({ ...formData, afternoonEnd: e.target.value })}
                   InputLabelProps={{ shrink: true }}
                 />
               </Grid>
@@ -361,19 +384,22 @@ export const EmployeesPage = () => {
               Especialidades Habilitadas
             </Typography>
             <FormGroup row>
-              {services.map((s) => (
+              {services.map((service) => {
+                const serviceName = service.name || service.nombre;
+                return (
                 <FormControlLabel
-                  key={s.id}
+                  key={service.id}
                   control={
                     <Checkbox
-                      checked={formData.especialidades.includes(s.nombre)}
-                      onChange={() => handleToggleEspecialidad(s.nombre)}
+                      checked={formData.specialties.includes(serviceName)}
+                      onChange={() => handleToggleSpecialty(serviceName)}
                       color="primary"
                     />
                   }
-                  label={s.nombre}
+                  label={serviceName}
                 />
-              ))}
+                );
+              })}
             </FormGroup>
           </DialogContent>
           <DialogActions sx={{ px: 3, pb: 2 }}>
@@ -381,7 +407,7 @@ export const EmployeesPage = () => {
               Cancelar
             </Button>
             <Button type="submit" variant="contained" color="info" sx={{ fontWeight: 700 }}>
-              {editingEmployee ? 'Guardar Cambios' : 'Asignar Empleado'}
+              {selectedEmployee ? 'Guardar Cambios' : 'Asignar Empleado'}
             </Button>
           </DialogActions>
         </form>

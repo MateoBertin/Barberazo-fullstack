@@ -43,38 +43,38 @@ export const ServicesPage = () => {
   const isEmpleado = user?.rol === 'empleado';
 
   const [openModal, setOpenModal] = useState(false);
-  const [editingService, setEditingService] = useState(null);
+  const [selectedService, setSelectedService] = useState(null);
 
   const [formData, setFormData] = useState({
-    nombre: '',
-    duracionMinutos: 30,
-    precio: 0,
-    descripcion: '',
+    name: '',
+    durationMinutes: 30,
+    price: 0,
+    description: '',
   });
 
   const handleOpenCreate = () => {
-    setEditingService(null);
-    setFormData({ nombre: '', duracionMinutos: 30, precio: 3000, descripcion: '' });
+    setSelectedService(null);
+    setFormData({ name: '', durationMinutes: 30, price: 3000, description: '' });
     setOpenModal(true);
   };
 
   const handleOpenEdit = (service) => {
-    setEditingService(service);
+    setSelectedService(service);
     setFormData({
-      nombre: service.nombre,
-      duracionMinutos: service.duracionMinutos,
-      precio: service.precio,
-      descripcion: service.descripcion || '',
+      name: service.name || service.nombre,
+      durationMinutes: service.durationMinutes ?? service.duracionMinutos ?? 30,
+      price: service.price ?? service.precio ?? 0,
+      description: service.description || service.descripcion || '',
     });
     setOpenModal(true);
   };
 
   const handleSave = (e) => {
     e.preventDefault();
-    if (!formData.nombre.trim()) return;
+    if (!formData.name.trim()) return;
 
-    if (editingService) {
-      updateService(editingService.id, formData);
+    if (selectedService) {
+      updateService(selectedService.id, formData);
       enqueueSnackbar('Servicio actualizado con éxito.', { variant: 'success' });
     } else {
       addService(formData);
@@ -86,8 +86,10 @@ export const ServicesPage = () => {
   const handleToggleStatus = (service) => {
     if (isEmpleado) return;
     toggleServiceStatus(service.id);
-    const nextState = service.estado === 'Habilitado' ? 'Deshabilitado' : 'Habilitado';
-    enqueueSnackbar(`Servicio "${service.nombre}" cambiado a ${nextState}.`, { variant: 'info' });
+    const serviceName = service.name || service.nombre;
+    const currentStatus = service.status || service.estado;
+    const nextStatus = currentStatus === 'Habilitado' ? 'Deshabilitado' : 'Habilitado';
+    enqueueSnackbar(`Servicio "${serviceName}" cambiado a ${nextStatus}.`, { variant: 'info' });
   };
 
   return (
@@ -144,7 +146,14 @@ export const ServicesPage = () => {
 
       {/* Lista de Servicios en Grilla */}
       <Grid container spacing={3}>
-        {services.map((service) => (
+        {services.map((service) => {
+          const serviceName = service.name || service.nombre;
+          const serviceDescription = service.description || service.descripcion;
+          const serviceDuration = service.durationMinutes ?? service.duracionMinutos ?? 30;
+          const servicePrice = service.price ?? service.precio ?? 0;
+          const serviceStatus = service.status || service.estado;
+          const isEnabled = serviceStatus === 'Habilitado';
+          return (
           <Grid item xs={12} sm={6} md={4} key={service.id}>
             <Card
               sx={{
@@ -153,39 +162,39 @@ export const ServicesPage = () => {
                 flexDirection: 'column',
                 borderRadius: 3,
                 background: '#181b20',
-                border: service.estado === 'Habilitado' ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(239, 68, 68, 0.3)',
-                opacity: service.estado === 'Deshabilitado' ? 0.75 : 1,
+                border: isEnabled ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(239, 68, 68, 0.3)',
+                opacity: isEnabled ? 1 : 0.75,
               }}
             >
               <CardContent sx={{ flexGrow: 1 }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1.5 }}>
                   <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                    {service.nombre}
+                    {serviceName}
                   </Typography>
                   <Chip
-                    label={service.estado.toUpperCase()}
-                    color={service.estado === 'Habilitado' ? 'success' : 'error'}
+                    label={serviceStatus.toUpperCase()}
+                    color={isEnabled ? 'success' : 'error'}
                     size="small"
                     sx={{ fontWeight: 700 }}
                   />
                 </Box>
 
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 2, minHeight: 40 }}>
-                  {service.descripcion || 'Sin descripción detallada.'}
+                  {serviceDescription || 'Sin descripción detallada.'}
                 </Typography>
 
                 <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 2 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                     <TimeIcon sx={{ color: '#d4af37', fontSize: 18 }} />
                     <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                      {service.duracionMinutos} min
+                      {serviceDuration} min
                     </Typography>
                   </Box>
 
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                     <MoneyIcon sx={{ color: '#10b981', fontSize: 18 }} />
                     <Typography variant="h6" sx={{ fontWeight: 800, color: '#10b981' }}>
-                      ${service.precio.toLocaleString('es-AR')}
+                      ${servicePrice.toLocaleString('es-AR')}
                     </Typography>
                   </Box>
                 </Stack>
@@ -195,13 +204,13 @@ export const ServicesPage = () => {
                     <FormControlLabel
                       control={
                         <Switch
-                          checked={service.estado === 'Habilitado'}
+                          checked={isEnabled}
                           onChange={() => handleToggleStatus(service)}
                           color="success"
                           size="small"
                         />
                       }
-                      label={<Typography variant="caption">{service.estado === 'Habilitado' ? 'Habilitado' : 'Deshabilitado'}</Typography>}
+                      label={<Typography variant="caption">{isEnabled ? 'Habilitado' : 'Deshabilitado'}</Typography>}
                     />
                     <IconButton color="primary" size="small" onClick={() => handleOpenEdit(service)}>
                       <EditIcon fontSize="small" />
@@ -211,7 +220,8 @@ export const ServicesPage = () => {
               </CardContent>
             </Card>
           </Grid>
-        ))}
+          );
+        })}
       </Grid>
 
       {/* Modal de Alta / Edición de Servicio (Dueño) */}
@@ -225,15 +235,15 @@ export const ServicesPage = () => {
         }}
       >
         <DialogTitle sx={{ fontWeight: 700 }}>
-          {editingService ? 'Editar Servicio' : 'Crear Nuevo Servicio'}
+          {selectedService ? 'Editar Servicio' : 'Crear Nuevo Servicio'}
         </DialogTitle>
         <form onSubmit={handleSave}>
           <DialogContent>
             <TextField
               fullWidth
               label="Nombre del Servicio"
-              value={formData.nombre}
-              onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               required
               sx={{ mb: 2 }}
             />
@@ -244,8 +254,8 @@ export const ServicesPage = () => {
                   fullWidth
                   label="Duración (Minutos)"
                   type="number"
-                  value={formData.duracionMinutos}
-                  onChange={(e) => setFormData({ ...formData, duracionMinutos: parseInt(e.target.value) || 15 })}
+                  value={formData.durationMinutes}
+                  onChange={(e) => setFormData({ ...formData, durationMinutes: parseInt(e.target.value) || 15 })}
                   required
                   InputProps={{
                     endAdornment: <InputAdornment position="end">min</InputAdornment>,
@@ -257,8 +267,8 @@ export const ServicesPage = () => {
                   fullWidth
                   label="Precio ($ ARS)"
                   type="number"
-                  value={formData.precio}
-                  onChange={(e) => setFormData({ ...formData, precio: parseInt(e.target.value) || 0 })}
+                  value={formData.price}
+                  onChange={(e) => setFormData({ ...formData, price: parseInt(e.target.value) || 0 })}
                   required
                   InputProps={{
                     startAdornment: <InputAdornment position="start">$</InputAdornment>,
@@ -272,8 +282,8 @@ export const ServicesPage = () => {
               multiline
               rows={3}
               label="Descripción del Servicio"
-              value={formData.descripcion}
-              onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             />
           </DialogContent>
           <DialogActions sx={{ px: 3, pb: 2 }}>
@@ -281,7 +291,7 @@ export const ServicesPage = () => {
               Cancelar
             </Button>
             <Button type="submit" variant="contained" color="primary" sx={{ fontWeight: 700 }}>
-              {editingService ? 'Guardar Cambios' : 'Crear Servicio'}
+              {selectedService ? 'Guardar Cambios' : 'Crear Servicio'}
             </Button>
           </DialogActions>
         </form>

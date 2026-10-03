@@ -42,27 +42,32 @@ export const ClientsPage = () => {
   const isEmpleado = user?.rol === 'empleado';
   const [searchTerm, setSearchTerm] = useState('');
 
-  const filteredClients = clients.filter(
-    (c) =>
-      c.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.telefono.includes(searchTerm)
-  );
+  const filteredClients = clients.filter((client) => {
+    const clientName = client.name || client.nombre || '';
+    const clientPhone = client.phone || client.telefono || '';
+    return (
+      clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      client.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      clientPhone.includes(searchTerm)
+    );
+  });
 
-  const handleToggleBlock = (client) => {
+  const handleToggleClientBlock = (client) => {
     if (isEmpleado) return;
 
+    const clientName = client.name || client.nombre;
+    const currentStatus = client.status || client.estado;
     toggleClientBlock(client.id);
-    const nextState = client.estado === 'Bloqueado' ? 'Activo' : 'Bloqueado';
-    if (nextState === 'Bloqueado') {
-      enqueueSnackbar(`Cliente ${client.nombre} ha sido BLOQUEADO.`, { variant: 'error' });
+    const nextStatus = currentStatus === 'Bloqueado' ? 'Activo' : 'Bloqueado';
+    if (nextStatus === 'Bloqueado') {
+      enqueueSnackbar(`Cliente ${clientName} ha sido BLOQUEADO.`, { variant: 'error' });
     } else {
-      enqueueSnackbar(`Cliente ${client.nombre} ha sido DESBLOQUEADO.`, { variant: 'success' });
+      enqueueSnackbar(`Cliente ${clientName} ha sido DESBLOQUEADO.`, { variant: 'success' });
     }
   };
 
-  const getStatusChip = (estado, strikes) => {
-    switch (estado) {
+  const getStatusChip = (status) => {
+    switch (status) {
       case 'Bloqueado':
         return <Chip label="BLOQUEADO" color="error" size="small" sx={{ fontWeight: 800 }} />;
       case 'Multado':
@@ -70,7 +75,7 @@ export const ClientsPage = () => {
       case 'Activo':
         return <Chip label="ACTIVO" color="success" size="small" sx={{ fontWeight: 800 }} />;
       default:
-        return <Chip label={estado} size="small" />;
+        return <Chip label={status} size="small" />;
     }
   };
 
@@ -143,24 +148,30 @@ export const ClientsPage = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {filteredClients.map((client) => (
+            {filteredClients.map((client) => {
+              const clientName = client.name || client.nombre;
+              const clientPhone = client.phone || client.telefono;
+              const clientStatus = client.status || client.estado;
+              const registrationDate = client.registrationDate || client.fechaRegistro || '2026-05-01';
+              const isBlocked = clientStatus === 'Bloqueado';
+              return (
               <TableRow key={client.id} hover sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                 <TableCell sx={{ fontWeight: 700 }}>
                   <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-                    {client.nombre}
+                    {clientName}
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
-                    Registrado: {client.fechaRegistro || '2026-05-01'}
+                    Registrado: {registrationDate}
                   </Typography>
                 </TableCell>
 
                 <TableCell>
                   <Typography variant="body2">{client.email}</Typography>
-                  <Typography variant="caption" color="text.secondary">{client.telefono}</Typography>
+                  <Typography variant="caption" color="text.secondary">{clientPhone}</Typography>
                 </TableCell>
 
                 <TableCell>
-                  {getStatusChip(client.estado, client.strikes)}
+                  {getStatusChip(clientStatus)}
                 </TableCell>
 
                 <TableCell>
@@ -183,19 +194,20 @@ export const ClientsPage = () => {
                     </Tooltip>
                   ) : (
                     <Button
-                      variant={client.estado === 'Bloqueado' ? 'contained' : 'outlined'}
-                      color={client.estado === 'Bloqueado' ? 'success' : 'error'}
+                      variant={isBlocked ? 'contained' : 'outlined'}
+                      color={isBlocked ? 'success' : 'error'}
                       size="small"
-                      startIcon={client.estado === 'Bloqueado' ? <CheckIcon /> : <BlockIcon />}
-                      onClick={() => handleToggleBlock(client)}
+                      startIcon={isBlocked ? <CheckIcon /> : <BlockIcon />}
+                      onClick={() => handleToggleClientBlock(client)}
                       sx={{ fontWeight: 700 }}
                     >
-                      {client.estado === 'Bloqueado' ? 'Desbloquear' : 'Bloquear'}
+                      {isBlocked ? 'Desbloquear' : 'Bloquear'}
                     </Button>
                   )}
                 </TableCell>
               </TableRow>
-            ))}
+              );
+            })}
           </TableBody>
         </Table>
       </TableContainer>

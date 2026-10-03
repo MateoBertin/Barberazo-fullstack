@@ -54,24 +54,25 @@ const getDayCellStyles = (dayInfo, isSelected) => {
     };
   }
 
-  const isHabilitado = !dayInfo.dayData || dayInfo.dayData.estado === 'Habilitado';
+  const dayStatus = dayInfo.dayData?.status || dayInfo.dayData?.estado;
+  const isEnabled = !dayInfo.dayData || dayStatus === 'Habilitado';
 
   return {
     bg: isSelected
-      ? isHabilitado ? 'rgba(34,197,94,0.28)' : 'rgba(239,68,68,0.22)'
-      : isHabilitado ? 'rgba(34,197,94,0.06)' : 'rgba(239,68,68,0.05)',
-    color: isHabilitado ? '#22c55e' : '#ef4444',
+      ? isEnabled ? 'rgba(34,197,94,0.28)' : 'rgba(239,68,68,0.22)'
+      : isEnabled ? 'rgba(34,197,94,0.06)' : 'rgba(239,68,68,0.05)',
+    color: isEnabled ? '#22c55e' : '#ef4444',
     cursor: 'pointer',
     border: isSelected
-      ? `2px solid ${isHabilitado ? '#22c55e' : '#ef4444'}`
-      : `1px solid ${isHabilitado ? 'rgba(34,197,94,0.25)' : 'rgba(239,68,68,0.22)'}`,
+      ? `2px solid ${isEnabled ? '#22c55e' : '#ef4444'}`
+      : `1px solid ${isEnabled ? 'rgba(34,197,94,0.25)' : 'rgba(239,68,68,0.22)'}`,
     hoverFilter: 'brightness(1.25)',
     hoverScale: 1.06,
   };
 };
 
 export const DatesPage = () => {
-  const { diasTrabajo, toggleDayStatus, updateDaySchedule } = useData();
+  const { workingDays, toggleDayStatus, updateDaySchedule } = useData();
   const { enqueueSnackbar } = useSnackbar();
 
   // Hoy sin hora para comparaciones de fechas
@@ -97,11 +98,11 @@ export const DatesPage = () => {
   const canGoBack = viewDate > minMonth;
   const canGoForward = viewDate < maxMonth;
 
-  const prevMonth = () => {
+  const handlePrevMonth = () => {
     if (canGoBack)
       setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1));
   };
-  const nextMonth = () => {
+  const handleNextMonth = () => {
     if (canGoForward)
       setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 1));
   };
@@ -110,11 +111,11 @@ export const DatesPage = () => {
   const [selectedDay, setSelectedDay] = useState(null);
 
   // Diálogo de confirmación de deshabilitación
-  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
   // Edición de horario del día
-  const [editSchedule, setEditSchedule] = useState(false);
-  const [scheduleForm, setScheduleForm] = useState({ inicio: '08:00', fin: '20:00' });
+  const [isEditingSchedule, setIsEditingSchedule] = useState(false);
+  const [scheduleForm, setScheduleForm] = useState({ startTime: '08:00', endTime: '20:00' });
 
   // Construye la grilla del mes activo
   const calendarDays = useMemo(() => {
@@ -134,32 +135,32 @@ export const DatesPage = () => {
       const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
       const isWorkday = dow !== 0 && dow !== 1;
       const isPast = date < today;
-      const dayData = diasTrabajo.find((dt) => dt.fecha === dateStr) || null;
+      const dayData = workingDays.find((day) => (day.date || day.fecha) === dateStr) || null;
 
       grid.push({ day: d, date, dateStr, dow, isWorkday, isPast, dayData, isToday: dateStr === todayStr });
     }
 
     return grid;
-  }, [viewDate, diasTrabajo, today, todayStr]);
+  }, [viewDate, workingDays, today, todayStr]);
 
   // Estadísticas del mes visualizado
   const stats = useMemo(() => {
     const year = viewDate.getFullYear();
     const month = viewDate.getMonth();
-    const monthDays = diasTrabajo.filter((dt) => {
-      const d = new Date(dt.fecha);
+    const monthDays = workingDays.filter((day) => {
+      const d = new Date(day.date || day.fecha);
       return d.getFullYear() === year && d.getMonth() === month;
     });
     return {
-      habilitados: monthDays.filter((d) => d.estado === 'Habilitado').length,
-      deshabilitados: monthDays.filter((d) => d.estado === 'Deshabilitado').length,
-      total: monthDays.length,
+      enabledCount: monthDays.filter((d) => (d.status || d.estado) === 'Habilitado').length,
+      disabledCount: monthDays.filter((d) => (d.status || d.estado) === 'Deshabilitado').length,
+      totalCount: monthDays.length,
     };
-  }, [viewDate, diasTrabajo]);
+  }, [viewDate, workingDays]);
 
-  // Actualiza el selectedDay con los datos más recientes de diasTrabajo
+  // Actualiza el selectedDay con los datos más recientes de workingDays
   const refreshSelectedDay = (dateStr) => {
-    const dayData = diasTrabajo.find((dt) => dt.fecha === dateStr) || null;
+    const dayData = workingDays.find((day) => (day.date || day.fecha) === dateStr) || null;
     setSelectedDay((prev) => (prev ? { ...prev, dayData } : null));
   };
 
@@ -167,15 +168,15 @@ export const DatesPage = () => {
   const handleDayClick = (dayInfo) => {
     if (!dayInfo.isWorkday || dayInfo.isPast) return;
     setSelectedDay(dayInfo);
-    setEditSchedule(false);
+    setIsEditingSchedule(false);
   };
 
   // Habilitar / iniciar flujo de deshabilitar
-  const handleToggle = () => {
+  const handleToggleDayStatus = () => {
     if (!selectedDay) return;
-    const currentState = selectedDay.dayData?.estado ?? 'Habilitado';
-    if (currentState === 'Habilitado') {
-      setConfirmOpen(true); // CUU6.2: pide confirmación antes de deshabilitar
+    const currentStatus = selectedDay.dayData?.status || selectedDay.dayData?.estado || 'Habilitado';
+    if (currentStatus === 'Habilitado') {
+      setIsConfirmOpen(true); // CUU6.2: pide confirmación antes de deshabilitar
     } else {
       // CUU6.1: habilitar directamente
       toggleDayStatus(selectedDay.dateStr);
@@ -188,33 +189,33 @@ export const DatesPage = () => {
   };
 
   // Confirmar deshabilitación (CUU6.2)
-  const handleConfirmDisable = () => {
+  const handleConfirmDisableDay = () => {
     toggleDayStatus(selectedDay.dateStr);
     enqueueSnackbar(
       `Fecha ${selectedDay.dateStr} deshabilitada.`,
       { variant: 'warning' }
     );
-    setConfirmOpen(false);
+    setIsConfirmOpen(false);
     refreshSelectedDay(selectedDay.dateStr);
   };
 
   // Guardar horario editado
-  const handleSaveSchedule = () => {
-    if (scheduleForm.inicio >= scheduleForm.fin) {
+  const handleSaveDaySchedule = () => {
+    if (scheduleForm.startTime >= scheduleForm.endTime) {
       enqueueSnackbar('El horario de inicio debe ser menor al de fin.', { variant: 'error' });
       return;
     }
-    updateDaySchedule(selectedDay.dateStr, scheduleForm.inicio, scheduleForm.fin);
+    updateDaySchedule(selectedDay.dateStr, scheduleForm.startTime, scheduleForm.endTime);
     enqueueSnackbar('Horario del día actualizado correctamente.', { variant: 'success' });
-    setEditSchedule(false);
+    setIsEditingSchedule(false);
     refreshSelectedDay(selectedDay.dateStr);
   };
 
   // Helper: estado actual del día seleccionado (puede haber cambiado por toggleDayStatus)
-  const selectedDayLiveData = selectedDay
-    ? diasTrabajo.find((dt) => dt.fecha === selectedDay.dateStr) || selectedDay.dayData
+  const selectedDayData = selectedDay
+    ? workingDays.find((day) => (day.date || day.fecha) === selectedDay.dateStr) || selectedDay.dayData
     : null;
-  const isSelectedHabilitado = selectedDayLiveData?.estado !== 'Deshabilitado';
+  const isSelectedDayEnabled = (selectedDayData?.status || selectedDayData?.estado) !== 'Deshabilitado';
 
   return (
     <Container maxWidth="lg" sx={{ py: 6 }}>
@@ -250,7 +251,7 @@ export const DatesPage = () => {
             >
               <Box sx={{ textAlign: 'center' }}>
                 <Typography variant="h4" sx={{ color: '#22c55e', fontWeight: 800 }}>
-                  {stats.habilitados}
+                  {stats.enabledCount}
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
                   Habilitados
@@ -258,7 +259,7 @@ export const DatesPage = () => {
               </Box>
               <Box sx={{ textAlign: 'center' }}>
                 <Typography variant="h4" sx={{ color: '#ef4444', fontWeight: 800 }}>
-                  {stats.deshabilitados}
+                  {stats.disabledCount}
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
                   Deshabilitados
@@ -266,7 +267,7 @@ export const DatesPage = () => {
               </Box>
               <Box sx={{ textAlign: 'center' }}>
                 <Typography variant="h4" sx={{ fontWeight: 800 }}>
-                  {stats.total}
+                  {stats.totalCount}
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
                   Total mes
@@ -296,7 +297,7 @@ export const DatesPage = () => {
               sx={{ mb: 3 }}
             >
               <IconButton
-                onClick={prevMonth}
+                onClick={handlePrevMonth}
                 disabled={!canGoBack}
                 sx={{ color: canGoBack ? '#22c55e' : 'rgba(255,255,255,0.15)' }}
               >
@@ -306,7 +307,7 @@ export const DatesPage = () => {
                 {MONTH_NAMES[viewDate.getMonth()]} {viewDate.getFullYear()}
               </Typography>
               <IconButton
-                onClick={nextMonth}
+                onClick={handleNextMonth}
                 disabled={!canGoForward}
                 sx={{ color: canGoForward ? '#22c55e' : 'rgba(255,255,255,0.15)' }}
               >
@@ -360,7 +361,7 @@ export const DatesPage = () => {
                           ? 'Día no laborable (Dom/Lun)'
                           : dayInfo.isPast
                           ? 'Fecha pasada'
-                          : dayInfo.dayData?.estado ?? 'Habilitado'
+                          : dayInfo.dayData?.status || dayInfo.dayData?.estado || 'Habilitado'
                       }
                       arrow
                       placement="top"
@@ -473,7 +474,7 @@ export const DatesPage = () => {
                 p: 3,
                 borderRadius: 3,
                 background: '#181b20',
-                border: `1px solid ${isSelectedHabilitado ? 'rgba(34,197,94,0.4)' : 'rgba(239,68,68,0.4)'}`,
+                border: `1px solid ${isSelectedDayEnabled ? 'rgba(34,197,94,0.4)' : 'rgba(239,68,68,0.4)'}`,
                 position: 'sticky',
                 top: 80,
                 transition: 'border-color 0.3s ease',
@@ -490,16 +491,16 @@ export const DatesPage = () => {
                     })}
                   </Typography>
                   <Chip
-                    label={isSelectedHabilitado ? 'Habilitado' : 'Deshabilitado'}
-                    color={isSelectedHabilitado ? 'success' : 'error'}
+                    label={isSelectedDayEnabled ? 'Habilitado' : 'Deshabilitado'}
+                    color={isSelectedDayEnabled ? 'success' : 'error'}
                     size="small"
-                    icon={isSelectedHabilitado ? <CheckIcon /> : <CancelIcon />}
+                    icon={isSelectedDayEnabled ? <CheckIcon /> : <CancelIcon />}
                     sx={{ mt: 0.5, fontWeight: 700 }}
                   />
                 </Box>
                 <IconButton
                   size="small"
-                  onClick={() => { setSelectedDay(null); setEditSchedule(false); }}
+                  onClick={() => { setSelectedDay(null); setIsEditingSchedule(false); }}
                   sx={{ color: 'text.secondary' }}
                 >
                   <CancelIcon fontSize="small" />
@@ -516,20 +517,20 @@ export const DatesPage = () => {
                 </Typography>
               </Stack>
 
-              {!editSchedule ? (
+              {!isEditingSchedule ? (
                 <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
                   <Typography variant="body2" color="text.secondary">
-                    {selectedDayLiveData?.horarioInicio || '08:00'} → {selectedDayLiveData?.horarioFin || '20:00'} hs
+                    {selectedDayData?.startTime || selectedDayData?.horarioInicio || '08:00'} → {selectedDayData?.endTime || selectedDayData?.horarioFin || '20:00'} hs
                   </Typography>
                   <Button
                     size="small"
                     startIcon={<EditIcon />}
                     onClick={() => {
                       setScheduleForm({
-                        inicio: selectedDayLiveData?.horarioInicio || '08:00',
-                        fin: selectedDayLiveData?.horarioFin || '20:00',
+                        startTime: selectedDayData?.startTime || selectedDayData?.horarioInicio || '08:00',
+                        endTime: selectedDayData?.endTime || selectedDayData?.horarioFin || '20:00',
                       });
-                      setEditSchedule(true);
+                      setIsEditingSchedule(true);
                     }}
                     sx={{ color: '#d4af37', minWidth: 0 }}
                   >
@@ -544,9 +545,9 @@ export const DatesPage = () => {
                       label="Hora inicio"
                       type="time"
                       size="small"
-                      value={scheduleForm.inicio}
+                      value={scheduleForm.startTime}
                       onChange={(e) =>
-                        setScheduleForm((p) => ({ ...p, inicio: e.target.value }))
+                        setScheduleForm((prev) => ({ ...prev, startTime: e.target.value }))
                       }
                       InputLabelProps={{ shrink: true }}
                     />
@@ -555,9 +556,9 @@ export const DatesPage = () => {
                       label="Hora fin"
                       type="time"
                       size="small"
-                      value={scheduleForm.fin}
+                      value={scheduleForm.endTime}
                       onChange={(e) =>
-                        setScheduleForm((p) => ({ ...p, fin: e.target.value }))
+                        setScheduleForm((prev) => ({ ...prev, endTime: e.target.value }))
                       }
                       InputLabelProps={{ shrink: true }}
                     />
@@ -567,7 +568,7 @@ export const DatesPage = () => {
                       size="small"
                       variant="contained"
                       color="warning"
-                      onClick={handleSaveSchedule}
+                      onClick={handleSaveDaySchedule}
                       sx={{ fontWeight: 700 }}
                     >
                       Guardar
@@ -575,7 +576,7 @@ export const DatesPage = () => {
                     <Button
                       size="small"
                       color="inherit"
-                      onClick={() => setEditSchedule(false)}
+                      onClick={() => setIsEditingSchedule(false)}
                     >
                       Cancelar
                     </Button>
@@ -598,12 +599,12 @@ export const DatesPage = () => {
               <Button
                 fullWidth
                 variant="contained"
-                color={isSelectedHabilitado ? 'error' : 'success'}
-                startIcon={isSelectedHabilitado ? <EventBusyIcon /> : <EventAvailableIcon />}
-                onClick={handleToggle}
+                color={isSelectedDayEnabled ? 'error' : 'success'}
+                startIcon={isSelectedDayEnabled ? <EventBusyIcon /> : <EventAvailableIcon />}
+                onClick={handleToggleDayStatus}
                 sx={{ fontWeight: 700, py: 1.4 }}
               >
-                {isSelectedHabilitado
+                {isSelectedDayEnabled
                   ? 'Deshabilitar este día'
                   : 'Habilitar este día'}
               </Button>
@@ -614,8 +615,8 @@ export const DatesPage = () => {
 
       {/* ─── Diálogo de confirmación de deshabilitación (CUU6.2) ─── */}
       <Dialog
-        open={confirmOpen}
-        onClose={() => setConfirmOpen(false)}
+        open={isConfirmOpen}
+        onClose={() => setIsConfirmOpen(false)}
         PaperProps={{
           sx: {
             background: '#181b20',
@@ -648,11 +649,11 @@ export const DatesPage = () => {
           </Typography>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button onClick={() => setConfirmOpen(false)} color="inherit">
+          <Button onClick={() => setIsConfirmOpen(false)} color="inherit">
             Cancelar
           </Button>
           <Button
-            onClick={handleConfirmDisable}
+            onClick={handleConfirmDisableDay}
             variant="contained"
             color="error"
             startIcon={<EventBusyIcon />}

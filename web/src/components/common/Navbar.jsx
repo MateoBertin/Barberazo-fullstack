@@ -124,6 +124,7 @@ export const Navbar = () => {
                 fontFamily: '"Outfit", sans-serif',
                 fontWeight: 800,
                 letterSpacing: 1,
+                fontSize: { xs: '1.1rem', sm: '1.5rem' },
                 background: 'linear-gradient(90deg, #ffffff 0%, #d4af37 100%)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
@@ -265,7 +266,7 @@ export const Navbar = () => {
                 label={getRoleLabel(user.rol)}
                 color={getRoleColor(user.rol)}
                 size="small"
-                sx={{ fontWeight: 700 }}
+                sx={{ fontWeight: 700, display: { xs: 'none', sm: 'flex' } }}
               />
 
               {user.rol === 'cliente' && (
@@ -274,6 +275,7 @@ export const Navbar = () => {
                   color={user.estado === 'Multado' ? 'error' : user.strikes > 0 ? 'warning' : 'default'}
                   size="small"
                   variant="outlined"
+                  sx={{ display: { xs: 'none', sm: 'flex' } }}
                 />
               )}
 
@@ -321,9 +323,14 @@ export const Navbar = () => {
     >
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, p: 2 }}>
         <ScissorsIcon sx={{ color: '#d4af37', fontSize: 24 }} />
-        <Typography variant="h6" sx={{ fontWeight: 800, letterSpacing: 1 }}>
-          BARBERAZO
-        </Typography>
+        <Box>
+          <Typography variant="h6" sx={{ fontWeight: 800, letterSpacing: 1, lineHeight: 1.2 }}>
+            BARBERAZO
+          </Typography>
+          <Typography variant="caption" color="text.secondary">
+            {getRoleLabel(user?.rol)} • {user?.email}
+          </Typography>
+        </Box>
       </Box>
       <Divider />
 

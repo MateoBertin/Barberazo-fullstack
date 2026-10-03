@@ -3,6 +3,7 @@ import { Container, Typography, Paper, Grid, Stack, Chip } from '@mui/material';
 import { AdminPanelSettings as AdminIcon } from '@mui/icons-material';
 import { useAuth } from '../../context/AuthContext';
 import { TurnosManager } from '../../components/turnos/TurnosManager';
+import { BRAND_COLORS, withAlpha } from '../../theme';
 
 export const OwnerDashboard = () => {
   const { user } = useAuth();
@@ -15,15 +16,15 @@ export const OwnerDashboard = () => {
         sx={{
           p: { xs: 2.5, sm: 4 },
           borderRadius: 4,
-          background: 'linear-gradient(135deg, #181b20 0%, #2a2215 100%)',
-          border: '1px solid rgba(212, 175, 55, 0.4)',
+          background: `linear-gradient(135deg, ${BRAND_COLORS.card} 0%, ${BRAND_COLORS.goldTint} 100%)`,
+          border: `1px solid ${withAlpha(BRAND_COLORS.gold, 0.4)}`,
           mb: 4,
         }}
       >
         <Grid container spacing={3} alignItems="center">
           <Grid item xs={12} md={8}>
             <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 1 }}>
-              <AdminIcon sx={{ color: '#d4af37', fontSize: 32 }} />
+              <AdminIcon sx={{ color: BRAND_COLORS.gold, fontSize: 32, flexShrink: 0 }} />
               <Typography variant="h4" sx={{ fontWeight: 800, fontSize: { xs: '1.5rem', sm: '2.125rem' } }}>
                 Agenda y Gestión de Turnos
               </Typography>

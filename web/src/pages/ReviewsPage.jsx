@@ -20,6 +20,7 @@ import {
 } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
+import { BRAND_COLORS, withAlpha } from '../theme';
 
 export const ReviewsPage = () => {
   const { user } = useAuth();
@@ -59,13 +60,13 @@ export const ReviewsPage = () => {
         sx={{
           p: { xs: 2.5, sm: 4 },
           borderRadius: 4,
-          background: 'linear-gradient(135deg, #181b20 0%, #22262f 100%)',
-          border: '1px solid rgba(212, 175, 55, 0.3)',
+          background: `linear-gradient(135deg, ${BRAND_COLORS.card} 0%, ${BRAND_COLORS.neutralTint} 100%)`,
+          border: `1px solid ${withAlpha(BRAND_COLORS.gold, 0.3)}`,
           mb: 4,
         }}
       >
         <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 1 }}>
-          <StarIcon sx={{ color: '#d4af37', fontSize: 32 }} />
+          <StarIcon sx={{ color: BRAND_COLORS.gold, fontSize: 32, flexShrink: 0 }} />
           <Typography variant="h4" sx={{ fontWeight: 800, fontSize: { xs: '1.5rem', sm: '2.125rem' } }}>
             {isOwner ? 'Reseñas de Clientes' : 'Mis Reseñas Recibidas'}
           </Typography>
@@ -83,7 +84,7 @@ export const ReviewsPage = () => {
         <Grid container spacing={2} sx={{ mb: 4 }}>
           {employeeAverages.map((employee) => (
             <Grid item xs={12} sm={6} md={4} key={employee.id}>
-              <Paper sx={{ p: 2, borderRadius: 3, background: '#181b20' }}>
+              <Paper sx={{ p: 2, borderRadius: 3, background: BRAND_COLORS.card }}>
                 <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
                   {employee.name}
                 </Typography>
@@ -100,9 +101,9 @@ export const ReviewsPage = () => {
       )}
 
       {/* ─── Tabla de reseñas (CUU8.1) ─── */}
-      <TableContainer component={Paper} sx={{ borderRadius: 3, background: '#181b20', border: '1px solid rgba(255,255,255,0.08)' }}>
+      <TableContainer component={Paper} sx={{ borderRadius: 3, background: BRAND_COLORS.card, border: `1px solid ${withAlpha(BRAND_COLORS.white, 0.08)}` }}>
         <Table>
-          <TableHead sx={{ background: '#121419' }}>
+          <TableHead sx={{ background: BRAND_COLORS.appBar }}>
             <TableRow>
               <TableCell sx={{ fontWeight: 700, color: 'text.secondary' }}>Fecha</TableCell>
               <TableCell sx={{ fontWeight: 700, color: 'text.secondary' }}>Cliente</TableCell>

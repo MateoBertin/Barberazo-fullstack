@@ -34,6 +34,7 @@ import {
 import { useData } from '../../context/DataContext';
 import { useAuth } from '../../context/AuthContext';
 import { useSnackbar } from 'notistack';
+import { BRAND_COLORS, withAlpha } from '../../theme';
 
 export const ServicesPage = () => {
   const { services, addService, updateService, toggleServiceStatus } = useData();
@@ -101,15 +102,15 @@ export const ServicesPage = () => {
         sx={{
           p: { xs: 2.5, sm: 4 },
           borderRadius: 4,
-          background: 'linear-gradient(135deg, #181b20 0%, #22262f 100%)',
-          border: '1px solid rgba(212, 175, 55, 0.3)',
+          background: `linear-gradient(135deg, ${BRAND_COLORS.card} 0%, ${BRAND_COLORS.neutralTint} 100%)`,
+          border: `1px solid ${withAlpha(BRAND_COLORS.gold, 0.3)}`,
           mb: 4,
         }}
       >
         <Grid container spacing={2} alignItems="center" justifyContent="space-between">
           <Grid item xs={12} sm={8}>
             <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 1 }}>
-              <ServicesIcon sx={{ color: '#d4af37', fontSize: 32 }} />
+              <ServicesIcon sx={{ color: BRAND_COLORS.gold, fontSize: 32, flexShrink: 0 }} />
               <Typography variant="h4" sx={{ fontWeight: 800, fontSize: { xs: '1.5rem', sm: '2.125rem' } }}>
                 Catálogo de Servicios {isEmpleado && '(Modo Lectura)'}
               </Typography>
@@ -162,8 +163,8 @@ export const ServicesPage = () => {
                 display: 'flex',
                 flexDirection: 'column',
                 borderRadius: 3,
-                background: '#181b20',
-                border: isEnabled ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(239, 68, 68, 0.3)',
+                background: BRAND_COLORS.card,
+                border: isEnabled ? `1px solid ${withAlpha(BRAND_COLORS.white, 0.08)}` : `1px solid ${withAlpha(BRAND_COLORS.danger, 0.3)}`,
                 opacity: isEnabled ? 1 : 0.75,
               }}
             >
@@ -186,22 +187,22 @@ export const ServicesPage = () => {
 
                 <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 2 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                    <TimeIcon sx={{ color: '#d4af37', fontSize: 18 }} />
+                    <TimeIcon sx={{ color: BRAND_COLORS.gold, fontSize: 18 }} />
                     <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
                       {serviceDuration} min
                     </Typography>
                   </Box>
 
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                    <MoneyIcon sx={{ color: '#10b981', fontSize: 18 }} />
-                    <Typography variant="h6" sx={{ fontWeight: 800, color: '#10b981' }}>
+                    <MoneyIcon sx={{ color: BRAND_COLORS.successGreen, fontSize: 18 }} />
+                    <Typography variant="h6" sx={{ fontWeight: 800, color: BRAND_COLORS.successGreen }}>
                       ${servicePrice.toLocaleString('es-AR')}
                     </Typography>
                   </Box>
                 </Stack>
 
                 {!isEmpleado && (
-                  <Box sx={{ pt: 1, borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Box sx={{ pt: 1, borderTop: `1px solid ${withAlpha(BRAND_COLORS.white, 0.08)}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <FormControlLabel
                       control={
                         <Switch
@@ -232,7 +233,7 @@ export const ServicesPage = () => {
         maxWidth="sm"
         fullWidth
         PaperProps={{
-          sx: { background: '#181b20', border: '1px solid rgba(212, 175, 55, 0.3)', borderRadius: 3, p: 1 },
+          sx: { background: BRAND_COLORS.card, border: `1px solid ${withAlpha(BRAND_COLORS.gold, 0.3)}`, borderRadius: 3, p: 1 },
         }}
       >
         <DialogTitle sx={{ fontWeight: 700 }}>

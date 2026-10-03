@@ -9,6 +9,15 @@ export const BRAND_COLORS = {
   card: '#181b20', // Fondo de tarjetas y paneles
   deepGreen: '#0f1a0f', // Fondo degradado del encabezado de Fechas
   white: '#ffffff',
+  infoBlue: '#3b82f6', // Azul (empleados y datos informativos)
+  successGreen: '#10b981', // Verde (precios, clientes y éxitos)
+  mutedGray: '#9ca3af', // Gris (estados neutros)
+  darkPanel: '#1e2229', // Fondo de tarjetas de estadísticas y tablas
+  appBar: '#121419', // Fondo de barra y encabezados de tabla
+  goldTint: '#2a2215', // Degradado oscuro dorado (dueño)
+  blueTint: '#172433', // Degradado oscuro azul (empleados)
+  greenTint: '#1c2b20', // Degradado oscuro verde (clientes)
+  neutralTint: '#22262f', // Degradado oscuro neutro (servicios y reseñas)
 };
 
 // Agrega transparencia a un color hexadecimal ('#22c55e' + 0.28 => 'rgba(34,197,94,0.28)')

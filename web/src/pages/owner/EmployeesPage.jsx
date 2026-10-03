@@ -34,6 +34,7 @@ import {
 } from '@mui/icons-material';
 import { useData } from '../../context/DataContext';
 import { useSnackbar } from 'notistack';
+import { BRAND_COLORS, withAlpha } from '../../theme';
 
 const DIAS_SEMANA = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 
@@ -147,15 +148,15 @@ export const EmployeesPage = () => {
         sx={{
           p: { xs: 2.5, sm: 4 },
           borderRadius: 4,
-          background: 'linear-gradient(135deg, #181b20 0%, #172433 100%)',
-          border: '1px solid rgba(59, 130, 246, 0.3)',
+          background: `linear-gradient(135deg, ${BRAND_COLORS.card} 0%, ${BRAND_COLORS.blueTint} 100%)`,
+          border: `1px solid ${withAlpha(BRAND_COLORS.infoBlue, 0.3)}`,
           mb: 4,
         }}
       >
         <Grid container spacing={2} alignItems="center" justifyContent="space-between">
           <Grid item xs={12} sm={8}>
             <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 1 }}>
-              <BadgeIcon sx={{ color: '#3b82f6', fontSize: 32 }} />
+              <BadgeIcon sx={{ color: BRAND_COLORS.infoBlue, fontSize: 32, flexShrink: 0 }} />
               <Typography variant="h4" sx={{ fontWeight: 800, fontSize: { xs: '1.5rem', sm: '2.125rem' } }}>
                 Gestión de Empleados y Horarios
               </Typography>
@@ -192,7 +193,7 @@ export const EmployeesPage = () => {
           const afternoonEnd = schedule.afternoonShift?.endTime || '20:00';
           return (
           <Grid item xs={12} md={6} key={employee.id}>
-            <Card sx={{ borderRadius: 3, background: '#181b20', border: '1px solid rgba(255,255,255,0.08)' }}>
+            <Card sx={{ borderRadius: 3, background: BRAND_COLORS.card, border: `1px solid ${withAlpha(BRAND_COLORS.white, 0.08)}` }}>
               <CardContent>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
                   <Box>
@@ -226,7 +227,7 @@ export const EmployeesPage = () => {
 
                 <Divider sx={{ my: 1.5 }} />
 
-                <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1, color: '#d4af37' }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1, color: BRAND_COLORS.gold }}>
                   Jornada & Horarios Asignados:
                 </Typography>
 
@@ -265,7 +266,7 @@ export const EmployeesPage = () => {
         maxWidth="md"
         fullWidth
         PaperProps={{
-          sx: { background: '#181b20', border: '1px solid rgba(59, 130, 246, 0.3)', borderRadius: 3, p: 1 },
+          sx: { background: BRAND_COLORS.card, border: `1px solid ${withAlpha(BRAND_COLORS.infoBlue, 0.3)}`, borderRadius: 3, p: 1 },
         }}
       >
         <DialogTitle sx={{ fontWeight: 700 }}>
@@ -306,7 +307,7 @@ export const EmployeesPage = () => {
 
             <Divider sx={{ my: 2 }} />
 
-            <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1, color: '#3b82f6' }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1, color: BRAND_COLORS.infoBlue }}>
               Configuración de Días de Trabajo
             </Typography>
             <FormGroup row sx={{ mb: 2 }}>

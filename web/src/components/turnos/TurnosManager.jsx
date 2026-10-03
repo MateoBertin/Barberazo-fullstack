@@ -32,6 +32,7 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { useData } from '../../context/DataContext';
 import { useSnackbar } from 'notistack';
+import { BRAND_COLORS, withAlpha } from '../../theme';
 
 export const TurnosManager = ({ mode = 'owner', modo = 'dueno' }) => {
   const currentMode = mode || modo;
@@ -146,12 +147,12 @@ export const TurnosManager = ({ mode = 'owner', modo = 'dueno' }) => {
       {/* ─── TARJETAS DE RESUMEN / ESTADÍSTICAS ─── */}
       <Grid container spacing={2} sx={{ mb: 4 }}>
         <Grid item xs={6} sm={3}>
-          <Card sx={{ background: '#1e2229', border: '1px solid rgba(59, 130, 246, 0.3)' }}>
+          <Card sx={{ background: BRAND_COLORS.darkPanel, border: `1px solid ${withAlpha(BRAND_COLORS.infoBlue, 0.3)}` }}>
             <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
               <Typography variant="caption" color="text.secondary">
                 Turnos Pendientes
               </Typography>
-              <Typography variant="h4" sx={{ fontWeight: 800, fontSize: { xs: '1.5rem', sm: '2.125rem' }, color: '#3b82f6' }}>
+              <Typography variant="h4" sx={{ fontWeight: 800, fontSize: { xs: '1.5rem', sm: '2.125rem' }, color: BRAND_COLORS.infoBlue }}>
                 {stats.requested}
               </Typography>
             </CardContent>
@@ -159,12 +160,12 @@ export const TurnosManager = ({ mode = 'owner', modo = 'dueno' }) => {
         </Grid>
 
         <Grid item xs={6} sm={3}>
-          <Card sx={{ background: '#1e2229', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
+          <Card sx={{ background: BRAND_COLORS.darkPanel, border: `1px solid ${withAlpha(BRAND_COLORS.successGreen, 0.3)}` }}>
             <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
               <Typography variant="caption" color="text.secondary">
                 Asistidos
               </Typography>
-              <Typography variant="h4" sx={{ fontWeight: 800, fontSize: { xs: '1.5rem', sm: '2.125rem' }, color: '#10b981' }}>
+              <Typography variant="h4" sx={{ fontWeight: 800, fontSize: { xs: '1.5rem', sm: '2.125rem' }, color: BRAND_COLORS.successGreen }}>
                 {stats.attended}
               </Typography>
             </CardContent>
@@ -172,12 +173,12 @@ export const TurnosManager = ({ mode = 'owner', modo = 'dueno' }) => {
         </Grid>
 
         <Grid item xs={6} sm={3}>
-          <Card sx={{ background: '#1e2229', border: '1px solid rgba(239, 68, 68, 0.3)' }}>
+          <Card sx={{ background: BRAND_COLORS.darkPanel, border: `1px solid ${withAlpha(BRAND_COLORS.danger, 0.3)}` }}>
             <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
               <Typography variant="caption" color="text.secondary">
                 Inasistencias
               </Typography>
-              <Typography variant="h4" sx={{ fontWeight: 800, fontSize: { xs: '1.5rem', sm: '2.125rem' }, color: '#ef4444' }}>
+              <Typography variant="h4" sx={{ fontWeight: 800, fontSize: { xs: '1.5rem', sm: '2.125rem' }, color: BRAND_COLORS.danger }}>
                 {stats.absent}
               </Typography>
             </CardContent>
@@ -185,12 +186,12 @@ export const TurnosManager = ({ mode = 'owner', modo = 'dueno' }) => {
         </Grid>
 
         <Grid item xs={6} sm={3}>
-          <Card sx={{ background: '#1e2229', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
+          <Card sx={{ background: BRAND_COLORS.darkPanel, border: `1px solid ${withAlpha(BRAND_COLORS.white, 0.1)}` }}>
             <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
               <Typography variant="caption" color="text.secondary">
                 Cancelados
               </Typography>
-              <Typography variant="h4" sx={{ fontWeight: 800, fontSize: { xs: '1.5rem', sm: '2.125rem' }, color: '#9ca3af' }}>
+              <Typography variant="h4" sx={{ fontWeight: 800, fontSize: { xs: '1.5rem', sm: '2.125rem' }, color: BRAND_COLORS.mutedGray }}>
                 {stats.cancelled}
               </Typography>
             </CardContent>
@@ -199,7 +200,7 @@ export const TurnosManager = ({ mode = 'owner', modo = 'dueno' }) => {
       </Grid>
 
       {/* ─── BARRA DE FILTROS ─── */}
-      <Paper sx={{ p: 2.5, borderRadius: 3, background: '#181b20', border: '1px solid rgba(255,255,255,0.08)', mb: 3 }}>
+      <Paper sx={{ p: 2.5, borderRadius: 3, background: BRAND_COLORS.card, border: `1px solid ${withAlpha(BRAND_COLORS.white, 0.08)}`, mb: 3 }}>
         <Grid container spacing={2} alignItems="center">
           <Grid item xs={12} sm={4}>
             <TextField
@@ -250,9 +251,9 @@ export const TurnosManager = ({ mode = 'owner', modo = 'dueno' }) => {
       </Paper>
 
       {/* ─── TABLA DE GESTIÓN DE TURNOS ─── */}
-      <TableContainer component={Paper} sx={{ borderRadius: 3, background: '#181b20', border: '1px solid rgba(255,255,255,0.08)' }}>
+      <TableContainer component={Paper} sx={{ borderRadius: 3, background: BRAND_COLORS.card, border: `1px solid ${withAlpha(BRAND_COLORS.white, 0.08)}` }}>
         <Table>
-          <TableHead sx={{ background: '#1e2229' }}>
+          <TableHead sx={{ background: BRAND_COLORS.darkPanel }}>
             <TableRow>
               <TableCell sx={{ fontWeight: 700 }}>Fecha & Hora</TableCell>
               <TableCell sx={{ fontWeight: 700 }}>Cliente</TableCell>
@@ -283,7 +284,7 @@ export const TurnosManager = ({ mode = 'owner', modo = 'dueno' }) => {
                 const cancellationNote = appointment.cancellationReason;
 
                 return (
-                  <TableRow key={appointment.id} hover sx={{ '&:hover': { background: 'rgba(255,255,255,0.02)' } }}>
+                  <TableRow key={appointment.id} hover sx={{ '&:hover': { background: withAlpha(BRAND_COLORS.white, 0.02) } }}>
                     <TableCell>
                       <Typography variant="body2" sx={{ fontWeight: 700 }}>
                         {appointmentDate}

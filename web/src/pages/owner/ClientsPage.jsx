@@ -33,6 +33,7 @@ import {
 import { useData } from '../../context/DataContext';
 import { useAuth } from '../../context/AuthContext';
 import { useSnackbar } from 'notistack';
+import { BRAND_COLORS, withAlpha } from '../../theme';
 
 export const ClientsPage = () => {
   const { clients, toggleClientBlock } = useData();
@@ -87,15 +88,15 @@ export const ClientsPage = () => {
         sx={{
           p: { xs: 2.5, sm: 4 },
           borderRadius: 4,
-          background: 'linear-gradient(135deg, #181b20 0%, #1c2b20 100%)',
-          border: '1px solid rgba(16, 185, 129, 0.3)',
+          background: `linear-gradient(135deg, ${BRAND_COLORS.card} 0%, ${BRAND_COLORS.greenTint} 100%)`,
+          border: `1px solid ${withAlpha(BRAND_COLORS.successGreen, 0.3)}`,
           mb: 4,
         }}
       >
         <Grid container spacing={2} alignItems="center" justifyContent="space-between">
           <Grid item xs={12} sm={8}>
             <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 1 }}>
-              <PeopleIcon sx={{ color: '#10b981', fontSize: 32 }} />
+              <PeopleIcon sx={{ color: BRAND_COLORS.successGreen, fontSize: 32, flexShrink: 0 }} />
               <Typography variant="h4" sx={{ fontWeight: 800, fontSize: { xs: '1.5rem', sm: '2.125rem' } }}>
                 Gestión de Clientes {isEmpleado && '(Modo Consulta)'}
               </Typography>
@@ -119,7 +120,7 @@ export const ClientsPage = () => {
       )}
 
       {/* Buscador */}
-      <Paper sx={{ p: 2, mb: 3, borderRadius: 3, background: '#181b20' }}>
+      <Paper sx={{ p: 2, mb: 3, borderRadius: 3, background: BRAND_COLORS.card }}>
         <TextField
           fullWidth
           placeholder="Buscar cliente por nombre, e-mail o teléfono..."
@@ -136,9 +137,9 @@ export const ClientsPage = () => {
       </Paper>
 
       {/* Tabla de Clientes */}
-      <TableContainer component={Paper} sx={{ borderRadius: 3, background: '#181b20', border: '1px solid rgba(255,255,255,0.08)' }}>
+      <TableContainer component={Paper} sx={{ borderRadius: 3, background: BRAND_COLORS.card, border: `1px solid ${withAlpha(BRAND_COLORS.white, 0.08)}` }}>
         <Table>
-          <TableHead sx={{ background: '#121419' }}>
+          <TableHead sx={{ background: BRAND_COLORS.appBar }}>
             <TableRow>
               <TableCell sx={{ fontWeight: 700, color: 'text.secondary' }}>Cliente</TableCell>
               <TableCell sx={{ fontWeight: 700, color: 'text.secondary' }}>Contacto</TableCell>

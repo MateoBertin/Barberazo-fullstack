@@ -272,7 +272,7 @@ export const DatesPage = () => {
               justifyContent={{ xs: 'flex-start', sm: 'flex-end' }}
             >
               <Box sx={{ textAlign: 'center' }}>
-                <Typography variant="h4" sx={{ color: BRAND_COLORS.brightGreen, fontWeight: 800 }}>
+                <Typography variant="h4" sx={{ color: BRAND_COLORS.brightGreen, fontWeight: 800, fontSize: { xs: '1.5rem', sm: '2.125rem' } }}>
                   {stats.enabledCount}
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
@@ -280,7 +280,7 @@ export const DatesPage = () => {
                 </Typography>
               </Box>
               <Box sx={{ textAlign: 'center' }}>
-                <Typography variant="h4" sx={{ color: BRAND_COLORS.danger, fontWeight: 800 }}>
+                <Typography variant="h4" sx={{ color: BRAND_COLORS.danger, fontWeight: 800, fontSize: { xs: '1.5rem', sm: '2.125rem' } }}>
                   {stats.disabledCount}
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
@@ -288,7 +288,7 @@ export const DatesPage = () => {
                 </Typography>
               </Box>
               <Box sx={{ textAlign: 'center' }}>
-                <Typography variant="h4" sx={{ fontWeight: 800 }}>
+                <Typography variant="h4" sx={{ fontWeight: 800, fontSize: { xs: '1.5rem', sm: '2.125rem' } }}>
                   {stats.totalCount}
                 </Typography>
                 <Typography variant="caption" color="text.secondary">

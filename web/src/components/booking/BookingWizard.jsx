@@ -186,7 +186,7 @@ export const BookingWizard = () => {
   // ─── CASO 1: CLIENTE BLOQUEADO O MULTADO ───
   if (user?.estado === 'Bloqueado') {
     return (
-      <Paper sx={{ p: 4, borderRadius: 3, background: '#1e2229', border: '1px solid #ef4444' }}>
+      <Paper sx={{ p: { xs: 2.5, sm: 4 }, borderRadius: 3, background: '#1e2229', border: '1px solid #ef4444' }}>
         <Stack direction="row" spacing={2} alignItems="center">
           <CancelIcon sx={{ color: '#ef4444', fontSize: 40 }} />
           <Box>
@@ -204,7 +204,7 @@ export const BookingWizard = () => {
 
   if (user?.estado === 'Multado') {
     return (
-      <Paper sx={{ p: 4, borderRadius: 3, background: '#1e2229', border: '1px solid #f59e0b' }}>
+      <Paper sx={{ p: { xs: 2.5, sm: 4 }, borderRadius: 3, background: '#1e2229', border: '1px solid #f59e0b' }}>
         <Stack direction="row" spacing={2} alignItems="center">
           <WarningIcon sx={{ color: '#f59e0b', fontSize: 40 }} />
           <Box>
@@ -237,7 +237,7 @@ export const BookingWizard = () => {
         <Paper
           elevation={3}
           sx={{
-            p: 4,
+            p: { xs: 2.5, sm: 4 },
             borderRadius: 4,
             background: 'linear-gradient(135deg, #181b20 0%, #20252e 100%)',
             border: '1px solid rgba(212, 175, 55, 0.4)',

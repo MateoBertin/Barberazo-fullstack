@@ -75,12 +75,12 @@ export const ClientProfilePage = () => {
   };
 
   return (
-    <Container maxWidth="md" sx={{ py: 6 }}>
+    <Container maxWidth="md" sx={{ py: { xs: 3, sm: 6 } }}>
       {/* ─── Encabezado ─── */}
       <Paper
         elevation={4}
         sx={{
-          p: 4,
+          p: { xs: 2.5, sm: 4 },
           borderRadius: 4,
           background: 'linear-gradient(135deg, #181b20 0%, #22262f 100%)',
           border: '1px solid rgba(212, 175, 55, 0.3)',
@@ -90,7 +90,7 @@ export const ClientProfilePage = () => {
         <Stack direction="row" spacing={1.5} alignItems="center">
           <ProfileIcon sx={{ color: '#d4af37', fontSize: 32 }} />
           <Box>
-            <Typography variant="h4" sx={{ fontWeight: 800 }}>
+            <Typography variant="h4" sx={{ fontWeight: 800, fontSize: { xs: '1.5rem', sm: '2.125rem' } }}>
               Mi Perfil
             </Typography>
             <Typography variant="body2" color="text.secondary">

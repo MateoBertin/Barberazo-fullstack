@@ -37,7 +37,7 @@ export const LandingPage = () => {
   };
 
   return (
-    <Box sx={{ minHeight: 'calc(100vh - 70px)', background: 'linear-gradient(180deg, #0f1115 0%, #181b20 100%)', py: 6 }}>
+    <Box sx={{ minHeight: 'calc(100vh - 70px)', background: 'linear-gradient(180deg, #0f1115 0%, #181b20 100%)', py: { xs: 3, sm: 6 } }}>
       <Container maxWidth="lg">
         {/* Hero Section */}
         <Grid container spacing={4} alignItems="center" sx={{ mb: 8 }}>

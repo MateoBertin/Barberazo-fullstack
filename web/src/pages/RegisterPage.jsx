@@ -122,21 +122,21 @@ export const RegisterPage = () => {
         display: 'flex',
         alignItems: 'center',
         background: 'linear-gradient(135deg, #0f1115 0%, #1a1d24 100%)',
-        py: 6,
+        py: { xs: 3, sm: 6 },
       }}
     >
       <Container maxWidth="sm">
         <Paper
           elevation={12}
           sx={{
-            p: 4,
+            p: { xs: 2.5, sm: 4 },
             borderRadius: 4,
             background: '#181b20',
             border: '1px solid rgba(255, 255, 255, 0.08)',
           }}
         >
           <Box sx={{ textAlign: 'center', mb: 3 }}>
-            <Typography variant="h4" sx={{ fontWeight: 800 }}>
+            <Typography variant="h4" sx={{ fontWeight: 800, fontSize: { xs: '1.5rem', sm: '2.125rem' } }}>
               Crear Cuenta de Cliente
             </Typography>
             <Typography variant="body2" color="text.secondary">

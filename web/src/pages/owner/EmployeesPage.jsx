@@ -140,12 +140,12 @@ export const EmployeesPage = () => {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ py: 6 }}>
+    <Container maxWidth="lg" sx={{ py: { xs: 3, sm: 6 } }}>
       {/* Encabezado */}
       <Paper
         elevation={4}
         sx={{
-          p: 4,
+          p: { xs: 2.5, sm: 4 },
           borderRadius: 4,
           background: 'linear-gradient(135deg, #181b20 0%, #172433 100%)',
           border: '1px solid rgba(59, 130, 246, 0.3)',
@@ -156,7 +156,7 @@ export const EmployeesPage = () => {
           <Grid item xs={12} sm={8}>
             <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 1 }}>
               <BadgeIcon sx={{ color: '#3b82f6', fontSize: 32 }} />
-              <Typography variant="h4" sx={{ fontWeight: 800 }}>
+              <Typography variant="h4" sx={{ fontWeight: 800, fontSize: { xs: '1.5rem', sm: '2.125rem' } }}>
                 Gestión de Empleados y Horarios
               </Typography>
             </Stack>

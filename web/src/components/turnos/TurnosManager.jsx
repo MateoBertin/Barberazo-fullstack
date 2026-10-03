@@ -151,7 +151,7 @@ export const TurnosManager = ({ mode = 'owner', modo = 'dueno' }) => {
               <Typography variant="caption" color="text.secondary">
                 Turnos Pendientes
               </Typography>
-              <Typography variant="h4" sx={{ fontWeight: 800, color: '#3b82f6' }}>
+              <Typography variant="h4" sx={{ fontWeight: 800, fontSize: { xs: '1.5rem', sm: '2.125rem' }, color: '#3b82f6' }}>
                 {stats.requested}
               </Typography>
             </CardContent>
@@ -164,7 +164,7 @@ export const TurnosManager = ({ mode = 'owner', modo = 'dueno' }) => {
               <Typography variant="caption" color="text.secondary">
                 Asistidos
               </Typography>
-              <Typography variant="h4" sx={{ fontWeight: 800, color: '#10b981' }}>
+              <Typography variant="h4" sx={{ fontWeight: 800, fontSize: { xs: '1.5rem', sm: '2.125rem' }, color: '#10b981' }}>
                 {stats.attended}
               </Typography>
             </CardContent>
@@ -177,7 +177,7 @@ export const TurnosManager = ({ mode = 'owner', modo = 'dueno' }) => {
               <Typography variant="caption" color="text.secondary">
                 Inasistencias
               </Typography>
-              <Typography variant="h4" sx={{ fontWeight: 800, color: '#ef4444' }}>
+              <Typography variant="h4" sx={{ fontWeight: 800, fontSize: { xs: '1.5rem', sm: '2.125rem' }, color: '#ef4444' }}>
                 {stats.absent}
               </Typography>
             </CardContent>
@@ -190,7 +190,7 @@ export const TurnosManager = ({ mode = 'owner', modo = 'dueno' }) => {
               <Typography variant="caption" color="text.secondary">
                 Cancelados
               </Typography>
-              <Typography variant="h4" sx={{ fontWeight: 800, color: '#9ca3af' }}>
+              <Typography variant="h4" sx={{ fontWeight: 800, fontSize: { xs: '1.5rem', sm: '2.125rem' }, color: '#9ca3af' }}>
                 {stats.cancelled}
               </Typography>
             </CardContent>

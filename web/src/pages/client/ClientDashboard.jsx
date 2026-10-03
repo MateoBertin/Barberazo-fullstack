@@ -31,12 +31,12 @@ export const ClientDashboard = () => {
     reviews.find((r) => r.appointmentId === appointmentId)?.rating || 0;
 
   return (
-    <Container maxWidth="lg" sx={{ py: 6 }}>
+    <Container maxWidth="lg" sx={{ py: { xs: 3, sm: 6 } }}>
       {/* ─── TARJETA HERO DE BIENVENIDA Y ESTADO ─── */}
       <Paper
         elevation={4}
         sx={{
-          p: 4,
+          p: { xs: 2.5, sm: 4 },
           borderRadius: 4,
           background: 'linear-gradient(135deg, #181b20 0%, #22262f 100%)',
           border: '1px solid rgba(212, 175, 55, 0.2)',
@@ -45,7 +45,7 @@ export const ClientDashboard = () => {
       >
         <Grid container spacing={3} alignItems="center">
           <Grid item xs={12} md={8}>
-            <Typography variant="h4" sx={{ fontWeight: 800, mb: 1 }}>
+            <Typography variant="h4" sx={{ fontWeight: 800, mb: 1, fontSize: { xs: '1.5rem', sm: '2.125rem' } }}>
               ¡Hola, {user?.nombre}! 👋
             </Typography>
             <Typography variant="body1" color="text.secondary">

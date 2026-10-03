@@ -33,11 +33,11 @@ import { useAuth } from '../../context/AuthContext';
 import { useData } from '../../context/DataContext';
 import { useSnackbar } from 'notistack';
 
-// Franjas horarias base para los turnos de atención
+// Franjas horarias de 1 hora para los turnos de atención
+// Regla de negocio: todos los turnos duran 1 hora y empiezan en punto
 const AVAILABLE_TIME_SLOTS = [
-  '08:00', '08:30', '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
-  '14:00', '14:30', '15:00', '15:30', '16:00', '16:30', '17:00', '17:30',
-  '18:00', '18:30', '19:00', '19:30',
+  '08:00', '09:00', '10:00', '11:00',
+  '14:00', '15:00', '16:00', '17:00', '18:00', '19:00',
 ];
 
 const STEPS = ['Servicio', 'Fecha', 'Barbero', 'Horario', 'Confirmación'];

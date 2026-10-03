@@ -45,16 +45,17 @@ export const ServicesPage = () => {
   const [openModal, setOpenModal] = useState(false);
   const [selectedService, setSelectedService] = useState(null);
 
+  // Regla de negocio: todos los servicios duran 1 hora (60 minutos)
   const [formData, setFormData] = useState({
     name: '',
-    durationMinutes: 30,
+    durationMinutes: 60,
     price: 0,
     description: '',
   });
 
   const handleOpenCreate = () => {
     setSelectedService(null);
-    setFormData({ name: '', durationMinutes: 30, price: 3000, description: '' });
+    setFormData({ name: '', durationMinutes: 60, price: 3000, description: '' });
     setOpenModal(true);
   };
 
@@ -62,7 +63,7 @@ export const ServicesPage = () => {
     setSelectedService(service);
     setFormData({
       name: service.name,
-      durationMinutes: service.durationMinutes ?? 30,
+      durationMinutes: 60,
       price: service.price ?? 0,
       description: service.description || '',
     });
@@ -255,8 +256,8 @@ export const ServicesPage = () => {
                   label="Duración (Minutos)"
                   type="number"
                   value={formData.durationMinutes}
-                  onChange={(e) => setFormData({ ...formData, durationMinutes: parseInt(e.target.value) || 15 })}
-                  required
+                  disabled
+                  helperText="Todos los servicios duran 1 hora"
                   InputProps={{
                     endAdornment: <InputAdornment position="end">min</InputAdornment>,
                   }}

@@ -61,7 +61,7 @@ export const INITIAL_SERVICES = [
   {
     id: 's1',
     name: 'Corte Tradicional',
-    durationMinutes: 30,
+    durationMinutes: 60,
     price: 4500,
     description: 'Corte de cabello clásico o moderno con asesoramiento de estilo y acabado.',
     status: 'Habilitado', // 'Habilitado' | 'Deshabilitado' (Máquina de estados de Servicios)
@@ -69,7 +69,7 @@ export const INITIAL_SERVICES = [
   {
     id: 's2',
     name: 'Arreglo de Barba',
-    durationMinutes: 20,
+    durationMinutes: 60,
     price: 3000,
     description: 'Diseño, perfilado, rebajado de barba y toalla caliente.',
     status: 'Habilitado',
@@ -77,7 +77,7 @@ export const INITIAL_SERVICES = [
   {
     id: 's3',
     name: 'Combo Corte + Barba',
-    durationMinutes: 45,
+    durationMinutes: 60,
     price: 6500,
     description: 'Servicio completo de corte de cabello y arreglo de barba profesional.',
     status: 'Habilitado',
@@ -93,7 +93,7 @@ export const INITIAL_SERVICES = [
   {
     id: 's5',
     name: 'Perfilado de Cejas',
-    durationMinutes: 15,
+    durationMinutes: 60,
     price: 2000,
     description: 'Depilación y diseño de cejas con navaja/pinza.',
     status: 'Habilitado',
@@ -101,16 +101,16 @@ export const INITIAL_SERVICES = [
 ];
 
 // Normaliza un servicio guardado (migra formato viejo al canónico en inglés)
+// Regla de negocio: todos los servicios duran 1 hora (60 minutos)
 const normalizeService = (service) => {
   const name = service.name || service.nombre;
-  const durationMinutes = service.durationMinutes ?? service.duracionMinutos ?? 30;
   const price = service.price ?? service.precio ?? 0;
   const description = service.description ?? service.descripcion ?? '';
   const status = service.status || service.estado || 'Habilitado';
   return {
     id: service.id,
     name,
-    durationMinutes,
+    durationMinutes: 60,
     price,
     description,
     status,
@@ -240,7 +240,7 @@ export const INITIAL_APPOINTMENTS = [
     serviceId: 's1',
     serviceName: 'Corte Tradicional',
     servicePrice: 4500,
-    serviceDuration: 30,
+    serviceDuration: 60,
     date: '2026-09-30',
     time: '11:00',
     status: 'Solicitado',
@@ -259,7 +259,7 @@ export const INITIAL_APPOINTMENTS = [
     serviceId: 's3',
     serviceName: 'Combo Corte + Barba',
     servicePrice: 6500,
-    serviceDuration: 45,
+    serviceDuration: 60,
     date: '2026-09-22',
     time: '16:00',
     status: 'Asistido',
@@ -278,7 +278,7 @@ export const INITIAL_APPOINTMENTS = [
     serviceId: 's2',
     serviceName: 'Arreglo de Barba',
     servicePrice: 3000,
-    serviceDuration: 20,
+    serviceDuration: 60,
     date: '2026-09-25',
     time: '17:00',
     status: 'No-Asistido',
@@ -289,6 +289,7 @@ export const INITIAL_APPOINTMENTS = [
 ];
 
 // Normaliza un appointment guardado (migra formato viejo al canónico en inglés)
+// Regla de negocio: todos los turnos duran 1 hora (60 minutos)
 const normalizeAppointment = (appointment) => {
   const date = appointment.date || appointment.fecha;
   const time = appointment.time || appointment.hora;
@@ -304,7 +305,7 @@ const normalizeAppointment = (appointment) => {
     serviceId: appointment.serviceId || appointment.servicioId,
     serviceName: appointment.serviceName || appointment.servicioNombre,
     servicePrice: appointment.servicePrice ?? appointment.servicioPrecio,
-    serviceDuration: appointment.serviceDuration ?? appointment.servicioDuracion,
+    serviceDuration: 60,
     date,
     time,
     status,
@@ -547,7 +548,7 @@ export const DataProvider = ({ children }) => {
       serviceId: newAppointment.serviceId,
       serviceName: newAppointment.serviceName,
       servicePrice: newAppointment.servicePrice,
-      serviceDuration: newAppointment.serviceDuration,
+      serviceDuration: 60, // Regla de negocio: todos los turnos duran 1 hora
       date: newAppointment.date,
       time: newAppointment.time,
       status: 'Solicitado',

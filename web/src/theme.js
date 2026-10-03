@@ -1,10 +1,29 @@
 import { createTheme } from '@mui/material/styles';
 
+// Fuente única de colores de marca (Paso 0 Fase 6).
+// La paleta MUI y los componentes importan desde acá: un solo lugar para cambiar.
+export const BRAND_COLORS = {
+  gold: '#d4af37', // Dorado elegante / Barbería premium
+  brightGreen: '#22c55e', // Verde brillante (estados habilitados)
+  danger: '#ef4444', // Rojo (errores y deshabilitados)
+  card: '#181b20', // Fondo de tarjetas y paneles
+  deepGreen: '#0f1a0f', // Fondo degradado del encabezado de Fechas
+  white: '#ffffff',
+};
+
+// Agrega transparencia a un color hexadecimal ('#22c55e' + 0.28 => 'rgba(34,197,94,0.28)')
+export const withAlpha = (hex, alpha) => {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r},${g},${b},${alpha})`;
+};
+
 const theme = createTheme({
   palette: {
     mode: 'dark',
     primary: {
-      main: '#d4af37', // Dorado elegante / Barbería premium
+      main: BRAND_COLORS.gold, // Dorado elegante / Barbería premium
       light: '#f3e5ab',
       dark: '#aa8c2c',
       contrastText: '#121212',
@@ -17,14 +36,14 @@ const theme = createTheme({
     },
     background: {
       default: '#0f1115',
-      paper: '#181b20',
+      paper: BRAND_COLORS.card,
     },
     text: {
       primary: '#f1f5f9',
       secondary: '#94a3b8',
     },
     error: {
-      main: '#ef4444',
+      main: BRAND_COLORS.danger,
     },
     warning: {
       main: '#f59e0b',
@@ -34,6 +53,9 @@ const theme = createTheme({
     },
     info: {
       main: '#3b82f6',
+    },
+    custom: {
+      brightGreen: BRAND_COLORS.brightGreen,
     },
   },
   typography: {

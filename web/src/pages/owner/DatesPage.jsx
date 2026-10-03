@@ -35,6 +35,7 @@ import {
 } from '@mui/icons-material';
 import { useData } from '../../context/DataContext';
 import { useSnackbar } from 'notistack';
+import { BRAND_COLORS, withAlpha } from '../../theme';
 
 const MONTH_NAMES = [
   'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -52,13 +53,14 @@ const HOUR_OPTIONS = [
 const isOnTheHour = (time) => HOUR_OPTIONS.includes(time);
 
 // Determina el color y estilo de cada celda del calendario
+// Usa los tokens centrales de marca (ver theme.js): mismo visual, sin hex duplicados
 const getDayCellStyles = (dayInfo, isSelected) => {
   if (!dayInfo) return {};
 
   if (!dayInfo.isWorkday || dayInfo.isPast) {
     return {
-      bg: 'rgba(255,255,255,0.02)',
-      color: 'rgba(255,255,255,0.12)',
+      bg: withAlpha(BRAND_COLORS.white, 0.02),
+      color: withAlpha(BRAND_COLORS.white, 0.12),
       cursor: 'default',
       border: '1px solid transparent',
       hoverFilter: 'none',
@@ -68,16 +70,17 @@ const getDayCellStyles = (dayInfo, isSelected) => {
 
   const dayStatus = dayInfo.dayData?.status;
   const isEnabled = !dayInfo.dayData || dayStatus === 'Habilitado';
+  const accent = isEnabled ? BRAND_COLORS.brightGreen : BRAND_COLORS.danger;
 
   return {
     bg: isSelected
-      ? isEnabled ? 'rgba(34,197,94,0.28)' : 'rgba(239,68,68,0.22)'
-      : isEnabled ? 'rgba(34,197,94,0.06)' : 'rgba(239,68,68,0.05)',
-    color: isEnabled ? '#22c55e' : '#ef4444',
+      ? withAlpha(accent, isEnabled ? 0.28 : 0.22)
+      : withAlpha(accent, isEnabled ? 0.06 : 0.05),
+    color: accent,
     cursor: 'pointer',
     border: isSelected
-      ? `2px solid ${isEnabled ? '#22c55e' : '#ef4444'}`
-      : `1px solid ${isEnabled ? 'rgba(34,197,94,0.25)' : 'rgba(239,68,68,0.22)'}`,
+      ? `2px solid ${accent}`
+      : `1px solid ${withAlpha(accent, isEnabled ? 0.25 : 0.22)}`,
     hoverFilter: 'brightness(1.25)',
     hoverScale: 1.06,
   };
@@ -241,15 +244,15 @@ export const DatesPage = () => {
         sx={{
           p: 4,
           borderRadius: 4,
-          background: 'linear-gradient(135deg, #0f1a0f 0%, #181b20 100%)',
-          border: '1px solid rgba(34,197,94,0.3)',
+          background: `linear-gradient(135deg, ${BRAND_COLORS.deepGreen} 0%, ${BRAND_COLORS.card} 100%)`,
+          border: `1px solid ${withAlpha(BRAND_COLORS.brightGreen, 0.3)}`,
           mb: 4,
         }}
       >
         <Grid container spacing={2} alignItems="center" justifyContent="space-between">
           <Grid item xs={12} sm={7}>
             <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 1 }}>
-              <CalendarIcon sx={{ color: '#22c55e', fontSize: 32 }} />
+              <CalendarIcon sx={{ color: BRAND_COLORS.brightGreen, fontSize: 32 }} />
               <Typography variant="h4" sx={{ fontWeight: 800 }}>
                 Habilitación de Calendario
               </Typography>
@@ -266,7 +269,7 @@ export const DatesPage = () => {
               justifyContent={{ xs: 'flex-start', sm: 'flex-end' }}
             >
               <Box sx={{ textAlign: 'center' }}>
-                <Typography variant="h4" sx={{ color: '#22c55e', fontWeight: 800 }}>
+                <Typography variant="h4" sx={{ color: BRAND_COLORS.brightGreen, fontWeight: 800 }}>
                   {stats.enabledCount}
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
@@ -274,7 +277,7 @@ export const DatesPage = () => {
                 </Typography>
               </Box>
               <Box sx={{ textAlign: 'center' }}>
-                <Typography variant="h4" sx={{ color: '#ef4444', fontWeight: 800 }}>
+                <Typography variant="h4" sx={{ color: BRAND_COLORS.danger, fontWeight: 800 }}>
                   {stats.disabledCount}
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
@@ -301,8 +304,8 @@ export const DatesPage = () => {
             sx={{
               p: 3,
               borderRadius: 3,
-              background: '#181b20',
-              border: '1px solid rgba(255,255,255,0.08)',
+              background: BRAND_COLORS.card,
+              border: `1px solid ${withAlpha(BRAND_COLORS.white, 0.08)}`,
             }}
           >
             {/* Navegación de mes */}
@@ -315,7 +318,7 @@ export const DatesPage = () => {
               <IconButton
                 onClick={handlePrevMonth}
                 disabled={!canGoBack}
-                sx={{ color: canGoBack ? '#22c55e' : 'rgba(255,255,255,0.15)' }}
+                sx={{ color: canGoBack ? BRAND_COLORS.brightGreen : withAlpha(BRAND_COLORS.white, 0.15) }}
               >
                 <ChevronLeft />
               </IconButton>
@@ -325,7 +328,7 @@ export const DatesPage = () => {
               <IconButton
                 onClick={handleNextMonth}
                 disabled={!canGoForward}
-                sx={{ color: canGoForward ? '#22c55e' : 'rgba(255,255,255,0.15)' }}
+                sx={{ color: canGoForward ? BRAND_COLORS.brightGreen : withAlpha(BRAND_COLORS.white, 0.15) }}
               >
                 <ChevronRight />
               </IconButton>
@@ -344,8 +347,8 @@ export const DatesPage = () => {
                       py: 0.5,
                       color:
                         i === 0 || i === 1
-                          ? 'rgba(255,255,255,0.18)'
-                          : '#d4af37',
+                          ? withAlpha(BRAND_COLORS.white, 0.18)
+                          : BRAND_COLORS.gold,
                       letterSpacing: '0.05em',
                     }}
                   >
@@ -442,8 +445,8 @@ export const DatesPage = () => {
                     width: 14,
                     height: 14,
                     borderRadius: 1,
-                    bgcolor: 'rgba(34,197,94,0.15)',
-                    border: '1px solid #22c55e',
+                    bgcolor: withAlpha(BRAND_COLORS.brightGreen, 0.15),
+                    border: `1px solid ${BRAND_COLORS.brightGreen}`,
                   }}
                 />
                 <Typography variant="caption" color="text.secondary">
@@ -456,8 +459,8 @@ export const DatesPage = () => {
                     width: 14,
                     height: 14,
                     borderRadius: 1,
-                    bgcolor: 'rgba(239,68,68,0.1)',
-                    border: '1px solid #ef4444',
+                    bgcolor: withAlpha(BRAND_COLORS.danger, 0.1),
+                    border: `1px solid ${BRAND_COLORS.danger}`,
                   }}
                 />
                 <Typography variant="caption" color="text.secondary">
@@ -470,7 +473,7 @@ export const DatesPage = () => {
                     width: 14,
                     height: 14,
                     borderRadius: 1,
-                    bgcolor: 'rgba(255,255,255,0.03)',
+                    bgcolor: withAlpha(BRAND_COLORS.white, 0.03),
                     border: '1px solid transparent',
                   }}
                 />
@@ -489,8 +492,8 @@ export const DatesPage = () => {
               sx={{
                 p: 3,
                 borderRadius: 3,
-                background: '#181b20',
-                border: `1px solid ${isSelectedDayEnabled ? 'rgba(34,197,94,0.4)' : 'rgba(239,68,68,0.4)'}`,
+                background: BRAND_COLORS.card,
+                border: `1px solid ${withAlpha(isSelectedDayEnabled ? BRAND_COLORS.brightGreen : BRAND_COLORS.danger, 0.4)}`,
                 position: 'sticky',
                 top: 80,
                 transition: 'border-color 0.3s ease',
@@ -527,8 +530,8 @@ export const DatesPage = () => {
 
               {/* Horario del día */}
               <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1.5 }}>
-                <TimeIcon sx={{ color: '#d4af37', fontSize: 18 }} />
-                <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#d4af37' }}>
+                <TimeIcon sx={{ color: BRAND_COLORS.gold, fontSize: 18 }} />
+                <Typography variant="subtitle2" sx={{ fontWeight: 700, color: BRAND_COLORS.gold }}>
                   Horario del día
                 </Typography>
               </Stack>
@@ -548,7 +551,7 @@ export const DatesPage = () => {
                       });
                       setIsEditingSchedule(true);
                     }}
-                    sx={{ color: '#d4af37', minWidth: 0 }}
+                    sx={{ color: BRAND_COLORS.gold, minWidth: 0 }}
                   >
                     Editar
                   </Button>
@@ -647,14 +650,14 @@ export const DatesPage = () => {
         onClose={() => setIsConfirmOpen(false)}
         PaperProps={{
           sx: {
-            background: '#181b20',
-            border: '1px solid rgba(239,68,68,0.4)',
+            background: BRAND_COLORS.card,
+            border: `1px solid ${withAlpha(BRAND_COLORS.danger, 0.4)}`,
             borderRadius: 3,
             p: 1,
           },
         }}
       >
-        <DialogTitle sx={{ fontWeight: 700, color: '#ef4444', display: 'flex', alignItems: 'center', gap: 1 }}>
+        <DialogTitle sx={{ fontWeight: 700, color: BRAND_COLORS.danger, display: 'flex', alignItems: 'center', gap: 1 }}>
           <EventBusyIcon /> Confirmar Deshabilitación
         </DialogTitle>
         <DialogContent>

@@ -13,6 +13,12 @@ import {
   Container,
   Divider,
   Badge,
+  Drawer,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
 } from '@mui/material';
 import {
   ContentCut as ScissorsIcon,
@@ -25,6 +31,7 @@ import {
   Star as StarIcon,
   Warning as WarningIcon,
   EventAvailable as DateIcon,
+  Menu as MenuIcon,
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -34,14 +41,22 @@ export const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [anchorEl, setAnchorEl] = useState(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   const handleMenuOpen = (event) => setAnchorEl(event.currentTarget);
   const handleMenuClose = () => setAnchorEl(null);
 
   const handleLogout = () => {
     handleMenuClose();
+    setIsDrawerOpen(false);
     logout();
     navigate('/');
+  };
+
+  // Navegación desde el menú mobile (cierra el drawer al ir a la página)
+  const handleDrawerNavigate = (path) => {
+    setIsDrawerOpen(false);
+    navigate(path);
   };
 
   const getRoleLabel = (rol) => {
@@ -69,9 +84,21 @@ export const Navbar = () => {
   };
 
   return (
+    <>
     <AppBar position="sticky" sx={{ background: '#121419', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
       <Container maxWidth="xl">
         <Toolbar disableGutters sx={{ justifyContent: 'space-between', height: 70 }}>
+          {/* Botón hamburguesa (solo mobile) */}
+          {user && (
+            <IconButton
+              onClick={() => setIsDrawerOpen(true)}
+              sx={{ display: { xs: 'flex', md: 'none' }, color: '#d4af37', mr: 1 }}
+              aria-label="Abrir menú de navegación"
+            >
+              <MenuIcon />
+            </IconButton>
+          )}
+
           {/* Logo & Branding */}
           <Box
             onClick={() => navigate(user ? (user.rol === 'dueno' ? '/dueno/home' : user.rol === 'empleado' ? '/empleado/home' : '/cliente/home') : '/')}
@@ -282,5 +309,168 @@ export const Navbar = () => {
         </Toolbar>
       </Container>
     </AppBar>
+
+    {/* ─── Drawer mobile: mismos links por rol + logout ─── */}
+    <Drawer
+      anchor="left"
+      open={isDrawerOpen}
+      onClose={() => setIsDrawerOpen(false)}
+      PaperProps={{
+        sx: { width: 270, background: '#121419', borderRight: '1px solid rgba(255,255,255,0.08)' },
+      }}
+    >
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, p: 2 }}>
+        <ScissorsIcon sx={{ color: '#d4af37', fontSize: 24 }} />
+        <Typography variant="h6" sx={{ fontWeight: 800, letterSpacing: 1 }}>
+          BARBERAZO
+        </Typography>
+      </Box>
+      <Divider />
+
+      <List sx={{ flexGrow: 1 }}>
+        {user?.rol === 'cliente' && (
+          <>
+            <ListItem disablePadding>
+              <ListItemButton
+                selected={location.pathname.includes('/cliente/home')}
+                onClick={() => handleDrawerNavigate('/cliente/home')}
+              >
+                <ListItemIcon><CalendarIcon sx={{ color: '#d4af37' }} /></ListItemIcon>
+                <ListItemText primary="Reservar Turno" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton
+                selected={location.pathname.includes('/cliente/multas')}
+                onClick={() => handleDrawerNavigate('/cliente/multas')}
+              >
+                <ListItemIcon><WarningIcon sx={{ color: '#d4af37' }} /></ListItemIcon>
+                <ListItemText primary={`Mis Multas${user.estado === 'Multado' ? ' (Pendiente)' : ''}`} />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton
+                selected={location.pathname.includes('/cliente/perfil')}
+                onClick={() => handleDrawerNavigate('/cliente/perfil')}
+              >
+                <ListItemIcon><AccountCircle sx={{ color: '#d4af37' }} /></ListItemIcon>
+                <ListItemText primary="Mi Perfil" />
+              </ListItemButton>
+            </ListItem>
+          </>
+        )}
+
+        {user?.rol === 'empleado' && (
+          <>
+            <ListItem disablePadding>
+              <ListItemButton
+                selected={location.pathname.includes('/empleado/home')}
+                onClick={() => handleDrawerNavigate('/empleado/home')}
+              >
+                <ListItemIcon><CalendarIcon sx={{ color: '#3b82f6' }} /></ListItemIcon>
+                <ListItemText primary="Turnos" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton
+                selected={location.pathname.includes('/empleado/clientes')}
+                onClick={() => handleDrawerNavigate('/empleado/clientes')}
+              >
+                <ListItemIcon><PeopleIcon sx={{ color: '#3b82f6' }} /></ListItemIcon>
+                <ListItemText primary="Clientes (Lectura)" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton
+                selected={location.pathname.includes('/empleado/servicios')}
+                onClick={() => handleDrawerNavigate('/empleado/servicios')}
+              >
+                <ListItemIcon><ServicesIcon sx={{ color: '#3b82f6' }} /></ListItemIcon>
+                <ListItemText primary="Servicios (Lectura)" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton
+                selected={location.pathname.includes('/empleado/resenas')}
+                onClick={() => handleDrawerNavigate('/empleado/resenas')}
+              >
+                <ListItemIcon><StarIcon sx={{ color: '#3b82f6' }} /></ListItemIcon>
+                <ListItemText primary="Reseñas" />
+              </ListItemButton>
+            </ListItem>
+          </>
+        )}
+
+        {user?.rol === 'dueno' && (
+          <>
+            <ListItem disablePadding>
+              <ListItemButton
+                selected={location.pathname.includes('/dueno/home')}
+                onClick={() => handleDrawerNavigate('/dueno/home')}
+              >
+                <ListItemIcon><CalendarIcon sx={{ color: '#d4af37' }} /></ListItemIcon>
+                <ListItemText primary="Turnos" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton
+                selected={location.pathname.includes('/dueno/clientes')}
+                onClick={() => handleDrawerNavigate('/dueno/clientes')}
+              >
+                <ListItemIcon><PeopleIcon sx={{ color: '#d4af37' }} /></ListItemIcon>
+                <ListItemText primary="Clientes" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton
+                selected={location.pathname.includes('/dueno/servicios')}
+                onClick={() => handleDrawerNavigate('/dueno/servicios')}
+              >
+                <ListItemIcon><ServicesIcon sx={{ color: '#d4af37' }} /></ListItemIcon>
+                <ListItemText primary="Servicios" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton
+                selected={location.pathname.includes('/dueno/empleados')}
+                onClick={() => handleDrawerNavigate('/dueno/empleados')}
+              >
+                <ListItemIcon><BadgeIcon sx={{ color: '#d4af37' }} /></ListItemIcon>
+                <ListItemText primary="Empleados" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton
+                selected={location.pathname.includes('/dueno/fechas')}
+                onClick={() => handleDrawerNavigate('/dueno/fechas')}
+              >
+                <ListItemIcon><DateIcon sx={{ color: '#d4af37' }} /></ListItemIcon>
+                <ListItemText primary="Fechas y Horarios" />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding>
+              <ListItemButton
+                selected={location.pathname.includes('/dueno/resenas')}
+                onClick={() => handleDrawerNavigate('/dueno/resenas')}
+              >
+                <ListItemIcon><StarIcon sx={{ color: '#d4af37' }} /></ListItemIcon>
+                <ListItemText primary="Reseñas" />
+              </ListItemButton>
+            </ListItem>
+          </>
+        )}
+      </List>
+
+      <Divider />
+      <List>
+        <ListItem disablePadding>
+          <ListItemButton onClick={handleLogout} sx={{ color: 'error.main' }}>
+            <ListItemIcon><LogoutIcon sx={{ color: 'error.main' }} /></ListItemIcon>
+            <ListItemText primary="Cerrar Sesión" />
+          </ListItemButton>
+        </ListItem>
+      </List>
+    </Drawer>
+    </>
   );
 };

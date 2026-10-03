@@ -4,8 +4,8 @@
 Este documento establece la planificación integral para el desarrollo del Frontend de la aplicación **Barberazo** (Sistema de Gestión de Turnos para Barbería), basada en la especificación de requerimientos, minutas, mapa de navegación, matrices CRUD, modelos de dominio y máquinas de estado del proyecto.
 
 > [!IMPORTANT]
-> **Estado del Plan:** **Fase 1** y **Fase 2** completadas con éxito en el código. Listo para comenzar la **Fase 3** (Agenda, Calendario y Configuración de Fechas).  
-> **Stack Seleccionado (según DAS E05):** React.js, Material UI (`@mui/material`), React Router v6, Notificaciones con Notistack/Toasts, estado local/global con Context/Redux.
+> **Estado del Plan:** **Fases 1, 2, 3 y 4** completadas con éxito en el código. Listo para comenzar la **Fase 5** (Perfil de Cliente y Reseñas).  
+> **Stack Seleccionado (según DAS E05):** React.js, Material UI (`@mui/material`), React Router v6, Notificaciones con Notistack, estado global con Context API.
 
 ---
 
@@ -142,20 +142,18 @@ graph TD
 
 ---
 
-### Fase 5: Casos de Uso Secundarios, Sobreturnos y Reseñas
-- **Objetivo:** Completar funciones secundarias como la gestión de sobreturnos con advertencia de solapamiento, edición de perfil y recepción de reseñas.
+### Fase 5: Casos de Uso Secundarios y Reseñas
+- **Objetivo:** Completar funciones secundarias como la edición de perfil y recepción de reseñas.
 - **Pantallas / Componentes:**
   - `P07 - Perfil de Cliente` (`/cliente/perfil`)
   - `P08 - Dejar Reseña` (`/cliente/resena/:turnoId`)
   - `P14 - Consulta de Reseñas` (`/dueno/resenas`, `/empleado/resenas`)
-  - Componentes: `SobreturnoModal` (con advertencia de superposición), `StarRating`, `ReviewCard`.
+  - Componentes: `StarRating`, `ReviewCard`.
 - **Casos de Uso Cubiertos:** `CUU1.4` (Completar Reseña), `CUU8.1` (Consultar Reseñas), `CUU9.1` (Editar Perfil), `CUU9.2` (Eliminar Perfil).
 - **Dependencias:** Fases 1 a 4.
 - **Reglas de Negocio a Validar:**
-  - **Sobreturnos con advertencia:** El sistema valida si el sobreturno se solapa con un turno existente. Emite un aviso en pantalla ("Horario solapado"); si el Dueño/Empleado confirma, se registra el sobreturno sin bloquearlo.
   - Formulario de reseña disponible solo para turnos con estado `Asistido`.
 - **Criterios de Aceptación:**
-  - Sobreturno registrable incluso con solapamiento tras la confirmación explícita del usuario.
   - Sistema de reseñas funcional y visible por el staff.
 
 ---
@@ -185,8 +183,6 @@ graph TD
    Se integrará la experiencia de pago simulando el flujo de **Mercado Pago** (mediante modal / botón de pago oficial de Mercado Pago), evitando solicitar datos de tarjeta de crédito directamente en la app.
 2. **Preferencia de Empleado en Reservas:**  
    Se incluirá la opción de elegir a un empleado específico o seleccionar la opción **"Sin preferencia / Cualquier empleado disponible"**.
-3. **Validación de Sobreturnos Solapados:**  
-   Al intentar agendar un sobreturno en un horario ocupado, la interfaz desplegará una **advertencia de solapamiento**. Si el Empleado/Dueño confirma que desea continuar, el sobreturno se registrará con éxito.
 
 ---
 
@@ -199,4 +195,3 @@ graph TD
 ### Verificación Manual
 - Navegación por roles (`Cliente`, `Empleado`, `Dueño`).
 - Simulación completa del ciclo de vida del turno: Reserva -> Inasistencia/Cancelación <24h -> Acumulación de 3 Strikes -> Bloqueo por Multa -> Pago Mercado Pago -> Desbloqueo.
-- Prueba de advertencia de solapamiento en sobreturnos.

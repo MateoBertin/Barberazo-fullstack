@@ -40,12 +40,17 @@ const generateWorkingDays = () => {
 };
 
 // Normaliza días guardados en localStorage (migra formato viejo al canónico en inglés)
+// Regla de negocio: turnos de 1 hora, el horario del día se recorta a horas en punto (xx:00)
 const normalizeWorkingDay = (day) => {
   const date = day.date || day.fecha;
   const dayOfWeek = day.dayOfWeek || day.diaSemana;
   const status = day.status || day.estado || 'Habilitado';
-  const startTime = day.startTime || day.horarioInicio || '08:00';
-  const endTime = day.endTime || day.horarioFin || '20:00';
+  const snapToHour = (time, fallback) => {
+    if (typeof time !== 'string' || !time.includes(':')) return fallback;
+    return `${time.split(':')[0].padStart(2, '0')}:00`;
+  };
+  const startTime = snapToHour(day.startTime || day.horarioInicio, '08:00');
+  const endTime = snapToHour(day.endTime || day.horarioFin, '20:00');
   return {
     id: day.id || `wd_${date}`,
     date,

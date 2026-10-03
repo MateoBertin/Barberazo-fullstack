@@ -76,6 +76,17 @@ export const BookingWizard = () => {
 
   // Horarios ocupados para la fecha seleccionada y el barbero seleccionado
   const selectedDateStr = selectedDate?.date;
+
+  // Slots del día seleccionado según su horario (turnos de 1 hora en punto)
+  // Solo se ofrecen los horarios entre el inicio y el fin del día (el fin es exclusivo:
+  // un día de 09:00 a 13:00 ofrece 09, 10, 11 y 12)
+  const dayTimeSlots = !selectedDateStr
+    ? []
+    : AVAILABLE_TIME_SLOTS.filter((slot) => {
+        const dayStart = selectedDate?.startTime || '08:00';
+        const dayEnd = selectedDate?.endTime || '20:00';
+        return slot >= dayStart && slot < dayEnd;
+      });
   const occupiedTimeSlots = appointments
     .filter(
       (a) =>
@@ -530,10 +541,11 @@ export const BookingWizard = () => {
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
             Día seleccionado: <strong>{selectedDate?.dayOfWeek} {selectedDateStr}</strong>
             {selectedEmployee ? ` con ${selectedEmployee.name}` : ' (Cualquier barbero)'}
+            {' '}({selectedDate?.startTime} a {selectedDate?.endTime} hs)
           </Typography>
 
           <Grid container spacing={1.5}>
-            {AVAILABLE_TIME_SLOTS.map((slot) => {
+            {dayTimeSlots.map((slot) => {
               const isOccupied = occupiedTimeSlots.includes(slot);
               const isSelected = selectedTime === slot;
 

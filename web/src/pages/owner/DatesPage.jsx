@@ -15,8 +15,11 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  TextField,
   Tooltip,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from '@mui/material';
 import {
   CalendarMonth as CalendarIcon,
@@ -38,6 +41,15 @@ const MONTH_NAMES = [
   'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
 ];
 const DAY_HEADERS = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+
+// Opciones horarias en punto para el horario del día
+// Regla de negocio: turnos de 1 hora, el día arranca y termina en hora exacta (xx:00)
+const HOUR_OPTIONS = [
+  '08:00', '09:00', '10:00', '11:00', '12:00', '13:00',
+  '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00',
+];
+
+const isOnTheHour = (time) => HOUR_OPTIONS.includes(time);
 
 // Determina el color y estilo de cada celda del calendario
 const getDayCellStyles = (dayInfo, isSelected) => {
@@ -199,8 +211,12 @@ export const DatesPage = () => {
     refreshSelectedDay(selectedDay.dateStr);
   };
 
-  // Guardar horario editado
+  // Guardar horario editado (solo horas en punto: turnos de 1 hora)
   const handleSaveDaySchedule = () => {
+    if (!isOnTheHour(scheduleForm.startTime) || !isOnTheHour(scheduleForm.endTime)) {
+      enqueueSnackbar('El horario debe ser en hora en punto (ej. 08:00 a 20:00).', { variant: 'error' });
+      return;
+    }
     if (scheduleForm.startTime >= scheduleForm.endTime) {
       enqueueSnackbar('El horario de inicio debe ser menor al de fin.', { variant: 'error' });
       return;
@@ -540,28 +556,40 @@ export const DatesPage = () => {
               ) : (
                 <Box sx={{ mb: 2 }}>
                   <Stack direction="row" spacing={2} sx={{ mb: 1.5 }}>
-                    <TextField
-                      fullWidth
-                      label="Hora inicio"
-                      type="time"
-                      size="small"
-                      value={scheduleForm.startTime}
-                      onChange={(e) =>
-                        setScheduleForm((prev) => ({ ...prev, startTime: e.target.value }))
-                      }
-                      InputLabelProps={{ shrink: true }}
-                    />
-                    <TextField
-                      fullWidth
-                      label="Hora fin"
-                      type="time"
-                      size="small"
-                      value={scheduleForm.endTime}
-                      onChange={(e) =>
-                        setScheduleForm((prev) => ({ ...prev, endTime: e.target.value }))
-                      }
-                      InputLabelProps={{ shrink: true }}
-                    />
+                    <FormControl fullWidth size="small">
+                      <InputLabel id="day-start-label">Hora inicio</InputLabel>
+                      <Select
+                        labelId="day-start-label"
+                        label="Hora inicio"
+                        value={HOUR_OPTIONS.includes(scheduleForm.startTime) ? scheduleForm.startTime : '08:00'}
+                        onChange={(e) =>
+                          setScheduleForm((prev) => ({ ...prev, startTime: e.target.value }))
+                        }
+                      >
+                        {HOUR_OPTIONS.map((hour) => (
+                          <MenuItem key={hour} value={hour}>
+                            {hour}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                    <FormControl fullWidth size="small">
+                      <InputLabel id="day-end-label">Hora fin</InputLabel>
+                      <Select
+                        labelId="day-end-label"
+                        label="Hora fin"
+                        value={HOUR_OPTIONS.includes(scheduleForm.endTime) ? scheduleForm.endTime : '20:00'}
+                        onChange={(e) =>
+                          setScheduleForm((prev) => ({ ...prev, endTime: e.target.value }))
+                        }
+                      >
+                        {HOUR_OPTIONS.map((hour) => (
+                          <MenuItem key={hour} value={hour}>
+                            {hour}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
                   </Stack>
                   <Stack direction="row" spacing={1}>
                     <Button
@@ -590,7 +618,7 @@ export const DatesPage = () => {
                 icon={<InfoIcon fontSize="small" />}
                 sx={{ mb: 2, py: 0.5, fontSize: '0.78rem', borderRadius: 2 }}
               >
-                Los turnos agendados para este día se gestionarán en la Fase 4.
+                Los turnos ofrecidos a los clientes respetan este horario, en bloques de 1 hora en punto.
               </Alert>
 
               <Divider sx={{ mb: 2 }} />

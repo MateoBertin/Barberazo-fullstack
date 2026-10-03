@@ -210,6 +210,22 @@ export const AuthProvider = ({ children }) => {
     });
   };
 
+  // CUU9.1: Editar datos del perfil (nombre y teléfono)
+  // Nota: AuthContext conserva claves en español (nombre, telefono) por compatibilidad
+  // con el backend y los mocks; la página mapea sus campos en inglés a estas claves.
+  const updateProfile = (updates) => {
+    updateUserState(updates);
+  };
+
+  // CUU9.2: Eliminar la cuenta del usuario actual
+  const deleteAccount = () => {
+    setUser(null);
+    setToken(null);
+    setPendingVerification(null);
+    localStorage.removeItem('barberazo_user');
+    localStorage.removeItem('barberazo_token');
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -223,6 +239,8 @@ export const AuthProvider = ({ children }) => {
         logout,
         resetPassword,
         updateUserState,
+        updateProfile,
+        deleteAccount,
       }}
     >
       {children}

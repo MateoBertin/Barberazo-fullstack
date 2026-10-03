@@ -96,10 +96,10 @@ La **refactorización de variables a inglés** según `refactor_english_plan.md`
 
 ---
 
-### Tarea Actual: FASE 5 (Módulos Secundarios)
-Refactor finalizado, se procede con la Fase 5 (ya programando 100% en inglés). Alcance recortado: **sin sobreturnos** (se consideró innecesario).
-* **Perfil de Cliente (`/cliente/perfil`):** Edición de datos (`CUU9.1`) y eliminación de cuenta (`CUU9.2`).
-* **Reseñas:** Calificación (1 a 5 estrellas + reseña) para turnos `Asistido` (`CUU1.4`), y consulta para el staff en `/dueno/resenas` y `/empleado/resenas` (`CUU8.1`).
+### FASE 5 (Módulos Secundarios) ✅ COMPLETADA
+* **Perfil de Cliente (`/cliente/perfil`):** Edición de datos (`CUU9.1`, `updateProfile` + `updateClient`) y eliminación de cuenta (`CUU9.2`, `deleteAccount` + `removeClient` con doble confirmación).
+* **Reseñas:** Calificación 1–5 estrellas + comentario para turnos `Asistido` (`CUU1.4`, `ReviewModal`, 1 reseña por turno) con historial en el dashboard; `reviews` + `addReview` en `DataContext` (`barberazo_reviews`); panel staff en `/dueno/resenas` (todas + promedios) y `/empleado/resenas` (propias) (`CUU8.1`, `ReviewsPage` con vista por rol).
+* Alcance recortado: **sin sobreturnos** (se consideró innecesario).
 
 ---
 

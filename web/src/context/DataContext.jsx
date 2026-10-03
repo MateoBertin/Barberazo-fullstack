@@ -354,6 +354,38 @@ const normalizeFine = (fine) => {
   };
 };
 
+// Reviews iniciales de prueba (CUU1.4, CUU8.1)
+export const INITIAL_REVIEWS = [
+  {
+    id: 'r_1',
+    appointmentId: 't_2',
+    clientId: 4,
+    clientName: 'Gerónimo Benavides',
+    employeeId: 'e2',
+    employeeName: 'Mateo Bertín',
+    serviceName: 'Combo Corte + Barba',
+    rating: 5,
+    comment: 'Excelente atención y muy buen acabado. Volveré seguro.',
+    date: '2026-09-22',
+  },
+];
+
+// Normaliza una review guardada al canónico en inglés
+const normalizeReview = (review) => {
+  return {
+    id: review.id,
+    appointmentId: review.appointmentId,
+    clientId: review.clientId,
+    clientName: review.clientName,
+    employeeId: review.employeeId,
+    employeeName: review.employeeName,
+    serviceName: review.serviceName,
+    rating: review.rating,
+    comment: review.comment || '',
+    date: review.date,
+  };
+};
+
 export const DataProvider = ({ children }) => {
   const [services, setServices] = useState(() => {
     const saved = localStorage.getItem('barberazo_services');
@@ -415,6 +447,16 @@ export const DataProvider = ({ children }) => {
     return INITIAL_FINES;
   });
 
+  // Reviews: Calificaciones de turnos asistidos (Fase 5, CUU1.4)
+  const [reviews, setReviews] = useState(() => {
+    const saved = localStorage.getItem('barberazo_reviews');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (parsed.length > 0) return parsed.map(normalizeReview);
+    }
+    return INITIAL_REVIEWS;
+  });
+
   useEffect(() => {
     localStorage.setItem('barberazo_services', JSON.stringify(services));
   }, [services]);
@@ -438,6 +480,10 @@ export const DataProvider = ({ children }) => {
   useEffect(() => {
     localStorage.setItem('barberazo_fines', JSON.stringify(fines));
   }, [fines]);
+
+  useEffect(() => {
+    localStorage.setItem('barberazo_reviews', JSON.stringify(reviews));
+  }, [reviews]);
 
   // --- CRUD SERVICIOS (CUU7.1, CUU7.2) ---
   const addService = (newService) => {
@@ -485,6 +531,17 @@ export const DataProvider = ({ children }) => {
 
   const deleteEmployee = (id) => {
     setEmployees((prev) => prev.filter((e) => e.id !== id));
+  };
+
+  // --- EDICIÓN Y ELIMINACIÓN DE CLIENTES (CUU9.1, CUU9.2) ---
+  const updateClient = (id, updatedData) => {
+    setClients((prev) =>
+      prev.map((c) => (String(c.id) === String(id) ? normalizeClient({ ...c, ...updatedData, id: c.id }) : c))
+    );
+  };
+
+  const removeClient = (id) => {
+    setClients((prev) => prev.filter((c) => String(c.id) !== String(id)));
   };
 
   // --- GESTIÓN DE CLIENTES Y BLOQUEOS (CUU5.1, CUU5.2) ---
@@ -695,6 +752,28 @@ export const DataProvider = ({ children }) => {
     );
   };
 
+  // --- FASE 5: REVIEWS (CUU1.4) ---
+  // CUU1.4: Register review for an attended appointment (1 review per appointment)
+  const addReview = (newReview) => {
+    const alreadyReviewed = reviews.some((r) => r.appointmentId === newReview.appointmentId);
+    if (alreadyReviewed) {
+      throw new Error('Este turno ya fue calificado.');
+    }
+    if (!newReview.rating || newReview.rating < 1 || newReview.rating > 5) {
+      throw new Error('La calificación debe ser de 1 a 5 estrellas.');
+    }
+
+    const review = normalizeReview({
+      ...newReview,
+      id: 'r_' + Date.now(),
+      comment: newReview.comment || '',
+      date: new Date().toISOString().split('T')[0],
+    });
+
+    setReviews((prev) => [review, ...prev]);
+    return review;
+  };
+
   return (
     <DataContext.Provider
       value={{
@@ -711,6 +790,8 @@ export const DataProvider = ({ children }) => {
         // Clientes
         clients,
         toggleClientBlock,
+        updateClient,
+        removeClient,
         // Días de trabajo / Calendario (Fase 3)
         workingDays,
         toggleDayStatus,
@@ -723,6 +804,9 @@ export const DataProvider = ({ children }) => {
         addStrike,
         fines,
         payFine,
+        // Reviews (Fase 5)
+        reviews,
+        addReview,
       }}
     >
       {children}

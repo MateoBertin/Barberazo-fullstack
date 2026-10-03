@@ -1,20 +1,38 @@
-import React from 'react';
-import { Box, Container, Typography, Paper, Grid, Chip, Button, Stack, Alert } from '@mui/material';
+import React, { useState } from 'react';
+import { Box, Container, Typography, Paper, Grid, Chip, Button, Stack, Alert, Rating } from '@mui/material';
 import {
-  CalendarMonth as CalendarIcon,
   Warning as WarningIcon,
-  CheckCircle as CheckIcon,
-  AccountCircle,
+  Star as StarIcon,
+  History as HistoryIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../../context/AuthContext';
+import { useData } from '../../context/DataContext';
 import { useNavigate } from 'react-router-dom';
+import { BookingWizard } from '../../components/booking/BookingWizard';
+import { ReviewModal } from '../../components/reviews/ReviewModal';
 
 export const ClientDashboard = () => {
   const { user } = useAuth();
+  const { appointments, reviews } = useData();
   const navigate = useNavigate();
+
+  // Historial del cliente: turnos finalizados (no activos), más recientes primero
+  const pastAppointments = appointments
+    .filter((a) => String(a.clientId) === String(user?.id) && a.status !== 'Solicitado')
+    .sort((a, b) => (b.date + b.time).localeCompare(a.date + a.time));
+
+  // Turno seleccionado para calificar (CUU1.4)
+  const [selectedAppointment, setSelectedAppointment] = useState(null);
+
+  const hasReview = (appointmentId) =>
+    reviews.some((r) => r.appointmentId === appointmentId);
+
+  const getReviewRating = (appointmentId) =>
+    reviews.find((r) => r.appointmentId === appointmentId)?.rating || 0;
 
   return (
     <Container maxWidth="lg" sx={{ py: 6 }}>
+      {/* ─── TARJETA HERO DE BIENVENIDA Y ESTADO ─── */}
       <Paper
         elevation={4}
         sx={{
@@ -31,7 +49,7 @@ export const ClientDashboard = () => {
               ¡Hola, {user?.nombre}! 👋
             </Typography>
             <Typography variant="body1" color="text.secondary">
-              Bienvenido al Portal de Clientes de Barberazo. Desde aquí podrás gestionar tus reservas y consultar tu estado.
+              Bienvenido a Barberazo. Aquí puedes reservar turnos, consultar tu turno activo o gestionar tus penalizaciones.
             </Typography>
           </Grid>
           <Grid item xs={12} md={4} sx={{ textAlign: { xs: 'left', md: 'right' } }}>
@@ -43,15 +61,16 @@ export const ClientDashboard = () => {
               />
               <Chip
                 label={`${user?.strikes || 0}/3 Strikes`}
-                color={user?.strikes > 0 ? 'warning' : 'default'}
+                color={user?.strikes > 0 ? (user?.strikes >= 3 ? 'error' : 'warning') : 'default'}
                 variant="outlined"
-                sx={{ fontWeight: 600 }}
+                sx={{ fontWeight: 700 }}
               />
             </Stack>
           </Grid>
         </Grid>
       </Paper>
 
+      {/* Alerta destacada si está multado */}
       {user?.estado === 'Multado' && (
         <Alert
           severity="error"
@@ -72,52 +91,72 @@ export const ClientDashboard = () => {
         </Alert>
       )}
 
-      <Grid container spacing={3}>
-        <Grid item xs={12} sm={4}>
-          <Paper sx={{ p: 3, borderRadius: 3, background: '#181b20', border: '1px solid rgba(255,255,255,0.08)' }}>
-            <CalendarIcon sx={{ fontSize: 36, color: '#d4af37', mb: 1.5 }} />
-            <Typography variant="h6" sx={{ fontWeight: 700 }}>
-              Mis Turnos
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-              Revisa tus turnos activos o cancela tus reservas agendadas.
-            </Typography>
-            <Button variant="outlined" color="primary" fullWidth onClick={() => navigate('/cliente/home')}>
-              Ver Agenda
-            </Button>
-          </Paper>
-        </Grid>
+      {/* ─── ASISTENTE DE RESERVA / TURNO ACTIVO (CUU1.2 & CUU1.5) ─── */}
+      <BookingWizard />
 
-        <Grid item xs={12} sm={4}>
-          <Paper sx={{ p: 3, borderRadius: 3, background: '#181b20', border: '1px solid rgba(255,255,255,0.08)' }}>
-            <WarningIcon sx={{ fontSize: 36, color: '#e65100', mb: 1.5 }} />
+      {/* ─── HISTORIAL DE TURNOS + CALIFICACIÓN (CUU1.4) ─── */}
+      {pastAppointments.length > 0 && (
+        <Paper sx={{ p: 3, borderRadius: 3, background: '#181b20', mt: 4 }}>
+          <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}>
+            <HistoryIcon sx={{ color: '#d4af37' }} />
             <Typography variant="h6" sx={{ fontWeight: 700 }}>
-              Multas y Penalizaciones
+              Mis Turnos Anteriores
             </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-              Consulta el historial de multas e inasistencias acumuladas.
-            </Typography>
-            <Button variant="outlined" color="secondary" fullWidth onClick={() => navigate('/cliente/multas')}>
-              Ver Multas
-            </Button>
-          </Paper>
-        </Grid>
+          </Stack>
+          <Stack spacing={1.5}>
+            {pastAppointments.map((appointment) => {
+              const reviewed = hasReview(appointment.id);
+              const canReview = appointment.status === 'Asistido' && !reviewed;
+              return (
+                <Paper
+                  key={appointment.id}
+                  sx={{ p: 2, background: 'rgba(255,255,255,0.03)', borderRadius: 2 }}
+                >
+                  <Stack
+                    direction={{ xs: 'column', sm: 'row' }}
+                    spacing={1}
+                    alignItems={{ xs: 'flex-start', sm: 'center' }}
+                    justifyContent="space-between"
+                  >
+                    <Box>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+                        {appointment.serviceName} — {appointment.date} a las {appointment.time} hs
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        Con {appointment.employeeName} • {appointment.status}
+                      </Typography>
+                    </Box>
+                    {canReview ? (
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        color="primary"
+                        startIcon={<StarIcon />}
+                        onClick={() => setSelectedAppointment(appointment)}
+                        sx={{ fontWeight: 700 }}
+                      >
+                        Calificar
+                      </Button>
+                    ) : (
+                      reviewed && (
+                        <Rating value={getReviewRating(appointment.id)} readOnly size="small" />
+                      )
+                    )}
+                  </Stack>
+                </Paper>
+              );
+            })}
+          </Stack>
+        </Paper>
+      )}
 
-        <Grid item xs={12} sm={4}>
-          <Paper sx={{ p: 3, borderRadius: 3, background: '#181b20', border: '1px solid rgba(255,255,255,0.08)' }}>
-            <AccountCircle sx={{ fontSize: 36, color: '#10b981', mb: 1.5 }} />
-            <Typography variant="h6" sx={{ fontWeight: 700 }}>
-              Perfil y Datos
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-              Actualiza tus datos de contacto y preferencias de usuario.
-            </Typography>
-            <Button variant="outlined" color="info" fullWidth onClick={() => navigate('/cliente/perfil')}>
-              Editar Perfil
-            </Button>
-          </Paper>
-        </Grid>
-      </Grid>
+      {/* ─── MODAL DE CALIFICACIÓN (CUU1.4) ─── */}
+      <ReviewModal
+        open={Boolean(selectedAppointment)}
+        onClose={() => setSelectedAppointment(null)}
+        appointment={selectedAppointment}
+      />
     </Container>
   );
 };
+

@@ -23,6 +23,13 @@ import { ClientsPage } from './pages/owner/ClientsPage';
 // Páginas de Fase 3 (Calendario & Configuración de Fechas)
 import { DatesPage } from './pages/owner/DatesPage';
 
+// Páginas de Fase 4 (Multas y Mercado Pago)
+import { ClientFinesPage } from './pages/client/ClientFinesPage';
+
+// Páginas de Fase 5 (Perfil y Reseñas)
+import { ClientProfilePage } from './pages/client/ClientProfilePage';
+import { ReviewsPage } from './pages/ReviewsPage';
+
 export const App = () => {
   return (
     <Router>
@@ -43,8 +50,8 @@ export const App = () => {
                 <Routes>
                   <Route path="home" element={<ClientDashboard />} />
                   <Route path="turnos" element={<ClientDashboard />} />
-                  <Route path="multas" element={<ClientDashboard />} />
-                  <Route path="perfil" element={<ClientDashboard />} />
+                  <Route path="multas" element={<ClientFinesPage />} />
+                  <Route path="perfil" element={<ClientProfilePage />} />
                   <Route path="*" element={<Navigate to="/cliente/home" replace />} />
                 </Routes>
               </RoleGuard>
@@ -64,7 +71,7 @@ export const App = () => {
                   <Route path="empleados" element={<EmployeesPage />} />
                   <Route path="clientes" element={<ClientsPage />} />
                   <Route path="fechas" element={<DatesPage />} />
-                  <Route path="resenas" element={<OwnerDashboard />} />
+                  <Route path="resenas" element={<ReviewsPage />} />
                   <Route path="*" element={<Navigate to="/dueno/home" replace />} />
                 </Routes>
               </RoleGuard>
@@ -82,7 +89,7 @@ export const App = () => {
                   <Route path="home" element={<EmployeeDashboard />} />
                   <Route path="servicios" element={<ServicesPage />} />
                   <Route path="clientes" element={<ClientsPage />} />
-                  <Route path="resenas" element={<EmployeeDashboard />} />
+                  <Route path="resenas" element={<ReviewsPage />} />
                   <Route path="*" element={<Navigate to="/empleado/home" replace />} />
                 </Routes>
               </RoleGuard>

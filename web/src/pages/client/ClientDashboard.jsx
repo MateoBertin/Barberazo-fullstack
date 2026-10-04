@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
-import { Box, Container, Typography, Paper, Grid, Chip, Button, Stack, Alert, Rating } from '@mui/material';
+import { Box, Container, Typography, Paper, Grid, Chip, Button, Stack, Rating } from '@mui/material';
 import {
-  Warning as WarningIcon,
   Star as StarIcon,
   History as HistoryIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../../context/AuthContext';
 import { useData } from '../../context/DataContext';
-import { useNavigate } from 'react-router-dom';
 import { BookingWizard } from '../../components/booking/BookingWizard';
 import { ReviewModal } from '../../components/reviews/ReviewModal';
 import { BRAND_COLORS, withAlpha } from '../../theme';
@@ -15,7 +13,6 @@ import { BRAND_COLORS, withAlpha } from '../../theme';
 export const ClientDashboard = () => {
   const { user } = useAuth();
   const { appointments, reviews } = useData();
-  const navigate = useNavigate();
 
   // Historial del cliente: turnos finalizados (no activos), más recientes primero
   const pastAppointments = appointments
@@ -71,28 +68,9 @@ export const ClientDashboard = () => {
         </Grid>
       </Paper>
 
-      {/* Alerta destacada si está multado */}
-      {user?.estado === 'Multado' && (
-        <Alert
-          severity="error"
-          icon={<WarningIcon fontSize="inherit" />}
-          sx={{ mb: 4, borderRadius: 3, '& .MuiAlert-message': { width: '100%' } }}
-          action={
-            <Button color="inherit" size="small" variant="outlined" onClick={() => navigate('/cliente/multas')}>
-              Pagar Multa Ahora
-            </Button>
-          }
-        >
-          <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-            Cuenta Multada por acumular 3 strikes.
-          </Typography>
-          <Typography variant="body2">
-            No podrás solicitar nuevos turnos hasta regularizar el pago de tu multa.
-          </Typography>
-        </Alert>
-      )}
-
       {/* ─── ASISTENTE DE RESERVA / TURNO ACTIVO (CUU1.2 & CUU1.5) ─── */}
+      {/* Si la cuenta está multada, el propio BookingWizard muestra el aviso
+          y bloquea la reserva: no se duplica el mensaje acá */}
       <BookingWizard />
 
       {/* ─── HISTORIAL DE TURNOS + CALIFICACIÓN (CUU1.4) ─── */}

@@ -34,7 +34,7 @@ import { useData } from '../../context/DataContext';
 import { useSnackbar } from 'notistack';
 import { BRAND_COLORS, withAlpha } from '../../theme';
 
-export const TurnosManager = ({ mode = 'owner', modo = 'dueno' }) => {
+export const TurnosManager = ({ mode = null, modo = 'dueno' }) => {
   const currentMode = mode || modo;
   const { user } = useAuth();
   const { appointments, employees, updateAppointmentStatus } = useData();
@@ -42,9 +42,14 @@ export const TurnosManager = ({ mode = 'owner', modo = 'dueno' }) => {
 
   // Estados de filtros controlados en inglés (según apuntes de React)
   const [dateFilter, setDateFilter] = useState('all'); // 'all' | 'today' | 'upcoming'
-  const [employeeFilter, setEmployeeFilter] = useState(
-    currentMode === 'empleado' || currentMode === 'employee' ? user?.id : 'all'
-  );
+  // El empleado ve por defecto su propia agenda. Se lo ubica por email
+  // (igual que en Reseñas): el id de Auth es numérico y no coincide
+  // con los ids de empleados ('e1', 'e2').
+  const isEmployeeMode = currentMode === 'empleado' || currentMode === 'employee';
+  const ownEmployeeId = isEmployeeMode
+    ? employees.find((e) => e.email === user?.email)?.id || 'all'
+    : 'all';
+  const [employeeFilter, setEmployeeFilter] = useState(ownEmployeeId);
   const [clientSearch, setClientSearch] = useState('');
 
   // Estados para diálogo de cancelación por el local (CUU1.6)

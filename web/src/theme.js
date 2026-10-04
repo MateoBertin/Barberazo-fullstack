@@ -23,6 +23,11 @@ export const BRAND_COLORS = {
   mercadoPago: '#009ee3', // Azul oficial de Mercado Pago
   mercadoPagoDark: '#0081ba', // Azul oscuro (hover de Mercado Pago)
   ink: '#121212', // Texto sobre fondos dorados
+  pageBg: '#0f1115', // Fondo base de la app
+  authTint: '#1a1d24', // Degradado de pantallas de autenticación
+  goldDark: '#aa8c2c', // Dorado oscuro (degradados e hovers)
+  accentOrange: '#ff833a', // Naranja claro (landing)
+  deepOrange: '#e65100', // Naranja intenso (landing)
 };
 
 // Agrega transparencia a un color hexadecimal ('#22c55e' + 0.28 => 'rgba(34,197,94,0.28)')
@@ -39,17 +44,17 @@ const theme = createTheme({
     primary: {
       main: BRAND_COLORS.gold, // Dorado elegante / Barbería premium
       light: '#f3e5ab',
-      dark: '#aa8c2c',
-      contrastText: '#121212',
+      dark: BRAND_COLORS.goldDark,
+      contrastText: BRAND_COLORS.ink,
     },
     secondary: {
-      main: '#e65100', // Naranja/Ámbar de acento
-      light: '#ff833a',
+      main: BRAND_COLORS.deepOrange, // Naranja/Ámbar de acento
+      light: BRAND_COLORS.accentOrange,
       dark: '#ac1900',
-      contrastText: '#ffffff',
+      contrastText: BRAND_COLORS.white,
     },
     background: {
-      default: '#0f1115',
+      default: BRAND_COLORS.pageBg,
       paper: BRAND_COLORS.card,
     },
     text: {
@@ -60,13 +65,13 @@ const theme = createTheme({
       main: BRAND_COLORS.danger,
     },
     warning: {
-      main: '#f59e0b',
+      main: BRAND_COLORS.warningAmber,
     },
     success: {
-      main: '#10b981',
+      main: BRAND_COLORS.successGreen,
     },
     info: {
-      main: '#3b82f6',
+      main: BRAND_COLORS.infoBlue,
     },
     custom: {
       brightGreen: BRAND_COLORS.brightGreen,
@@ -115,7 +120,7 @@ const theme = createTheme({
           fontSize: '0.95rem',
           boxShadow: 'none',
           '&:hover': {
-            boxShadow: '0 4px 12px rgba(212, 175, 55, 0.25)',
+            boxShadow: `0 4px 12px ${withAlpha(BRAND_COLORS.gold, 0.25)}`,
           },
         },
       },

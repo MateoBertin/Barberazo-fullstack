@@ -13,6 +13,7 @@ import {
 import { Email as EmailIcon, ArrowBack as BackIcon } from '@mui/icons-material';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { BRAND_COLORS, withAlpha } from '../theme';
 
 export const ForgotPasswordPage = () => {
   const navigate = useNavigate();
@@ -38,7 +39,7 @@ export const ForgotPasswordPage = () => {
         minHeight: 'calc(100vh - 70px)',
         display: 'flex',
         alignItems: 'center',
-        background: 'linear-gradient(135deg, #0f1115 0%, #1a1d24 100%)',
+        background: `linear-gradient(135deg, ${BRAND_COLORS.pageBg} 0%, ${BRAND_COLORS.authTint} 100%)`,
         py: { xs: 3, sm: 6 },
       }}
     >
@@ -48,8 +49,8 @@ export const ForgotPasswordPage = () => {
           sx={{
             p: { xs: 2.5, sm: 4 },
             borderRadius: 4,
-            background: '#181b20',
-            border: '1px solid rgba(255, 255, 255, 0.08)',
+            background: BRAND_COLORS.card,
+            border: `1px solid ${withAlpha(BRAND_COLORS.white, 0.08)}`,
           }}
         >
           <Box sx={{ mb: 3 }}>

@@ -35,6 +35,7 @@ import {
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { BRAND_COLORS, withAlpha } from '../../theme';
 
 export const Navbar = () => {
   const { user, logout } = useAuth();
@@ -85,14 +86,14 @@ export const Navbar = () => {
 
   return (
     <>
-    <AppBar position="sticky" sx={{ background: '#121419', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+    <AppBar position="sticky" sx={{ background: BRAND_COLORS.appBar, borderBottom: `1px solid ${withAlpha(BRAND_COLORS.white, 0.08)}` }}>
       <Container maxWidth="xl">
         <Toolbar disableGutters sx={{ justifyContent: 'space-between', height: 70 }}>
           {/* Botón hamburguesa (solo mobile) */}
           {user && (
             <IconButton
               onClick={() => setIsDrawerOpen(true)}
-              sx={{ display: { xs: 'flex', md: 'none' }, color: '#d4af37', mr: 1 }}
+              sx={{ display: { xs: 'flex', md: 'none' }, color: BRAND_COLORS.gold, mr: 1 }}
               aria-label="Abrir menú de navegación"
             >
               <MenuIcon />
@@ -109,14 +110,14 @@ export const Navbar = () => {
                 width: 40,
                 height: 40,
                 borderRadius: '50%',
-                background: 'linear-gradient(135deg, #d4af37 0%, #aa8c2c 100%)',
+                background: `linear-gradient(135deg, ${BRAND_COLORS.gold} 0%, ${BRAND_COLORS.goldDark} 100%)`,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: '0 4px 12px rgba(212, 175, 55, 0.4)',
+                boxShadow: `0 4px 12px ${withAlpha(BRAND_COLORS.gold, 0.4)}`,
               }}
             >
-              <ScissorsIcon sx={{ color: '#121212', fontSize: 24 }} />
+              <ScissorsIcon sx={{ color: BRAND_COLORS.ink, fontSize: 24 }} />
             </Box>
             <Typography
               variant="h5"
@@ -125,7 +126,7 @@ export const Navbar = () => {
                 fontWeight: 800,
                 letterSpacing: 1,
                 fontSize: { xs: '1.1rem', sm: '1.5rem' },
-                background: 'linear-gradient(90deg, #ffffff 0%, #d4af37 100%)',
+                background: `linear-gradient(90deg, ${BRAND_COLORS.white} 0%, ${BRAND_COLORS.gold} 100%)`,
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
               }}
@@ -280,7 +281,7 @@ export const Navbar = () => {
               )}
 
               <IconButton onClick={handleMenuOpen} sx={{ p: 0.5 }}>
-                <Avatar sx={{ bgcolor: '#d4af37', color: '#121212', fontWeight: 'bold' }}>
+                <Avatar sx={{ bgcolor: BRAND_COLORS.gold, color: BRAND_COLORS.ink, fontWeight: 'bold' }}>
                   {user.nombre.charAt(0).toUpperCase()}
                 </Avatar>
               </IconButton>
@@ -290,7 +291,7 @@ export const Navbar = () => {
                 open={Boolean(anchorEl)}
                 onClose={handleMenuClose}
                 PaperProps={{
-                  sx: { mt: 1.5, background: '#181b20', border: '1px solid rgba(255,255,255,0.1)', minWidth: 200 },
+                  sx: { mt: 1.5, background: BRAND_COLORS.card, border: `1px solid ${withAlpha(BRAND_COLORS.white, 0.1)}`, minWidth: 200 },
                 }}
               >
                 <Box sx={{ px: 2, py: 1 }}>
@@ -318,11 +319,11 @@ export const Navbar = () => {
       open={isDrawerOpen}
       onClose={() => setIsDrawerOpen(false)}
       PaperProps={{
-        sx: { width: 270, background: '#121419', borderRight: '1px solid rgba(255,255,255,0.08)' },
+        sx: { width: 270, background: BRAND_COLORS.appBar, borderRight: `1px solid ${withAlpha(BRAND_COLORS.white, 0.08)}` },
       }}
     >
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, p: 2 }}>
-        <ScissorsIcon sx={{ color: '#d4af37', fontSize: 24 }} />
+        <ScissorsIcon sx={{ color: BRAND_COLORS.gold, fontSize: 24 }} />
         <Box>
           <Typography variant="h6" sx={{ fontWeight: 800, letterSpacing: 1, lineHeight: 1.2 }}>
             BARBERAZO
@@ -342,7 +343,7 @@ export const Navbar = () => {
                 selected={location.pathname.includes('/cliente/home')}
                 onClick={() => handleDrawerNavigate('/cliente/home')}
               >
-                <ListItemIcon><CalendarIcon sx={{ color: '#d4af37' }} /></ListItemIcon>
+                <ListItemIcon><CalendarIcon sx={{ color: BRAND_COLORS.gold }} /></ListItemIcon>
                 <ListItemText primary="Reservar Turno" />
               </ListItemButton>
             </ListItem>
@@ -351,7 +352,7 @@ export const Navbar = () => {
                 selected={location.pathname.includes('/cliente/multas')}
                 onClick={() => handleDrawerNavigate('/cliente/multas')}
               >
-                <ListItemIcon><WarningIcon sx={{ color: '#d4af37' }} /></ListItemIcon>
+                <ListItemIcon><WarningIcon sx={{ color: BRAND_COLORS.gold }} /></ListItemIcon>
                 <ListItemText primary={`Mis Multas${user.estado === 'Multado' ? ' (Pendiente)' : ''}`} />
               </ListItemButton>
             </ListItem>
@@ -360,7 +361,7 @@ export const Navbar = () => {
                 selected={location.pathname.includes('/cliente/perfil')}
                 onClick={() => handleDrawerNavigate('/cliente/perfil')}
               >
-                <ListItemIcon><AccountCircle sx={{ color: '#d4af37' }} /></ListItemIcon>
+                <ListItemIcon><AccountCircle sx={{ color: BRAND_COLORS.gold }} /></ListItemIcon>
                 <ListItemText primary="Mi Perfil" />
               </ListItemButton>
             </ListItem>
@@ -374,7 +375,7 @@ export const Navbar = () => {
                 selected={location.pathname.includes('/empleado/home')}
                 onClick={() => handleDrawerNavigate('/empleado/home')}
               >
-                <ListItemIcon><CalendarIcon sx={{ color: '#3b82f6' }} /></ListItemIcon>
+                <ListItemIcon><CalendarIcon sx={{ color: BRAND_COLORS.infoBlue }} /></ListItemIcon>
                 <ListItemText primary="Turnos" />
               </ListItemButton>
             </ListItem>
@@ -383,7 +384,7 @@ export const Navbar = () => {
                 selected={location.pathname.includes('/empleado/clientes')}
                 onClick={() => handleDrawerNavigate('/empleado/clientes')}
               >
-                <ListItemIcon><PeopleIcon sx={{ color: '#3b82f6' }} /></ListItemIcon>
+                <ListItemIcon><PeopleIcon sx={{ color: BRAND_COLORS.infoBlue }} /></ListItemIcon>
                 <ListItemText primary="Clientes (Lectura)" />
               </ListItemButton>
             </ListItem>
@@ -392,7 +393,7 @@ export const Navbar = () => {
                 selected={location.pathname.includes('/empleado/servicios')}
                 onClick={() => handleDrawerNavigate('/empleado/servicios')}
               >
-                <ListItemIcon><ServicesIcon sx={{ color: '#3b82f6' }} /></ListItemIcon>
+                <ListItemIcon><ServicesIcon sx={{ color: BRAND_COLORS.infoBlue }} /></ListItemIcon>
                 <ListItemText primary="Servicios (Lectura)" />
               </ListItemButton>
             </ListItem>
@@ -401,7 +402,7 @@ export const Navbar = () => {
                 selected={location.pathname.includes('/empleado/resenas')}
                 onClick={() => handleDrawerNavigate('/empleado/resenas')}
               >
-                <ListItemIcon><StarIcon sx={{ color: '#3b82f6' }} /></ListItemIcon>
+                <ListItemIcon><StarIcon sx={{ color: BRAND_COLORS.infoBlue }} /></ListItemIcon>
                 <ListItemText primary="Reseñas" />
               </ListItemButton>
             </ListItem>
@@ -415,7 +416,7 @@ export const Navbar = () => {
                 selected={location.pathname.includes('/dueno/home')}
                 onClick={() => handleDrawerNavigate('/dueno/home')}
               >
-                <ListItemIcon><CalendarIcon sx={{ color: '#d4af37' }} /></ListItemIcon>
+                <ListItemIcon><CalendarIcon sx={{ color: BRAND_COLORS.gold }} /></ListItemIcon>
                 <ListItemText primary="Turnos" />
               </ListItemButton>
             </ListItem>
@@ -424,7 +425,7 @@ export const Navbar = () => {
                 selected={location.pathname.includes('/dueno/clientes')}
                 onClick={() => handleDrawerNavigate('/dueno/clientes')}
               >
-                <ListItemIcon><PeopleIcon sx={{ color: '#d4af37' }} /></ListItemIcon>
+                <ListItemIcon><PeopleIcon sx={{ color: BRAND_COLORS.gold }} /></ListItemIcon>
                 <ListItemText primary="Clientes" />
               </ListItemButton>
             </ListItem>
@@ -433,7 +434,7 @@ export const Navbar = () => {
                 selected={location.pathname.includes('/dueno/servicios')}
                 onClick={() => handleDrawerNavigate('/dueno/servicios')}
               >
-                <ListItemIcon><ServicesIcon sx={{ color: '#d4af37' }} /></ListItemIcon>
+                <ListItemIcon><ServicesIcon sx={{ color: BRAND_COLORS.gold }} /></ListItemIcon>
                 <ListItemText primary="Servicios" />
               </ListItemButton>
             </ListItem>
@@ -442,7 +443,7 @@ export const Navbar = () => {
                 selected={location.pathname.includes('/dueno/empleados')}
                 onClick={() => handleDrawerNavigate('/dueno/empleados')}
               >
-                <ListItemIcon><BadgeIcon sx={{ color: '#d4af37' }} /></ListItemIcon>
+                <ListItemIcon><BadgeIcon sx={{ color: BRAND_COLORS.gold }} /></ListItemIcon>
                 <ListItemText primary="Empleados" />
               </ListItemButton>
             </ListItem>
@@ -451,7 +452,7 @@ export const Navbar = () => {
                 selected={location.pathname.includes('/dueno/fechas')}
                 onClick={() => handleDrawerNavigate('/dueno/fechas')}
               >
-                <ListItemIcon><DateIcon sx={{ color: '#d4af37' }} /></ListItemIcon>
+                <ListItemIcon><DateIcon sx={{ color: BRAND_COLORS.gold }} /></ListItemIcon>
                 <ListItemText primary="Fechas y Horarios" />
               </ListItemButton>
             </ListItem>
@@ -460,7 +461,7 @@ export const Navbar = () => {
                 selected={location.pathname.includes('/dueno/resenas')}
                 onClick={() => handleDrawerNavigate('/dueno/resenas')}
               >
-                <ListItemIcon><StarIcon sx={{ color: '#d4af37' }} /></ListItemIcon>
+                <ListItemIcon><StarIcon sx={{ color: BRAND_COLORS.gold }} /></ListItemIcon>
                 <ListItemText primary="Reseñas" />
               </ListItemButton>
             </ListItem>

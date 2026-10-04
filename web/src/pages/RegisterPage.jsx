@@ -26,6 +26,7 @@ import {
 } from '@mui/icons-material';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { BRAND_COLORS, withAlpha } from '../theme';
 
 export const RegisterPage = () => {
   const navigate = useNavigate();
@@ -121,7 +122,7 @@ export const RegisterPage = () => {
         minHeight: 'calc(100vh - 70px)',
         display: 'flex',
         alignItems: 'center',
-        background: 'linear-gradient(135deg, #0f1115 0%, #1a1d24 100%)',
+        background: `linear-gradient(135deg, ${BRAND_COLORS.pageBg} 0%, ${BRAND_COLORS.authTint} 100%)`,
         py: { xs: 3, sm: 6 },
       }}
     >
@@ -131,8 +132,8 @@ export const RegisterPage = () => {
           sx={{
             p: { xs: 2.5, sm: 4 },
             borderRadius: 4,
-            background: '#181b20',
-            border: '1px solid rgba(255, 255, 255, 0.08)',
+            background: BRAND_COLORS.card,
+            border: `1px solid ${withAlpha(BRAND_COLORS.white, 0.08)}`,
           }}
         >
           <Box sx={{ textAlign: 'center', mb: 3 }}>
@@ -276,11 +277,11 @@ export const RegisterPage = () => {
         open={openVerifyModal}
         onClose={() => {}}
         PaperProps={{
-          sx: { background: '#181b20', border: '1px solid rgba(212, 175, 55, 0.3)', borderRadius: 3, p: 2 },
+          sx: { background: BRAND_COLORS.card, border: `1px solid ${withAlpha(BRAND_COLORS.gold, 0.3)}`, borderRadius: 3, p: 2 },
         }}
       >
         <DialogTitle sx={{ textAlign: 'center', pb: 1 }}>
-          <EmailReadIcon sx={{ fontSize: 48, color: '#d4af37', mb: 1 }} />
+          <EmailReadIcon sx={{ fontSize: 48, color: BRAND_COLORS.gold, mb: 1 }} />
           <Typography variant="h5" sx={{ fontWeight: 800 }}>
             Verificación por Correo
           </Typography>
@@ -292,7 +293,7 @@ export const RegisterPage = () => {
           </Alert>
 
           {successCode && (
-            <Alert severity="success" sx={{ mb: 2, background: 'rgba(16, 185, 129, 0.15)' }}>
+            <Alert severity="success" sx={{ mb: 2, background: withAlpha(BRAND_COLORS.successGreen, 0.15) }}>
               Código de demostración generado: <strong>{successCode}</strong>
             </Alert>
           )}

@@ -3,6 +3,7 @@ import { Navigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { Box, Typography, Button, Paper, Container } from '@mui/material';
 import { Block as BlockIcon } from '@mui/icons-material';
+import { BRAND_COLORS, withAlpha } from '../../theme';
 
 export const RoleGuard = ({ allowedRoles, children }) => {
   const { user } = useAuth();
@@ -17,10 +18,10 @@ export const RoleGuard = ({ allowedRoles, children }) => {
         <Paper
           elevation={4}
           sx={{
-            p: 4,
+            p: { xs: 2.5, sm: 4 },
             textAlign: 'center',
-            background: '#181b20',
-            border: '1px solid rgba(239, 68, 68, 0.3)',
+            background: BRAND_COLORS.card,
+            border: `1px solid ${withAlpha(BRAND_COLORS.danger, 0.3)}`,
             borderRadius: 4,
           }}
         >

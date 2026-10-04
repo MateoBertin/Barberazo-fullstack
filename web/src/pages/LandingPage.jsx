@@ -23,6 +23,7 @@ import {
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth, MOCK_USERS } from '../context/AuthContext';
+import { BRAND_COLORS, withAlpha } from '../theme';
 
 export const LandingPage = () => {
   const navigate = useNavigate();
@@ -37,7 +38,7 @@ export const LandingPage = () => {
   };
 
   return (
-    <Box sx={{ minHeight: 'calc(100vh - 70px)', background: 'linear-gradient(180deg, #0f1115 0%, #181b20 100%)', py: { xs: 3, sm: 6 } }}>
+    <Box sx={{ minHeight: 'calc(100vh - 70px)', background: `linear-gradient(180deg, ${BRAND_COLORS.pageBg} 0%, ${BRAND_COLORS.card} 100%)`, py: { xs: 3, sm: 6 } }}>
       <Container maxWidth="lg">
         {/* Hero Section */}
         <Grid container spacing={4} alignItems="center" sx={{ mb: 8 }}>
@@ -46,7 +47,7 @@ export const LandingPage = () => {
               label="UTN FRRo - Seminario Integrador G24"
               color="primary"
               variant="outlined"
-              sx={{ mb: 2, fontWeight: 600, borderColor: '#d4af37' }}
+              sx={{ mb: 2, fontWeight: 600, borderColor: BRAND_COLORS.gold }}
             />
             <Typography
               variant="h2"
@@ -63,7 +64,7 @@ export const LandingPage = () => {
                 component="span"
                 variant="inherit"
                 sx={{
-                  background: 'linear-gradient(90deg, #d4af37 0%, #ff833a 100%)',
+                  background: `linear-gradient(90deg, ${BRAND_COLORS.gold} 0%, ${BRAND_COLORS.accentOrange} 100%)`,
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                 }}
@@ -118,14 +119,14 @@ export const LandingPage = () => {
               elevation={8}
               sx={{
                 p: 3.5,
-                background: 'rgba(24, 27, 32, 0.95)',
+                background: withAlpha(BRAND_COLORS.card, 0.95),
                 backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(212, 175, 55, 0.3)',
+                border: `1px solid ${withAlpha(BRAND_COLORS.gold, 0.3)}`,
                 borderRadius: 4,
               }}
             >
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
-                <ScissorsIcon sx={{ color: '#d4af37', fontSize: 28 }} />
+                <ScissorsIcon sx={{ color: BRAND_COLORS.gold, fontSize: 28 }} />
                 <Typography variant="h6" sx={{ fontWeight: 700 }}>
                   Acceso Rápido de Evaluación
                 </Typography>
@@ -200,7 +201,7 @@ export const LandingPage = () => {
           <Grid item xs={12} sm={4}>
             <Card sx={{ height: '100%', p: 1 }}>
               <CardContent>
-                <CalendarIcon sx={{ fontSize: 40, color: '#d4af37', mb: 2 }} />
+                <CalendarIcon sx={{ fontSize: 40, color: BRAND_COLORS.gold, mb: 2 }} />
                 <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
                   Reserva Inteligente de Turnos
                 </Typography>
@@ -214,7 +215,7 @@ export const LandingPage = () => {
           <Grid item xs={12} sm={4}>
             <Card sx={{ height: '100%', p: 1 }}>
               <CardContent>
-                <ShieldIcon sx={{ fontSize: 40, color: '#e65100', mb: 2 }} />
+                <ShieldIcon sx={{ fontSize: 40, color: BRAND_COLORS.deepOrange, mb: 2 }} />
                 <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
                   Control de Strikes y Multas
                 </Typography>
@@ -228,7 +229,7 @@ export const LandingPage = () => {
           <Grid item xs={12} sm={4}>
             <Card sx={{ height: '100%', p: 1 }}>
               <CardContent>
-                <StarIcon sx={{ fontSize: 40, color: '#10b981', mb: 2 }} />
+                <StarIcon sx={{ fontSize: 40, color: BRAND_COLORS.successGreen, mb: 2 }} />
                 <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
                   Calificación y Reseñas
                 </Typography>

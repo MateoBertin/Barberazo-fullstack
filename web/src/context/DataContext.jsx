@@ -619,6 +619,24 @@ export const DataProvider = ({ children }) => {
       createdAt: new Date().toISOString(),
     };
 
+    // Si el cliente no tiene registro en clients (ej. se registró por Auth y
+    // nunca reservó), se crea para que strikes y multas tengan dónde sumarse
+    const clientExists = clients.some(
+      (c) => String(c.id) === String(appointment.clientId) || c.email === appointment.clientEmail
+    );
+    if (!clientExists) {
+      const newClient = normalizeClient({
+        id: appointment.clientId,
+        name: appointment.clientName,
+        email: appointment.clientEmail,
+        phone: appointment.clientPhone,
+        status: 'Activo',
+        strikes: 0,
+        registrationDate: new Date().toISOString().split('T')[0],
+      });
+      setClients((prev) => [...prev, newClient]);
+    }
+
     setAppointments((prev) => [appointment, ...prev]);
     return appointment;
   };
@@ -691,41 +709,52 @@ export const DataProvider = ({ children }) => {
   // Add strike and generate fine on 3rd strike
   // El cliente se busca por id y, como respaldo, por email: los turnos guardan
   // el id de Auth (numérico) mientras que los clientes usan ids propios ('c1').
+  // Los cálculos se hacen fuera de los updaters: en StrictMode React puede
+  // invocarlos dos veces y los efectos (crear multa) se duplicarían.
   const addStrike = (clientId, reason = 'Inasistencia o cancelación tardía', clientEmail = null) => {
-    setClients((prevClients) =>
-      prevClients.map((client) => {
-        const matchesId = String(client.id) === String(clientId);
-        const matchesEmail = clientEmail && client.email === clientEmail;
-        if (matchesId || matchesEmail) {
-          const nextStrikes = (client.strikes || 0) + 1;
-          const isFined = nextStrikes >= 3;
-          const nextStatus = isFined ? 'Multado' : client.status;
+    const client = clients.find(
+      (c) => String(c.id) === String(clientId) || (clientEmail && c.email === clientEmail)
+    );
+    if (!client) return;
 
-          if (isFined) {
-            const newFine = {
-              id: 'm_' + Date.now(),
-              clientId: client.id,
-              clientName: client.name,
-              clientEmail: client.email,
-              amount: 3000,
-              reason: reason || 'Acumulación de 3 strikes',
-              status: 'Pendiente',
-              issueDate: new Date().toISOString().split('T')[0],
-              paymentDate: null,
-              paymentMethod: null,
-            };
-            setFines((prevFines) => [newFine, ...prevFines]);
-          }
+    const nextStrikes = (client.strikes || 0) + 1;
+    const isFined = nextStrikes >= 3;
+    const nextStatus = isFined ? 'Multado' : client.status;
 
-          if (user && String(user.id) === String(client.id)) {
-            updateUserState({ strikes: nextStrikes, estado: nextStatus });
-          }
-
-          return { ...client, strikes: nextStrikes, status: nextStatus };
+    if (isFined) {
+      const newFine = {
+        id: 'm_' + Date.now(),
+        clientId: client.id,
+        clientName: client.name,
+        clientEmail: client.email,
+        amount: 3000,
+        reason: reason || 'Acumulación de 3 strikes',
+        status: 'Pendiente',
+        issueDate: new Date().toISOString().split('T')[0],
+        paymentDate: null,
+        paymentMethod: null,
+      };
+      setFines((prevFines) => {
+        if (prevFines.some((f) => f.clientId === client.id && f.status === 'Pendiente' && f.reason === newFine.reason)) {
+          return prevFines;
         }
-        return client;
+        return [newFine, ...prevFines];
+      });
+    }
+
+    setClients((prevClients) =>
+      prevClients.map((c) => {
+        const matchesId = String(c.id) === String(client.id);
+        const matchesEmail = client.email && c.email === client.email;
+        return matchesId || matchesEmail
+          ? { ...c, strikes: nextStrikes, status: nextStatus }
+          : c;
       })
     );
+
+    if (user && (String(user.id) === String(client.id) || user.email === client.email)) {
+      updateUserState({ strikes: nextStrikes, estado: nextStatus });
+    }
   };
 
   // CUU4.1: Pay fine (Mercado Pago simulation)

@@ -27,3 +27,6 @@ npm-debug.log*
 # Planes y memoria interna (documentación local, no se commitea)
 plans/
 
+# Docs de materia (no se commitean)
+otro/
+

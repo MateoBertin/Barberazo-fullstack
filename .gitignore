@@ -26,3 +26,8 @@ npm-debug.log*
 .DS_Store
 Thumbs.db
 .vite/
+
+# Tooling local e IA (se regeneran solos, no se commitean)
+.playwright-mcp/
+.agents/
+opencode.json

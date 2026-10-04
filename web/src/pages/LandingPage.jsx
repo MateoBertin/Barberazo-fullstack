@@ -5,17 +5,12 @@ import {
   Typography,
   Button,
   Grid,
-  Card,
-  CardContent,
   Stack,
   Chip,
   Paper,
 } from '@mui/material';
 import {
   ContentCut as ScissorsIcon,
-  CalendarMonth as CalendarIcon,
-  Star as StarIcon,
-  Shield as ShieldIcon,
   Person as PersonIcon,
   Badge as BadgeIcon,
   AdminPanelSettings as AdminIcon,
@@ -41,7 +36,7 @@ export const LandingPage = () => {
     <Box sx={{ minHeight: 'calc(100vh - 70px)', background: `linear-gradient(180deg, ${BRAND_COLORS.pageBg} 0%, ${BRAND_COLORS.card} 100%)`, py: { xs: 3, sm: 6 } }}>
       <Container maxWidth="lg">
         {/* Hero Section */}
-        <Grid container spacing={4} alignItems="center" sx={{ mb: 8 }}>
+        <Grid container spacing={4} alignItems="center">
           <Grid item xs={12} md={7}>
             <Chip
               label="UTN FRRo - Seminario Integrador G24"
@@ -193,51 +188,6 @@ export const LandingPage = () => {
                 </Button>
               </Stack>
             </Paper>
-          </Grid>
-        </Grid>
-
-        {/* Feature Cards */}
-        <Grid container spacing={3} sx={{ mt: 2 }}>
-          <Grid item xs={12} sm={4}>
-            <Card sx={{ height: '100%', p: 1 }}>
-              <CardContent>
-                <CalendarIcon sx={{ fontSize: 40, color: BRAND_COLORS.gold, mb: 2 }} />
-                <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
-                  Reserva Inteligente de Turnos
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Selecciona la fecha, el servicio deseado (corte, barba, tintura) y la duración estimada. Elige tu barbero o asigna a cualquier disponible.
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-
-          <Grid item xs={12} sm={4}>
-            <Card sx={{ height: '100%', p: 1 }}>
-              <CardContent>
-                <ShieldIcon sx={{ fontSize: 40, color: BRAND_COLORS.deepOrange, mb: 2 }} />
-                <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
-                  Control de Strikes y Multas
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Política justa para el negocio: cancelaciones tardías (&lt;24hs) e inasistencias acumulan strikes. A los 3 strikes se genera multa con opción de pago Mercado Pago.
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-
-          <Grid item xs={12} sm={4}>
-            <Card sx={{ height: '100%', p: 1 }}>
-              <CardContent>
-                <StarIcon sx={{ fontSize: 40, color: BRAND_COLORS.successGreen, mb: 2 }} />
-                <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
-                  Calificación y Reseñas
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Al completar tu turno, recibe una solicitud para valorar el servicio prestado y dejar tus comentarios para mantener la excelencia del local.
-                </Typography>
-              </CardContent>
-            </Card>
           </Grid>
         </Grid>
       </Container>

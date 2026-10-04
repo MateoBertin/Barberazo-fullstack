@@ -173,11 +173,13 @@ export const DatesPage = () => {
     };
   }, [viewDate, workingDays]);
 
-  // Actualiza el selectedDay con los datos más recientes de workingDays
-  const refreshSelectedDay = (dateStr) => {
-    const dayData = workingDays.find((day) => day.date === dateStr) || null;
-    setSelectedDay((prev) => (prev ? { ...prev, dayData } : null));
-  };
+  // Helper: estado actual del día seleccionado, siempre desde workingDays
+  // (selectedDay.dayData puede quedar desactualizado tras un toggle, por eso
+  // se lee el estado vivo acá y no se cachea en selectedDay)
+  const selectedDayData = selectedDay
+    ? workingDays.find((day) => day.date === selectedDay.dateStr) || selectedDay.dayData
+    : null;
+  const isSelectedDayEnabled = selectedDayData?.status !== 'Deshabilitado';
 
   // Clic sobre un día del calendario
   const handleDayClick = (dayInfo) => {
@@ -189,7 +191,7 @@ export const DatesPage = () => {
   // Habilitar / iniciar flujo de deshabilitar
   const handleToggleDayStatus = () => {
     if (!selectedDay) return;
-    const currentStatus = selectedDay.dayData?.status || 'Habilitado';
+    const currentStatus = selectedDayData?.status || 'Habilitado';
     if (currentStatus === 'Habilitado') {
       setIsConfirmOpen(true); // CUU6.2: pide confirmación antes de deshabilitar
     } else {
@@ -199,7 +201,6 @@ export const DatesPage = () => {
         `Fecha ${selectedDay.dateStr} habilitada correctamente.`,
         { variant: 'success' }
       );
-      refreshSelectedDay(selectedDay.dateStr);
     }
   };
 
@@ -211,7 +212,6 @@ export const DatesPage = () => {
       { variant: 'warning' }
     );
     setIsConfirmOpen(false);
-    refreshSelectedDay(selectedDay.dateStr);
   };
 
   // Guardar horario editado (solo horas en punto: turnos de 1 hora)
@@ -227,14 +227,7 @@ export const DatesPage = () => {
     updateDaySchedule(selectedDay.dateStr, scheduleForm.startTime, scheduleForm.endTime);
     enqueueSnackbar('Horario del día actualizado correctamente.', { variant: 'success' });
     setIsEditingSchedule(false);
-    refreshSelectedDay(selectedDay.dateStr);
   };
-
-  // Helper: estado actual del día seleccionado (puede haber cambiado por toggleDayStatus)
-  const selectedDayData = selectedDay
-    ? workingDays.find((day) => day.date === selectedDay.dateStr) || selectedDay.dayData
-    : null;
-  const isSelectedDayEnabled = selectedDayData?.status !== 'Deshabilitado';
 
   return (
     <Container maxWidth="lg" sx={{ py: { xs: 3, sm: 6 } }}>

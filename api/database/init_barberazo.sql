@@ -172,8 +172,8 @@ INSERT INTO `clientes` (`id_cliente`, `id_usuario`, `nombre`, `apellido`, `telef
 
 -- 4. Insertar Servicios Predeterminados
 INSERT INTO `servicios` (`id_servicio`, `nombre`, `descripcion`, `precio`, `duracion_minutos`, `estado`) VALUES
-(1, 'Corte Tradicional', 'Corte de cabello clásico o moderno con asesoramiento de estilo y acabado.', 4500.00, 30, 'HABILITADO'),
-(2, 'Arreglo de Barba', 'Diseño, perfilado, rebajado de barba y toalla caliente.', 3000.00, 20, 'HABILITADO'),
-(3, 'Combo Corte + Barba', 'Servicio completo de corte de cabello y arreglo de barba profesional.', 6500.00, 45, 'HABILITADO'),
+(1, 'Corte Tradicional', 'Corte de cabello clásico o moderno con asesoramiento de estilo y acabado.', 4500.00, 60, 'HABILITADO'),
+(2, 'Arreglo de Barba', 'Diseño, perfilado, rebajado de barba y toalla caliente.', 3000.00, 60, 'HABILITADO'),
+(3, 'Combo Corte + Barba', 'Servicio completo de corte de cabello y arreglo de barba profesional.', 6500.00, 60, 'HABILITADO'),
 (4, 'Tintura / Coloración', 'Aplicación de tintura, mechas o camuflaje de canas.', 8500.00, 60, 'HABILITADO'),
-(5, 'Perfilado de Cejas', 'Depilación y diseño de cejas con navaja/pinza.', 2000.00, 15, 'HABILITADO');
+(5, 'Perfilado de Cejas', 'Depilación y diseño de cejas con navaja/pinza.', 2000.00, 60, 'HABILITADO');

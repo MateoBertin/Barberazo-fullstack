@@ -653,7 +653,8 @@ export const DataProvider = ({ children }) => {
     if (isLessThan24Hours) {
       addStrike(
         appointment.clientId,
-        'Cancelación de turno con menos de 24 horas de anticipación'
+        'Cancelación de turno con menos de 24 horas de anticipación',
+        appointment.clientEmail
       );
     }
 
@@ -681,16 +682,21 @@ export const DataProvider = ({ children }) => {
     if (newStatus === 'No-Asistido') {
       addStrike(
         appointment.clientId,
-        `Inasistencia al turno del día ${appointment.date}`
+        `Inasistencia al turno del día ${appointment.date}`,
+        appointment.clientEmail
       );
     }
   };
 
   // Add strike and generate fine on 3rd strike
-  const addStrike = (clientId, reason = 'Inasistencia o cancelación tardía') => {
+  // El cliente se busca por id y, como respaldo, por email: los turnos guardan
+  // el id de Auth (numérico) mientras que los clientes usan ids propios ('c1').
+  const addStrike = (clientId, reason = 'Inasistencia o cancelación tardía', clientEmail = null) => {
     setClients((prevClients) =>
       prevClients.map((client) => {
-        if (String(client.id) === String(clientId)) {
+        const matchesId = String(client.id) === String(clientId);
+        const matchesEmail = clientEmail && client.email === clientEmail;
+        if (matchesId || matchesEmail) {
           const nextStrikes = (client.strikes || 0) + 1;
           const isFined = nextStrikes >= 3;
           const nextStatus = isFined ? 'Multado' : client.status;
@@ -725,6 +731,7 @@ export const DataProvider = ({ children }) => {
   // CUU4.1: Pay fine (Mercado Pago simulation)
   const payFine = (fineId, clientId) => {
     const todayStr = new Date().toISOString().split('T')[0];
+    const paidFine = fines.find((f) => f.id === fineId);
 
     setFines((prev) =>
       prev.map((fine) =>
@@ -741,7 +748,10 @@ export const DataProvider = ({ children }) => {
 
     setClients((prev) =>
       prev.map((client) => {
-        if (String(client.id) === String(clientId)) {
+        const matchesId = String(client.id) === String(clientId);
+        const matchesFine = paidFine && String(client.id) === String(paidFine.clientId);
+        const matchesEmail = paidFine && client.email === paidFine.clientEmail;
+        if (matchesId || matchesFine || matchesEmail) {
           if (user && String(user.id) === String(client.id)) {
             updateUserState({ strikes: 0, estado: 'Activo' });
           }

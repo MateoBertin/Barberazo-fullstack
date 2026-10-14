@@ -38,13 +38,26 @@ export const LoginPage = () => {
 
   const from = location.state?.from?.pathname;
 
+  const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    const cleanEmail = email.trim();
+    if (!cleanEmail || !password) {
+      setError('Email y contraseña son obligatorios.');
+      return;
+    }
+    if (!EMAIL_REGEX.test(cleanEmail)) {
+      setError('El formato del email no es válido.');
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const loggedUser = await login(email, password);
+      const loggedUser = await login(cleanEmail, password);
       const targetPath =
         from ||
         (loggedUser.rol === 'dueno'
@@ -120,6 +133,7 @@ export const LoginPage = () => {
             <TextField
               fullWidth
               label="Correo Electrónico"
+              type="email"
               variant="outlined"
               margin="normal"
               value={email}

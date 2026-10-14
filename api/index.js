@@ -3,6 +3,12 @@ const express = require('express');
 const cors = require('cors');
 const { testConnection } = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
+const servicioRoutes = require('./routes/servicioRoutes');
+const fechaRoutes = require('./routes/fechaRoutes');
+const empleadoRoutes = require('./routes/empleadoRoutes');
+const clienteRoutes = require('./routes/clienteRoutes');
+const turnoRoutes = require('./routes/turnoRoutes');
+const resenaRoutes = require('./routes/resenaRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -14,7 +20,14 @@ app.get('/', (req, res) => {
   res.json({ message: 'API Barbería - Backend activo' });
 });
 
+// Rutas de la API
 app.use('/api/auth', authRoutes);
+app.use('/api/servicios', servicioRoutes); // Módulo 1 - Pedro
+app.use('/api/fechas', fechaRoutes);       // Módulo 1 - Pedro
+app.use('/api/empleados', empleadoRoutes); // Módulo 2 - Mateo
+app.use('/api/clientes', clienteRoutes);   // Módulo 2 - Mateo
+app.use('/api/turnos', turnoRoutes);       // Módulo 3 - Lucas
+app.use('/api/resenas', resenaRoutes);     // Módulo 3 - Lucas
 
 async function startServer() {
   try {

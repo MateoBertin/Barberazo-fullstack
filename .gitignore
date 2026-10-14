@@ -33,5 +33,6 @@ Thumbs.db
 opencode.json
 AGENTS.md
 
-# Documentación local (no se commitea)
+# Documentación local (no se commitean binarios .docx pesados)
 docs/
+!docs/ANALISIS/*.md

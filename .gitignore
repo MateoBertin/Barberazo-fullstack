@@ -31,3 +31,7 @@ Thumbs.db
 .playwright-mcp/
 .agents/
 opencode.json
+AGENTS.md
+
+# Documentación local (no se commitea)
+docs/

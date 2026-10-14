@@ -84,6 +84,7 @@
     "negotiator": "^1.0.0",
     "node-addon-api": "^8.9.2",
     "node-gyp-build": "^4.8.4",
+    "nodemailer": "^10.1.0",
     "normalize-path": "^3.0.0",
     "object-assign": "^4.1.1",
     "object-inspect": "^1.13.4",

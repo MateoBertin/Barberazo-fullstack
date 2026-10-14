@@ -18,7 +18,7 @@ async function register(req, res) {
       });
     }
 
-    const { user, token } = await authService.register({
+    await authService.register({
       nombre,
       apellido,
       email,
@@ -28,14 +28,68 @@ async function register(req, res) {
 
     return res.status(201).json({
       success: true,
-      message: 'Usuario registrado correctamente',
-      data: { user, token },
+      message: 'Registro exitoso. Te enviamos un código de confirmación a tu mail (válido por 5 minutos).',
     });
   } catch (error) {
     const statusCode = error.statusCode || 500;
     return res.status(statusCode).json({
       success: false,
       message: error.message || 'Error al registrar usuario',
+    });
+  }
+}
+
+// POST /api/auth/confirm - CUU2.1 paso 2: confirmar el registro con el código del mail
+async function confirmRegistration(req, res) {
+  try {
+    const { email, codigo } = req.body;
+
+    if (!email || !codigo) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email y código son obligatorios',
+      });
+    }
+
+    await authService.confirmRegistration({ email, codigo: String(codigo) });
+
+    return res.status(200).json({
+      success: true,
+      message: 'Registro confirmado. Ya podés iniciar sesión.',
+    });
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    return res.status(statusCode).json({
+      success: false,
+      message: error.message || 'Error al confirmar registro',
+    });
+  }
+}
+
+// POST /api/auth/resend-code - reenvío del código de confirmación
+async function resendConfirmationCode(req, res) {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: 'El email es obligatorio',
+      });
+    }
+
+    await authService.resendConfirmationCode({ email });
+
+    // Misma respuesta exista o no el mail, para no revelar qué cuentas están registradas
+    return res.status(200).json({
+      success: true,
+      message: 'Si el mail corresponde a una cuenta pendiente, te enviamos un nuevo código.',
+    });
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    return res.status(statusCode).json({
+      success: false,
+      message: error.message || 'Error al reenviar el código',
     });
   }
 }
@@ -90,4 +144,4 @@ async function getProfile(req, res) {
   }
 }
 
-module.exports = { register, login, getProfile };
+module.exports = { register, confirmRegistration, resendConfirmationCode, login, getProfile };

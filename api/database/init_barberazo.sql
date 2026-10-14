@@ -8,6 +8,7 @@ USE `dsw`;
 
 -- Deshabilitar chequeo de claves foráneas para recreación limpia si es necesario
 SET FOREIGN_KEY_CHECKS = 0;
+DROP TABLE IF EXISTS `codigos_verificacion`;
 DROP TABLE IF EXISTS `resenas`;
 DROP TABLE IF EXISTS `multas`;
 DROP TABLE IF EXISTS `turnos`;
@@ -143,6 +144,21 @@ CREATE TABLE `resenas` (
   CONSTRAINT `resenas_ibfk_1` FOREIGN KEY (`id_cliente`) REFERENCES `clientes` (`id_cliente`),
   CONSTRAINT `resenas_ibfk_2` FOREIGN KEY (`id_turno`) REFERENCES `turnos` (`id_turno`),
   CONSTRAINT `resenas_chk_1` CHECK (((`calificacion` >= 1) and (`calificacion` <= 5)))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- 10. TABLA CÓDIGOS DE VERIFICACIÓN
+-- Soporta CUU2.1 (confirmar registro, RN09) y CUU3.1 (recuperar contraseña)
+CREATE TABLE `codigos_verificacion` (
+  `id_codigo` int NOT NULL AUTO_INCREMENT,
+  `id_usuario` int NOT NULL,
+  `codigo` varchar(6) NOT NULL,
+  `tipo` enum('CONFIRMACION','RECUPERACION') NOT NULL,
+  `expira_en` datetime NOT NULL, -- RN09: válido solo 5 minutos
+  `usado` tinyint(1) NOT NULL DEFAULT 0,
+  `fecha_creacion` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id_codigo`),
+  KEY `id_usuario` (`id_usuario`),
+  CONSTRAINT `codigos_verificacion_ibfk_1` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id_usuario`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 

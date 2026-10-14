@@ -1,8 +1,35 @@
 const bcrypt = require('bcrypt');
+const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const { pool } = require('../config/db');
+const emailService = require('./emailService');
 
 const SALT_ROUNDS = 10;
+
+// Crea un error con código HTTP para que el controller sepa qué status responder
+function createError(message, statusCode) {
+  const error = new Error(message);
+  error.statusCode = statusCode;
+  return error;
+}
+
+// Código numérico de 6 dígitos (crypto.randomInt es seguro, a diferencia de Math.random)
+function generateCode() {
+  return String(crypto.randomInt(0, 1000000)).padStart(6, '0');
+}
+
+// Guarda un código en la BD. RN09: válido por 5 minutos.
+// `executor` puede ser el pool o una conexión con transacción abierta.
+// El vencimiento se calcula en MySQL (NOW() + 5 min) para no depender de zonas horarias de Node.
+async function saveCode(executor, idUsuario, tipo) {
+  const codigo = generateCode();
+  await executor.execute(
+    `INSERT INTO codigos_verificacion (id_usuario, codigo, tipo, expira_en)
+     VALUES (?, ?, ?, DATE_ADD(NOW(), INTERVAL 5 MINUTE))`,
+    [idUsuario, codigo, tipo]
+  );
+  return codigo;
+}
 
 async function findUserByEmail(email) {
   const [rows] = await pool.execute(
@@ -42,46 +69,96 @@ function sanitizeUser(user) {
   };
 }
 
+// CUU2.1 - Registrar cliente
+// El cliente queda en estado REGISTRADO (pendiente) hasta confirmar el código enviado por mail.
+// Ya no se devuelve token: primero debe confirmar y luego loguearse (CUU1.1).
 async function register({ nombre, apellido, email, password, telefono }) {
+  // Camino alternativo 1.a: el mail ya está registrado
   const existingUser = await findUserByEmail(email);
   if (existingUser) {
-    const error = new Error('El email ya está registrado');
-    error.statusCode = 409;
-    throw error;
+    throw createError('El email ya está registrado', 409);
   }
 
   const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
   const connection = await pool.getConnection();
+  let codigo;
 
   try {
     await connection.beginTransaction();
 
-    const query = 'INSERT INTO usuarios (email, password, rol) VALUES (?, ?, ?)';
-
-    const [userResult] = await connection.execute(query, [
-      email,
-      hashedPassword,
-      'CLIENTE',
-    ]);
+    const [userResult] = await connection.execute(
+      'INSERT INTO usuarios (email, password, rol) VALUES (?, ?, ?)',
+      [email, hashedPassword, 'CLIENTE']
+    );
 
     const idUsuario = userResult.insertId;
 
     await connection.execute(
       'INSERT INTO clientes (id_usuario, nombre, apellido, telefono, estado) VALUES (?, ?, ?, ?, ?)',
-      [idUsuario, nombre, apellido, telefono || null, 'ACTIVO']
+      [idUsuario, nombre, apellido, telefono || null, 'REGISTRADO']
     );
 
+    // RN09: código de confirmación válido por 5 minutos
+    codigo = await saveCode(connection, idUsuario, 'CONFIRMACION');
+
     await connection.commit();
-
-    const user = await findUserById(idUsuario);
-    const token = generateToken(user);
-
-    return { user: sanitizeUser(user), token };
   } catch (error) {
     await connection.rollback();
     throw error;
   } finally {
     connection.release();
+  }
+
+  // El mail se envía DESPUÉS del commit: si falla, el usuario ya existe y puede pedir reenvío.
+  await emailService.enviarCodigoConfirmacion(email, codigo);
+}
+
+// CUU2.1 (paso 2) - El cliente ingresa el código recibido y el sistema pasa su estado a ACTIVO
+async function confirmRegistration({ email, codigo }) {
+  const user = await findUserByEmail(email);
+  if (!user) {
+    throw createError('Código inválido o vencido', 400);
+  }
+
+  // Busca un código del usuario que coincida, no esté usado y no haya vencido
+  const [rows] = await pool.execute(
+    `SELECT id_codigo FROM codigos_verificacion
+     WHERE id_usuario = ? AND codigo = ? AND tipo = 'CONFIRMACION'
+       AND usado = 0 AND expira_en > NOW()
+     ORDER BY id_codigo DESC LIMIT 1`,
+    [user.id_usuario, codigo]
+  );
+
+  if (rows.length === 0) {
+    throw createError('Código inválido o vencido', 400);
+  }
+
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+    await connection.execute('UPDATE codigos_verificacion SET usado = 1 WHERE id_codigo = ?', [rows[0].id_codigo]);
+    await connection.execute(
+      "UPDATE clientes SET estado = 'ACTIVO' WHERE id_usuario = ? AND estado = 'REGISTRADO'",
+      [user.id_usuario]
+    );
+    await connection.commit();
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
+  }
+}
+
+// Reenvío del código si venció (5 min) o no llegó el mail
+async function resendConfirmationCode({ email }) {
+  const user = await findUserByEmail(email);
+  const profile = user ? await findUserById(user.id_usuario) : null;
+
+  // Solo se reenvía a cuentas pendientes de confirmar. No revelamos si el mail existe o no.
+  if (profile && profile.estado === 'REGISTRADO') {
+    const codigo = await saveCode(pool, user.id_usuario, 'CONFIRMACION');
+    await emailService.enviarCodigoConfirmacion(email, codigo);
   }
 }
 
@@ -101,10 +178,15 @@ async function login({ email, password }) {
   }
 
   const profile = await findUserById(user.id_usuario);
+
+  // CUU1.1 camino 1.b: usuario bloqueado
   if (profile && profile.estado === 'BLOQUEADO') {
-    const error = new Error('Tu cuenta ha sido bloqueada por la administración.');
-    error.statusCode = 403;
-    throw error;
+    throw createError('Tu cuenta ha sido bloqueada por la administración.', 403);
+  }
+
+  // CUU1.1 camino 1.c: todavía no confirmó su registro
+  if (profile && profile.estado === 'REGISTRADO') {
+    throw createError('Debés confirmar tu registro con el código enviado a tu mail para ingresar.', 403);
   }
 
   const token = generateToken(profile);
@@ -115,17 +197,19 @@ async function login({ email, password }) {
 function generateToken(user) {
   return jwt.sign(
     { id: user.id_usuario, email: user.email, rol: user.rol },
-    process.env.JWT_SECRET || 'caup2019',
+    process.env.JWT_SECRET,
     { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
   );
 }
 
 function verifyToken(token) {
-  return jwt.verify(token, process.env.JWT_SECRET || 'caup2019');
+  return jwt.verify(token, process.env.JWT_SECRET);
 }
 
 module.exports = {
   register,
+  confirmRegistration,
+  resendConfirmationCode,
   login,
   findUserById,
   findUserByEmail,

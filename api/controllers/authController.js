@@ -1,13 +1,29 @@
 const authService = require('../services/authService');
 
+// Validación básica de formato. El front también la aplica (UX),
+// pero el back siempre re-valida: al cliente nunca se le cree (seguridad).
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 async function register(req, res) {
   try {
-    const { nombre, apellido, email, password, telefono } = req.body;
+    const nombre = (req.body.nombre || '').trim();
+    const apellido = (req.body.apellido || '').trim();
+    const email = (req.body.email || '').trim().toLowerCase();
+    // La password NO se recorta: los espacios pueden ser intencionales.
+    const password = req.body.password || '';
+    const telefono = (req.body.telefono || '').toString().trim() || null;
 
     if (!nombre || !apellido || !email || !password) {
       return res.status(400).json({
         success: false,
         message: 'Nombre, apellido, email y contraseña son obligatorios',
+      });
+    }
+
+    if (!EMAIL_REGEX.test(email)) {
+      return res.status(400).json({
+        success: false,
+        message: 'El formato del email no es válido',
       });
     }
 
@@ -96,12 +112,20 @@ async function resendConfirmationCode(req, res) {
 
 async function login(req, res) {
   try {
-    const { email, password } = req.body;
+    const email = (req.body.email || '').trim().toLowerCase();
+    const password = req.body.password || '';
 
     if (!email || !password) {
       return res.status(400).json({
         success: false,
         message: 'Email y contraseña son obligatorios',
+      });
+    }
+
+    if (!EMAIL_REGEX.test(email)) {
+      return res.status(400).json({
+        success: false,
+        message: 'El formato del email no es válido',
       });
     }
 

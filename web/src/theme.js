@@ -1,6 +1,6 @@
 import { createTheme } from '@mui/material/styles';
 
-// Fuente única de colores de marca (Paso 0 Fase 6).
+
 // La paleta MUI y los componentes importan desde acá: un solo lugar para cambiar.
 export const BRAND_COLORS = {
   gold: '#d4af37', // Dorado elegante / Barbería premium
@@ -42,13 +42,13 @@ const theme = createTheme({
   palette: {
     mode: 'dark',
     primary: {
-      main: BRAND_COLORS.gold, // Dorado elegante / Barbería premium
+      main: BRAND_COLORS.gold,
       light: '#f3e5ab',
       dark: BRAND_COLORS.goldDark,
       contrastText: BRAND_COLORS.ink,
     },
     secondary: {
-      main: BRAND_COLORS.deepOrange, // Naranja/Ámbar de acento
+      main: BRAND_COLORS.deepOrange,
       light: BRAND_COLORS.accentOrange,
       dark: '#ac1900',
       contrastText: BRAND_COLORS.white,

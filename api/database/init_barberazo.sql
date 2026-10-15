@@ -105,10 +105,15 @@ CREATE TABLE `turnos` (
   `id_servicio` int NOT NULL,
   `fecha_hora` datetime NOT NULL,
   `estado` enum('SOLICITADO','CANCELADO','CANCELADO EMPLEADO','ASISTIDO','NO ASISTIDO') DEFAULT 'SOLICITADO',
+  `motivo_cancelacion` varchar(255) DEFAULT NULL,
+  `cancelado_por` enum('CLIENTE','EMPLEADO','ADMIN') DEFAULT NULL,
+  `fecha_creacion` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id_turno`),
   KEY `id_cliente` (`id_cliente`),
   KEY `id_empleado` (`id_empleado`),
   KEY `id_servicio` (`id_servicio`),
+  KEY `idx_turnos_empleado_fecha` (`id_empleado`, `fecha_hora`),
+  KEY `idx_turnos_cliente_estado` (`id_cliente`, `estado`),
   CONSTRAINT `turnos_ibfk_1` FOREIGN KEY (`id_cliente`) REFERENCES `clientes` (`id_cliente`),
   CONSTRAINT `turnos_ibfk_2` FOREIGN KEY (`id_empleado`) REFERENCES `empleados` (`id_empleado`),
   CONSTRAINT `turnos_ibfk_3` FOREIGN KEY (`id_servicio`) REFERENCES `servicios` (`id_servicio`)
@@ -122,10 +127,13 @@ CREATE TABLE `multas` (
   `monto` decimal(10,2) NOT NULL,
   `motivo` varchar(255) NOT NULL,
   `estado_pago` enum('PENDIENTE','PAGADO') DEFAULT 'PENDIENTE',
+  `fecha_pago` datetime DEFAULT NULL,
+  `metodo_pago` varchar(50) DEFAULT NULL,
   `fecha_emision` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id_multa`),
   KEY `id_cliente` (`id_cliente`),
   KEY `id_turno` (`id_turno`),
+  KEY `idx_multas_cliente_estado` (`id_cliente`, `estado_pago`),
   CONSTRAINT `multas_ibfk_1` FOREIGN KEY (`id_cliente`) REFERENCES `clientes` (`id_cliente`),
   CONSTRAINT `multas_ibfk_2` FOREIGN KEY (`id_turno`) REFERENCES `turnos` (`id_turno`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -140,7 +148,7 @@ CREATE TABLE `resenas` (
   `fecha_resena` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id_resena`),
   KEY `id_cliente` (`id_cliente`),
-  KEY `id_turno` (`id_turno`),
+  UNIQUE KEY `uq_resena_turno` (`id_turno`),
   CONSTRAINT `resenas_ibfk_1` FOREIGN KEY (`id_cliente`) REFERENCES `clientes` (`id_cliente`),
   CONSTRAINT `resenas_ibfk_2` FOREIGN KEY (`id_turno`) REFERENCES `turnos` (`id_turno`),
   CONSTRAINT `resenas_chk_1` CHECK (((`calificacion` >= 1) and (`calificacion` <= 5)))
@@ -193,3 +201,23 @@ INSERT INTO `servicios` (`id_servicio`, `nombre`, `descripcion`, `precio`, `dura
 (3, 'Combo Corte + Barba', 'Servicio completo de corte de cabello y arreglo de barba profesional.', 6500.00, 60, 'HABILITADO'),
 (4, 'Tintura / Coloración', 'Aplicación de tintura, mechas o camuflaje de canas.', 8500.00, 60, 'HABILITADO'),
 (5, 'Perfilado de Cejas', 'Depilación y diseño de cejas con navaja/pinza.', 2000.00, 60, 'HABILITADO');
+
+-- 5. Insertar Días de Trabajo Predeterminados (para agendamiento en BookingWizard)
+INSERT INTO `dias_trabajo` (`id_dia_trabajo`, `id_empleado`, `fecha`, `hora_inicio`, `hora_fin`, `estado`) VALUES
+(1, NULL, CURDATE() + INTERVAL 1 DAY, '08:00:00', '20:00:00', 'HABILITADO'),
+(2, NULL, CURDATE() + INTERVAL 2 DAY, '08:00:00', '20:00:00', 'HABILITADO'),
+(3, NULL, CURDATE() + INTERVAL 3 DAY, '08:00:00', '20:00:00', 'HABILITADO');
+
+-- 6. Insertar Turnos Iniciales de Prueba (CUU1.2, CUU1.3, CUU1.5, CUU1.6)
+INSERT INTO `turnos` (`id_turno`, `id_cliente`, `id_empleado`, `id_servicio`, `fecha_hora`, `estado`, `motivo_cancelacion`, `cancelado_por`) VALUES
+(1, 1, 1, 1, CONCAT(CURDATE() + INTERVAL 1 DAY, ' 11:00:00'), 'SOLICITADO', NULL, NULL),
+(2, 1, 2, 3, CONCAT(CURDATE() - INTERVAL 5 DAY, ' 16:00:00'), 'ASISTIDO', NULL, NULL),
+(3, 2, 1, 2, CONCAT(CURDATE() - INTERVAL 2 DAY, ' 17:00:00'), 'NO ASISTIDO', 'Inasistencia sin previo aviso', NULL);
+
+-- 7. Insertar Multa Inicial para Cliente Multado (CUU4.1)
+INSERT INTO `multas` (`id_multa`, `id_cliente`, `id_turno`, `monto`, `motivo`, `estado_pago`) VALUES
+(1, 2, 3, 3000.00, 'Acumulación de 3 strikes por inasistencias o cancelaciones tardías', 'PENDIENTE');
+
+-- 8. Insertar Reseña Inicial de Prueba (CUU1.4, CUU8.1)
+INSERT INTO `resenas` (`id_resena`, `id_cliente`, `id_turno`, `calificacion`, `comentario`) VALUES
+(1, 1, 2, 5, 'Excelente atención y muy buen acabado. Volveré seguro.');

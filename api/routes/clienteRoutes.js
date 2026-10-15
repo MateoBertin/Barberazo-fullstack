@@ -1,14 +1,21 @@
 const express = require('express');
+const clienteController = require('../controllers/clienteController');
+const { authenticateToken } = require('../middleware/authMiddleware');
+const { requireRole } = require('../middleware/roleMiddleware');
+
 const router = express.Router();
 
-// Esqueleto preparado para Mateo (Parte 2)
-// Endpoints esperados:
-// GET    /api/clientes
-// PATCH  /api/clientes/:id/bloqueo
-// PUT    /api/clientes/perfil
+// Fase 4 (Mateo): listado + bloqueo. Fase 5: perfil propio (CUU9.1/9.2).
+// /perfil va ANTES de /:id para que Express no confunda "perfil" con un id.
+// Endpoints:
+// GET    /api/clientes (ADMIN, EMPLEADO)
+// PATCH  /api/clientes/:id/bloqueo (ADMIN)
+// PUT    /api/clientes/perfil (CLIENTE)
+// DELETE /api/clientes/perfil (CLIENTE)
 
-router.get('/', (req, res) => {
-  res.json({ success: true, message: 'Módulo de clientes activo', data: [] });
-});
+router.put('/perfil', authenticateToken, requireRole('CLIENTE'), clienteController.updateProfile);
+router.delete('/perfil', authenticateToken, requireRole('CLIENTE'), clienteController.deleteAccount);
+router.get('/', authenticateToken, requireRole('ADMIN', 'EMPLEADO'), clienteController.getAll);
+router.patch('/:id/bloqueo', authenticateToken, requireRole('ADMIN'), clienteController.toggleBlock);
 
 module.exports = router;

@@ -24,55 +24,61 @@ import {
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { useData } from '../../context/DataContext';
+import { clienteService } from '../../services/clienteService';
 import { useSnackbar } from 'notistack';
 import { BRAND_COLORS, withAlpha } from '../../theme';
 
 export const ClientProfilePage = () => {
   const { user, updateProfile, deleteAccount } = useAuth();
-  const { clients, updateClient, removeClient } = useData();
   const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate();
 
-  // Registro espejo del cliente en DataContext (se busca por email o por id)
-  const clientRecord = clients.find(
-    (c) => c.email === user?.email || String(c.id) === String(user?.id)
-  );
-
-  // Formulario controlado en inglés (se mapea a claves de Auth al guardar)
+  // Formulario controlado en inglés (se mapea a claves del back al guardar).
+  // El back guarda nombre/apellido separados: se combinan para mostrar y se
+  // separan al guardar (primera palabra = nombre, resto = apellido).
+  const fullName = [user?.nombre, user?.apellido].filter(Boolean).join(' ') || user?.name || '';
   const [formData, setFormData] = useState({
-    name: user?.nombre || user?.name || '',
+    name: fullName,
     phone: user?.telefono || user?.phone || '',
   });
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
-  // CUU9.1: Guardar cambios del perfil
-  const handleSaveProfile = (e) => {
+  // CUU9.1: Guardar cambios del perfil contra MySQL y sincronizar sesión local.
+  const handleSaveProfile = async (e) => {
     e.preventDefault();
     if (!formData.name.trim()) {
       enqueueSnackbar('El nombre no puede estar vacío.', { variant: 'error' });
       return;
     }
 
-    updateProfile({ nombre: formData.name.trim(), telefono: formData.phone.trim() });
-
-    if (clientRecord) {
-      updateClient(clientRecord.id, { name: formData.name.trim(), phone: formData.phone.trim() });
+    const parts = formData.name.trim().split(/\s+/);
+    try {
+      const updated = await clienteService.updateProfile({
+        nombre: parts[0],
+        apellido: parts.slice(1).join(' '),
+        telefono: formData.phone.trim(),
+      });
+      updateProfile({ nombre: updated.nombre, apellido: updated.apellido, telefono: updated.telefono });
+      enqueueSnackbar('Perfil actualizado correctamente.', { variant: 'success' });
+    } catch (error) {
+      enqueueSnackbar(error.message, { variant: 'error' });
     }
-
-    enqueueSnackbar('Perfil actualizado correctamente.', { variant: 'success' });
   };
 
-  // CUU9.2: Eliminar la cuenta (doble confirmación)
-  const handleConfirmDeleteAccount = () => {
-    if (clientRecord) {
-      removeClient(clientRecord.id);
+  // CUU9.2: Eliminar la cuenta (doble confirmación). Si tiene turnos, el back
+  // responde 409 y no se cierra sesión.
+  const handleConfirmDeleteAccount = async () => {
+    try {
+      await clienteService.deleteAccount();
+      deleteAccount();
+      setIsDeleteDialogOpen(false);
+      enqueueSnackbar('Tu cuenta fue eliminada.', { variant: 'info' });
+      navigate('/');
+    } catch (error) {
+      setIsDeleteDialogOpen(false);
+      enqueueSnackbar(error.message, { variant: 'error' });
     }
-    deleteAccount();
-    setIsDeleteDialogOpen(false);
-    enqueueSnackbar('Tu cuenta fue eliminada.', { variant: 'info' });
-    navigate('/');
   };
 
   return (

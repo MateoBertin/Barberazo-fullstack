@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Container,
@@ -33,21 +33,65 @@ import {
   Star as StarIcon,
 } from '@mui/icons-material';
 import { useData } from '../../context/DataContext';
+import { empleadoService } from '../../services/empleadoService';
 import { useSnackbar } from 'notistack';
 import { BRAND_COLORS, withAlpha } from '../../theme';
+
+// Mapea fila del back (usuarios + empleados) al formato que ya usa esta UI.
+const fromApi = (emp) => {
+  const fullName = `${emp.nombre || ''} ${emp.apellido || ''}`.trim();
+  return {
+    id: emp.id_empleado,
+    name: fullName,
+    firstName: emp.nombre || '',
+    lastName: emp.apellido || '',
+    email: emp.email,
+    phone: emp.telefono || '',
+    specialties: emp.especialidades || [],
+    status: emp.estado === 'INACTIVO' ? 'Inactivo' : 'Activo',
+    schedule: {
+      enabledDays: ['Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
+      morningShift: { startTime: '08:00', endTime: '12:00' },
+      afternoonShift: { startTime: '14:00', endTime: '20:00' },
+    },
+  };
+};
 
 const DIAS_SEMANA = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 
 export const EmployeesPage = () => {
-  const { employees, services, addEmployee, updateEmployee, deleteEmployee } = useData();
+  const { services } = useData();
   const { enqueueSnackbar } = useSnackbar();
+
+  // Fase 6 (Mateo): empleados reales desde MySQL, no de localStorage.
+  const [employees, setEmployees] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
+
+  const fetchEmployees = async () => {
+    try {
+      setLoadError('');
+      const data = await empleadoService.getAll();
+      setEmployees(data.map(fromApi));
+    } catch (error) {
+      setLoadError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchEmployees();
+  }, []);
 
   const [openModal, setOpenModal] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
 
   const [formData, setFormData] = useState({
-    name: '',
+    firstName: '',
+    lastName: '',
     email: '',
+    password: '',
     phone: '',
     specialties: [],
     enabledDays: ['Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
@@ -60,8 +104,10 @@ export const EmployeesPage = () => {
   const handleOpenCreate = () => {
     setSelectedEmployee(null);
     setFormData({
-      name: '',
+      firstName: '',
+      lastName: '',
       email: '',
+      password: '',
       phone: '',
       specialties: services.map((s) => s.name),
       enabledDays: ['Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
@@ -77,8 +123,10 @@ export const EmployeesPage = () => {
     setSelectedEmployee(employee);
     const schedule = employee.schedule || {};
     setFormData({
-      name: employee.name,
+      firstName: employee.firstName || '',
+      lastName: employee.lastName || '',
       email: employee.email,
+      password: '',
       phone: employee.phone || '',
       specialties: employee.specialties || [],
       enabledDays: schedule.enabledDays || ['Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
@@ -90,11 +138,27 @@ export const EmployeesPage = () => {
     setOpenModal(true);
   };
 
-  const handleDelete = (employee) => {
+  // CUU10.3: baja lógica en el back (pasa a INACTIVO). Si tiene turnos
+  // futuros, el back responde 409 y se muestra el motivo.
+  const handleDelete = async (employee) => {
     const employeeName = employee.name;
-    if (window.confirm(`¿Estás seguro de eliminar al empleado ${employeeName}?`)) {
-      deleteEmployee(employee.id);
-      enqueueSnackbar(`Empleado ${employeeName} eliminado.`, { variant: 'warning' });
+    if (!window.confirm(`¿Estás seguro de dar de baja al empleado ${employeeName}?`)) return;
+    try {
+      await empleadoService.delete(employee.id);
+      enqueueSnackbar(`Empleado ${employeeName} dado de baja.`, { variant: 'warning' });
+      await fetchEmployees();
+    } catch (error) {
+      enqueueSnackbar(error.message, { variant: 'error' });
+    }
+  };
+
+  const handleReactivate = async (employee) => {
+    try {
+      await empleadoService.update(employee.id, { estado: 'ACTIVO' });
+      enqueueSnackbar(`Empleado ${employee.name} reactivado.`, { variant: 'success' });
+      await fetchEmployees();
+    } catch (error) {
+      enqueueSnackbar(error.message, { variant: 'error' });
     }
   };
 
@@ -114,30 +178,42 @@ export const EmployeesPage = () => {
     });
   };
 
-  const handleSave = (e) => {
+  // CUU10.1 / CUU10.2: alta y edición contra MySQL.
+  const handleSave = async (e) => {
     e.preventDefault();
-    if (!formData.name.trim() || !formData.email.trim()) return;
-
-    const payload = {
-      name: formData.name,
-      email: formData.email,
-      phone: formData.phone,
-      specialties: formData.specialties,
-      schedule: {
-        enabledDays: formData.enabledDays,
-        morningShift: { startTime: formData.morningStart, endTime: formData.morningEnd },
-        afternoonShift: { startTime: formData.afternoonStart, endTime: formData.afternoonEnd },
-      },
-    };
-
-    if (selectedEmployee) {
-      updateEmployee(selectedEmployee.id, payload);
-      enqueueSnackbar('Empleado actualizado con éxito.', { variant: 'success' });
-    } else {
-      addEmployee(payload);
-      enqueueSnackbar('Nuevo empleado asignado al equipo.', { variant: 'success' });
+    const nombre = formData.firstName.trim();
+    const apellido = formData.lastName.trim();
+    if (!nombre || !apellido || !formData.email.trim()) {
+      enqueueSnackbar('Nombre, apellido y email son obligatorios.', { variant: 'error' });
+      return;
     }
-    setOpenModal(false);
+
+    try {
+      if (selectedEmployee) {
+        await empleadoService.update(selectedEmployee.id, {
+          nombre,
+          apellido,
+          email: formData.email.trim(),
+          telefono: formData.phone,
+          especialidades: formData.specialties,
+        });
+        enqueueSnackbar('Empleado actualizado con éxito.', { variant: 'success' });
+      } else {
+        await empleadoService.create({
+          nombre,
+          apellido,
+          email: formData.email.trim(),
+          password: formData.password || undefined,
+          telefono: formData.phone,
+          especialidades: formData.specialties,
+        });
+        enqueueSnackbar('Nuevo empleado asignado al equipo.', { variant: 'success' });
+      }
+      setOpenModal(false);
+      await fetchEmployees();
+    } catch (error) {
+      enqueueSnackbar(error.message, { variant: 'error' });
+    }
   };
 
   return (
@@ -180,6 +256,14 @@ export const EmployeesPage = () => {
       </Paper>
 
       {/* Grilla de Empleados */}
+      {loadError && (
+        <Alert severity="error" sx={{ mb: 3, borderRadius: 3 }}>
+          No se pudo conectar con el servidor backend: {loadError}
+        </Alert>
+      )}
+      {loading ? (
+        <Typography color="text.secondary">Cargando empleados...</Typography>
+      ) : (
       <Grid container spacing={3}>
         {employees.map((employee) => {
           const employeeName = employee.name;
@@ -202,15 +286,27 @@ export const EmployeesPage = () => {
                     </Typography>
                     <Stack direction="row" spacing={1} sx={{ mt: 0.5 }}>
                       <Chip label="Barbero Staff" color="info" size="small" sx={{ fontWeight: 700 }} />
+                      <Chip
+                        label={employee.status === 'Inactivo' ? 'INACTIVO' : 'ACTIVO'}
+                        color={employee.status === 'Inactivo' ? 'error' : 'success'}
+                        size="small"
+                        sx={{ fontWeight: 700 }}
+                      />
                     </Stack>
                   </Box>
                   <Stack direction="row" spacing={0.5}>
                     <IconButton color="primary" onClick={() => handleOpenEdit(employee)}>
                       <EditIcon fontSize="small" />
                     </IconButton>
-                    <IconButton color="error" onClick={() => handleDelete(employee)}>
-                      <DeleteIcon fontSize="small" />
-                    </IconButton>
+                    {employee.status === 'Inactivo' ? (
+                      <Button size="small" color="success" onClick={() => handleReactivate(employee)} sx={{ fontWeight: 700 }}>
+                        Reactivar
+                      </Button>
+                    ) : (
+                      <IconButton color="error" onClick={() => handleDelete(employee)}>
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    )}
                   </Stack>
                 </Box>
 
@@ -258,6 +354,10 @@ export const EmployeesPage = () => {
           );
         })}
       </Grid>
+      )}
+      {!loading && !loadError && employees.length === 0 && (
+        <Typography color="text.secondary">No hay empleados registrados.</Typography>
+      )}
 
       {/* Modal de Alta / Edición de Empleado */}
       <Dialog
@@ -278,9 +378,18 @@ export const EmployeesPage = () => {
               <Grid item xs={12} sm={4}>
                 <TextField
                   fullWidth
-                  label="Nombre Completo"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  label="Nombre"
+                  value={formData.firstName}
+                  onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                  required
+                />
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <TextField
+                  fullWidth
+                  label="Apellido"
+                  value={formData.lastName}
+                  onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
                   required
                 />
               </Grid>
@@ -303,6 +412,17 @@ export const EmployeesPage = () => {
                   required
                 />
               </Grid>
+              {!selectedEmployee && (
+                <Grid item xs={12} sm={4}>
+                  <TextField
+                    fullWidth
+                    label="Contraseña inicial (opcional, por defecto 123456)"
+                    type="password"
+                    value={formData.password}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  />
+                </Grid>
+              )}
             </Grid>
 
             <Divider sx={{ my: 2 }} />

@@ -5,9 +5,22 @@ import { apiRequest } from './api';
  */
 export const turnoService = {
   async getAll(filters = {}) {
-    const params = new URLSearchParams(filters).toString();
+    // Limpiar claves vacías o undefined
+    const cleanFilters = {};
+    Object.entries(filters).forEach(([key, val]) => {
+      if (val !== undefined && val !== null && val !== '' && val !== 'all') {
+        cleanFilters[key] = val;
+      }
+    });
+
+    const params = new URLSearchParams(cleanFilters).toString();
     const endpoint = params ? `/turnos?${params}` : '/turnos';
     const res = await apiRequest(endpoint, { method: 'GET' });
+    return res.data;
+  },
+
+  async getById(id) {
+    const res = await apiRequest(`/turnos/${id}`, { method: 'GET' });
     return res.data;
   },
 
@@ -19,11 +32,11 @@ export const turnoService = {
     return res.data;
   },
 
-  async updateStatus(id, status, reason = '') {
+  async updateStatus(id, estado, motivo = '') {
     const res = await apiRequest(`/turnos/${id}/estado`, {
       method: 'PATCH',
-      body: JSON.stringify({ status, reason }),
+      body: JSON.stringify({ estado, motivo }),
     });
-    return res.data;
+    return res;
   },
 };

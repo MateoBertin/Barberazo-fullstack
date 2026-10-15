@@ -1,13 +1,17 @@
 const express = require('express');
+const resenaController = require('../controllers/resenaController');
+const { authenticateToken } = require('../middleware/authMiddleware');
+
 const router = express.Router();
 
-// Esqueleto preparado para Lucas (Parte 3)
-// Endpoints esperados:
-// GET    /api/resenas
-// POST   /api/resenas (solo si turno fue ASISTIDO)
+/**
+ * Rutas de Reseñas (Módulo 3 - Lucas)
+ * Endpoints:
+ * GET  /api/resenas -> Consultar reseñas (CUU8.1)
+ * POST /api/resenas -> Dejar calificación de un turno completado/asistido (CUU1.4)
+ */
 
-router.get('/', (req, res) => {
-  res.json({ success: true, message: 'Módulo de reseñas activo', data: [] });
-});
+router.get('/', authenticateToken, resenaController.getAll);
+router.post('/', authenticateToken, resenaController.create);
 
 module.exports = router;

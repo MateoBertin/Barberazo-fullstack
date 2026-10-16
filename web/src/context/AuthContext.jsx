@@ -115,74 +115,49 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Registro de cliente: inicia verificación por código (5 min)
-  const register = (userData) => {
-    // Generar código de 6 dígitos para la verificación
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiresAt = Date.now() + 5 * 60 * 1000; // 5 minutos
+  // Registro de cliente: crea el usuario en el backend (estado REGISTRADO)
+  // y guarda los datos para confirmar el código e iniciar sesión después.
+  const register = async (userData) => {
+    await authService.register({
+      nombre: (userData.nombre || '').trim(),
+      apellido: (userData.apellido || '').trim(),
+      email: userData.email,
+      password: userData.password,
+      telefono: userData.telefono,
+    });
 
-    const tempUser = {
-      ...userData,
-      verificationCode: code,
-      codeExpiresAt: expiresAt,
-    };
-
-    setPendingVerification(tempUser);
-    return code; // Retorna código para mostrar en modal de prueba
+    setPendingVerification({
+      email: userData.email,
+      password: userData.password,
+    });
   };
 
-  // Confirmar código de verificación y persistir en la BD MySQL
+  // Reenviar el código de confirmación (si venció o no llegó el mail).
+  const resendCode = async () => {
+    if (!pendingVerification) {
+      throw new Error('No hay ninguna sesión de verificación activa.');
+    }
+    await authService.resendCode(pendingVerification.email);
+  };
+
+  // Confirmar el código de verificación contra el backend y dejar la sesión iniciada.
   const verifyRegistrationCode = async (codeEntered) => {
     if (!pendingVerification) {
       throw new Error('No hay ninguna sesión de verificación activa.');
     }
 
-    if (Date.now() > pendingVerification.codeExpiresAt) {
-      setPendingVerification(null);
-      throw new Error('El código de verificación ha expirado (límite de 5 minutos). Inicia el registro nuevamente.');
+    const codigo = String(codeEntered || '').trim();
+    if (!codigo) {
+      throw new Error('Ingresá el código de 6 dígitos.');
     }
 
-    if (pendingVerification.verificationCode !== codeEntered) {
-      throw new Error('El código ingresado es incorrecto.');
-    }
+    // El backend valida el código y pasa el cliente a ACTIVO (error 400 si es inválido o venció).
+    await authService.confirm(pendingVerification.email, codigo);
 
-    try {
-      // Registrar en la base de datos real
-      const { user: registeredUser, token: receivedToken } = await authService.register({
-        nombre: pendingVerification.nombre,
-        apellido: pendingVerification.apellido,
-        email: pendingVerification.email,
-        password: pendingVerification.password,
-        telefono: pendingVerification.telefono,
-      });
-
-      setUser(registeredUser);
-      setToken(receivedToken);
-      localStorage.setItem('barberazo_user', JSON.stringify(registeredUser));
-      if (receivedToken) {
-        localStorage.setItem('barberazo_token', receivedToken);
-      }
-      setPendingVerification(null);
-      return registeredUser;
-    } catch (apiError) {
-      // Fallback local si el backend no está disponible
-      if (apiError.message.includes('No se pudo conectar') || apiError.message.includes('fetch')) {
-        const localUser = {
-          id: 'c_' + Date.now(),
-          nombre: pendingVerification.nombre,
-          email: pendingVerification.email,
-          telefono: pendingVerification.telefono,
-          rol: 'cliente',
-          estado: 'Activo',
-          strikes: 0,
-        };
-        setUser(localUser);
-        localStorage.setItem('barberazo_user', JSON.stringify(localUser));
-        setPendingVerification(null);
-        return localUser;
-      }
-      throw apiError;
-    }
+    // Sesión real: el registro no devuelve token, así que se inicia sesión.
+    const loggedUser = await login(pendingVerification.email, pendingVerification.password);
+    setPendingVerification(null);
+    return loggedUser;
   };
 
   const logout = () => {
@@ -236,6 +211,7 @@ export const AuthProvider = ({ children }) => {
         login,
         register,
         verifyRegistrationCode,
+        resendCode,
         logout,
         resetPassword,
         updateUserState,

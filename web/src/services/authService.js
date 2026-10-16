@@ -41,35 +41,32 @@ export const authService = {
   },
 
   async register(userData) {
-    // Si viene nombre completo en un solo campo, separar nombre y apellido
-    let nombre = userData.nombre || '';
-    let apellido = userData.apellido || '';
-
-    if (nombre && !apellido) {
-      const parts = nombre.trim().split(' ');
-      if (parts.length > 1) {
-        nombre = parts[0];
-        apellido = parts.slice(1).join(' ');
-      } else {
-        apellido = '-';
-      }
-    }
-
-    const res = await apiRequest('/auth/register', {
+    // Crea el usuario en estado REGISTRADO y genera el código de confirmación.
+    // El backend no devuelve sesión: primero hay que confirmar y después loguearse.
+    await apiRequest('/auth/register', {
       method: 'POST',
       body: JSON.stringify({
-        nombre,
-        apellido,
+        nombre: userData.nombre,
+        apellido: userData.apellido,
         email: userData.email,
         password: userData.password,
         telefono: userData.telefono || null,
       }),
     });
+  },
 
-    const user = normalizeUser(res.data.user);
-    const token = res.data.token;
+  async confirm(email, codigo) {
+    await apiRequest('/auth/confirm', {
+      method: 'POST',
+      body: JSON.stringify({ email, codigo: String(codigo) }),
+    });
+  },
 
-    return { user, token };
+  async resendCode(email) {
+    await apiRequest('/auth/resend-code', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    });
   },
 
   async getProfile() {

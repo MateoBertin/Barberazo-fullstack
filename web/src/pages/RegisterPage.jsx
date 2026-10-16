@@ -30,10 +30,11 @@ import { BRAND_COLORS, withAlpha } from '../theme';
 
 export const RegisterPage = () => {
   const navigate = useNavigate();
-  const { register, verifyRegistrationCode, pendingVerification } = useAuth();
+  const { register, verifyRegistrationCode, resendCode } = useAuth();
 
   const [formData, setFormData] = useState({
     nombre: '',
+    apellido: '',
     email: '',
     telefono: '',
     password: '',
@@ -41,7 +42,6 @@ export const RegisterPage = () => {
   });
 
   const [error, setError] = useState('');
-  const [successCode, setSuccessCode] = useState('');
   const [openVerifyModal, setOpenVerifyModal] = useState(false);
   const [inputCode, setInputCode] = useState('');
   const [timeLeft, setTimeLeft] = useState(300); // 5 minutos = 300s
@@ -63,9 +63,14 @@ export const RegisterPage = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleRegisterSubmit = (e) => {
+  const handleRegisterSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    if (!formData.nombre.trim() || !formData.apellido.trim()) {
+      setError('Nombre y apellido son obligatorios.');
+      return;
+    }
 
     if (formData.password !== formData.confirmPassword) {
       setError('Las contraseñas no coinciden.');
@@ -77,20 +82,24 @@ export const RegisterPage = () => {
       return;
     }
 
+    setLoading(true);
     try {
-      const code = register({
-        nombre: formData.nombre,
+      await register({
+        nombre: formData.nombre.trim(),
+        apellido: formData.apellido.trim(),
         email: formData.email,
         telefono: formData.telefono,
         password: formData.password,
       });
 
-      setSuccessCode(code);
-      setInputCode(code); // Pre-cargar para comodidad del usuario
+      setInputCode('');
       setTimeLeft(300);
+      setVerifyError('');
       setOpenVerifyModal(true);
     } catch (err) {
       setError(err.message || 'Error durante el registro.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -107,6 +116,16 @@ export const RegisterPage = () => {
       setVerifyError(err.message || 'Error de verificación.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResend = async () => {
+    setVerifyError('');
+    try {
+      await resendCode();
+      setTimeLeft(300);
+    } catch (err) {
+      setVerifyError(err.message || 'Error al reenviar el código.');
     }
   };
 
@@ -153,12 +172,30 @@ export const RegisterPage = () => {
 
           <form onSubmit={handleRegisterSubmit}>
             <Grid container spacing={2}>
-              <Grid item xs={12}>
+              <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
-                  label="Nombre Completo"
+                  label="Nombre"
                   name="nombre"
                   value={formData.nombre}
+                  onChange={handleChange}
+                  required
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <PersonIcon sx={{ color: 'text.secondary' }} />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </Grid>
+
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Apellido"
+                  name="apellido"
+                  value={formData.apellido}
                   onChange={handleChange}
                   required
                   InputProps={{
@@ -255,9 +292,10 @@ export const RegisterPage = () => {
               variant="contained"
               color="primary"
               size="large"
+              disabled={loading}
               sx={{ py: 1.4, fontSize: '1rem', fontWeight: 700, mt: 3, mb: 2 }}
             >
-              Registrarse y Enviar Código
+              {loading ? <CircularProgress size={24} color="inherit" /> : 'Registrarse y Enviar Código'}
             </Button>
           </form>
 
@@ -292,11 +330,9 @@ export const RegisterPage = () => {
             Se ha enviado un código de confirmación a <strong>{formData.email}</strong>. El código expirará en 5 minutos.
           </Alert>
 
-          {successCode && (
-            <Alert severity="success" sx={{ mb: 2, background: withAlpha(BRAND_COLORS.successGreen, 0.15) }}>
-              Código de demostración generado: <strong>{successCode}</strong>
-            </Alert>
-          )}
+          <Alert severity="warning" sx={{ mb: 2 }}>
+            En desarrollo el mail no llega: copiá el código de la consola del backend (línea MAIL SIMULADO).
+          </Alert>
 
           {verifyError && (
             <Alert severity="error" sx={{ mb: 2 }}>
@@ -322,6 +358,12 @@ export const RegisterPage = () => {
               required
             />
           </form>
+
+          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 1 }}>
+            <Button color="inherit" size="small" onClick={handleResend} disabled={loading}>
+              Reenviar código
+            </Button>
+          </Box>
         </DialogContent>
 
         <DialogActions sx={{ px: 3, pb: 2, justifyContent: 'center' }}>

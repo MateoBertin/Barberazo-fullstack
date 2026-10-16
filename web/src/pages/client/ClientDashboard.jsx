@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Container, Typography, Paper, Grid, Chip, Button, Stack, Rating } from '@mui/material';
 import {
   Star as StarIcon,
@@ -6,27 +6,86 @@ import {
 } from '@mui/icons-material';
 import { useAuth } from '../../context/AuthContext';
 import { useData } from '../../context/DataContext';
+import { turnoService } from '../../services/turnoService';
+import { resenaService } from '../../services/resenaService';
 import { BookingWizard } from '../../components/booking/BookingWizard';
 import { ReviewModal } from '../../components/reviews/ReviewModal';
 import { BRAND_COLORS, withAlpha } from '../../theme';
+
+// Estado del back ('SOLICITADO', 'ASISTIDO', ...) al formato que usa esta UI.
+const mapStatus = (estado) => {
+  const map = {
+    SOLICITADO: 'Solicitado',
+    ASISTIDO: 'Asistido',
+    'NO ASISTIDO': 'No-Asistido',
+    CANCELADO: 'Cancelado',
+    'CANCELADO EMPLEADO': 'Cancelado',
+  };
+  return map[estado] || estado;
+};
+
+// Fila del back (turnos + clientes + empleados + servicios) al formato de la UI.
+const fromApi = (turno) => ({
+  id: turno.id_turno,
+  clientId: turno.id_cliente,
+  clientName: turno.cliente_nombre_completo,
+  employeeId: turno.id_empleado,
+  employeeName: turno.empleado_nombre_completo,
+  serviceName: turno.servicio_nombre,
+  date: turno.fecha,
+  time: turno.hora,
+  status: mapStatus(turno.estado),
+});
 
 export const ClientDashboard = () => {
   const { user } = useAuth();
   const { appointments, reviews } = useData();
 
-  // Historial del cliente: turnos finalizados (no activos), más recientes primero
-  const pastAppointments = appointments
-    .filter((a) => String(a.clientId) === String(user?.id) && a.status !== 'Solicitado')
-    .sort((a, b) => (b.date + b.time).localeCompare(a.date + a.time));
+  // Historial real desde MySQL; si el back no responde, se usan los mocks locales.
+  const [apiAppointments, setApiAppointments] = useState(null);
+  const [apiReviews, setApiReviews] = useState(null);
+
+  const fetchHistory = async () => {
+    try {
+      const [turnos, resenas] = await Promise.all([
+        turnoService.getAll(),
+        resenaService.getAll(),
+      ]);
+      setApiAppointments((turnos || []).map(fromApi));
+      setApiReviews(
+        (resenas || []).map((resena) => ({
+          appointmentId: resena.id_turno,
+          rating: resena.calificacion,
+        }))
+      );
+    } catch {
+      setApiAppointments(null);
+      setApiReviews(null);
+    }
+  };
+
+  useEffect(() => {
+    fetchHistory();
+  }, []);
+
+  const allAppointments = apiAppointments || appointments;
+  const allReviews = apiReviews || reviews;
+
+  // Historial del cliente: turnos finalizados (no activos), más recientes primero.
+  // El back ya filtra por el cliente logueado; el filtro local es para el fallback mock.
+  const pastAppointments = allAppointments
+    .filter((a) => apiAppointments || String(a.clientId) === String(user?.id))
+    .filter((a) => a.status !== 'Solicitado')
+    .sort((a, b) => (`${b.date} ${b.time}`).localeCompare(`${a.date} ${a.time}`));
 
   // Turno seleccionado para calificar
   const [selectedAppointment, setSelectedAppointment] = useState(null);
 
   const hasReview = (appointmentId) =>
-    reviews.some((r) => r.appointmentId === appointmentId);
+    allReviews.some((r) => r.appointmentId === appointmentId);
 
   const getReviewRating = (appointmentId) =>
-    reviews.find((r) => r.appointmentId === appointmentId)?.rating || 0;
+    allReviews.find((r) => r.appointmentId === appointmentId)?.rating || 0;
 
   return (
     <Container maxWidth="lg" sx={{ py: { xs: 3, sm: 6 } }}>
@@ -134,6 +193,7 @@ export const ClientDashboard = () => {
         open={Boolean(selectedAppointment)}
         onClose={() => setSelectedAppointment(null)}
         appointment={selectedAppointment}
+        onReviewSubmitted={fetchHistory}
       />
     </Container>
   );

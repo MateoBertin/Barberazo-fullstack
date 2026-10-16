@@ -2,7 +2,7 @@
 
 Sistema para gestión de turnos, clientes, empleados y servicios de barbería. Materia Desarrollo de Software, Ingeniería en Sistemas (2026).
 
-> Estado real (verificado en código): el backend implementa solo autenticación (`POST /api/auth/register`, `POST /api/auth/login`, `GET /api/auth/profile`). El resto (turnos, servicios, empleados, multas, reseñas, calendario) funciona hoy en el frontend con `localStorage` + fallback a mocks si el backend no está corriendo (`web/src/context/AuthContext.jsx`, `web/src/context/DataContext.jsx`).
+> Estado: backend fullstack contra MySQL (`/api/auth`, `/api/servicios`, `/api/fechas`, `/api/empleados`, `/api/clientes`, `/api/turnos`, `/api/resenas`, `/api/pagos`, ver `api/index.js`). Si el backend no está corriendo, el login cae a `MOCK_USERS` locales solo para desarrollo (`web/src/context/AuthContext.jsx`).
 
 ---
 
@@ -26,15 +26,17 @@ Sistema para gestión de turnos, clientes, empleados y servicios de barbería. M
 ```text
 /
 ├── api/
-│   ├── index.js                    # Express, PORT 3000, monta /api/auth
+│   ├── index.js                    # Express, PORT 3000, monta todas las rutas /api/*
 │   ├── config/db.js                # Pool mysql2, defaults: localhost:3306, dsw
-│   ├── routes/authRoutes.js        # register, login, profile
-│   ├── controllers/authController.js
-│   ├── services/authService.js     # bcrypt + JWT, alta en usuarios + clientes
-│   ├── middleware/authMiddleware.js # Bearer JWT
+│   ├── routes/                     # authRoutes, servicioRoutes, fechaRoutes,
+│   │                               # empleadoRoutes, clienteRoutes, turnoRoutes,
+│   │                               # resenaRoutes, pagoRoutes
+│   ├── controllers/                # Uno por recurso (req/res + códigos HTTP)
+│   ├── services/                   # Reglas de negocio (authService, turnoService, ...)
+│   ├── repositories/               # Solo SQL con pool.execute
+│   ├── middleware/                 # authMiddleware (Bearer JWT) + roleMiddleware
 │   └── database/
-│       ├── init_barberazo.sql      # Canónico: crea dsw, 9 tablas + seed
-│       └── schema.sql              # Obsoleto: no usar (crea barberia mínima)
+│       └── init_barberazo.sql      # Canónico: crea dsw, tablas + seed
 └── web/
     ├── vite.config.js              # Puerto 5173 + proxy /api -> localhost:3000
     └── src/
@@ -58,7 +60,7 @@ Sistema para gestión de turnos, clientes, empleados y servicios de barbería. M
         │   └── authService.js      # Normaliza rol ADMIN->dueno, estados
         └── context/
             ├── AuthContext.jsx     # Sesión, MOCK_USERS fallback, registro con código
-            └── DataContext.jsx     # Servicios, empleados, turnos, multas, reseñas en localStorage
+            └── DataContext.jsx     # Estado compartido del front (las páginas consumen la API real)
 ```
 
 ---
@@ -69,9 +71,9 @@ Sistema para gestión de turnos, clientes, empleados y servicios de barbería. M
 
 1. Abrir MySQL Workbench.
 2. Ejecutar `api/database/init_barberazo.sql`.
-3. Se crea `dsw` con tablas `usuarios, clientes, empleados, servicios, horarios_empleados, dias_trabajo, turnos, multas, resenas` + seed.
+3. Se crea `dsw` con tablas `usuarios, clientes, empleados, servicios, horarios_empleados, dias_trabajo, turnos, multas, resenas, codigos_verificacion` + seed.
 
-No usar `schema.sql` (obsoleto).
+Atención: el script borra y recrea las tablas, así que ejecutarlo de nuevo elimina los datos cargados después del seed.
 
 ### 2. Backend (`/api`)
 
@@ -80,13 +82,15 @@ cd api
 npm install
 # Windows: copy .env.example .env
 # Linux/Mac: cp .env.example .env
-# Editar .env y poner DB_NAME=dsw (.env.example trae barberia por error)
+# Editar .env y poner en DB_PASSWORD la contraseña del usuario root de tu MySQL.
+# Sin la contraseña correcta el servidor no arranca y muestra:
+# "Error al conectar con MySQL: Access denied for user 'root'@'localhost'"
 npm run dev
 ```
 
 - Dev: `npm run dev` (nodemon). Prod: `npm start`.
-- Verificar: `GET http://localhost:3000/` → `{"message":"API Barbería - Backend activo"}`.
-- Endpoints: `POST /api/auth/register`, `POST /api/auth/login`, `GET /api/auth/profile` (requiere `Authorization: Bearer <token>`).
+- Verificar: `GET http://localhost:3000/` → `{"message":"API Barbería - Backend activo"}` y en consola `Conexión a MySQL establecida`.
+- Endpoints principales: `/api/auth/*` (register, login, profile), `/api/servicios`, `/api/fechas`, `/api/empleados`, `/api/clientes`, `/api/turnos`, `/api/resenas`, `/api/pagos`.
 
 ### 3. Frontend (`/web`)
 
@@ -102,6 +106,8 @@ npm run dev
 - Build: `npm run build`. Preview: `npm run preview`.
 
 El backend debe estar corriendo primero. Si no lo está, el login cae a `MOCK_USERS` locales (solo para desarrollo).
+
+Para probar, usar los usuarios seed de la tabla de abajo (clave `123456`). Si se registra un usuario nuevo, el código de confirmación no llega por mail: sin SMTP configurado se imprime en la consola del backend (`MAIL SIMULADO`), copiarlo de ahí antes de que venzan los 5 minutos.
 
 ---
 
@@ -139,8 +145,8 @@ Backend (`api/.env`, ver `api/.env.example`):
 | Var | Default en código | Uso |
 | :--- | :--- | :--- |
 | `PORT` | `3000` | Puerto Express |
-| `DB_HOST` / `DB_PORT` / `DB_USER` / `DB_PASSWORD` | `localhost` / `3306` / `root` | Conexión MySQL |
-| `DB_NAME` | `dsw` | Debe ser `dsw`, no `barberia` |
+| `DB_HOST` / `DB_PORT` / `DB_USER` / `DB_PASSWORD` | `localhost` / `3306` / `root` | Conexión MySQL (`DB_PASSWORD` debe ser tu clave real) |
+| `DB_NAME` | `dsw` | No cambiar |
 | `JWT_SECRET` / `JWT_EXPIRES_IN` | `24h` | Firma de tokens |
 
 Frontend (`web/.env`, opcional):

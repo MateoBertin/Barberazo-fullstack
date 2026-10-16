@@ -70,60 +70,50 @@ async function findByFecha(fecha, idEmpleado = null) {
     query += ' AND id_empleado IS NULL';
   }
 
+  query += ' ORDER BY id_dia_trabajo DESC LIMIT 1';
+
   const [rows] = await pool.execute(query, params);
   return rows[0] || null;
 }
 
 /**
  * Inserta un nuevo día o actualiza el existente si ya figuraba esa fecha.
- * Patrón ON DUPLICATE KEY UPDATE / Upsert seguro.
+ * En MySQL, si id_empleado es NULL, la restricción UNIQUE permite múltiples NULLs,
+ * por lo que verificamos por ID para garantizar unicidad real de fecha para el local.
  */
 async function upsert({ fecha, hora_inicio = '08:00:00', hora_fin = '20:00:00', estado = 'HABILITADO', motivo = null, id_empleado = null }) {
+  const existente = await findByFecha(fecha, id_empleado);
+
+  if (existente) {
+    await pool.execute(
+      `UPDATE dias_trabajo 
+       SET hora_inicio = ?, hora_fin = ?, estado = ?, motivo = ?
+       WHERE id_dia_trabajo = ?`,
+      [hora_inicio, hora_fin, estado, motivo, existente.id_dia_trabajo]
+    );
+    return { id_dia_trabajo: existente.id_dia_trabajo, updated: true };
+  }
+
   const [result] = await pool.execute(
     `INSERT INTO dias_trabajo (id_empleado, fecha, hora_inicio, hora_fin, estado, motivo)
-     VALUES (?, ?, ?, ?, ?, ?)
-     ON DUPLICATE KEY UPDATE
-       hora_inicio = VALUES(hora_inicio),
-       hora_fin = VALUES(hora_fin),
-       estado = VALUES(estado),
-       motivo = VALUES(motivo)`,
+     VALUES (?, ?, ?, ?, ?, ?)`,
     [id_empleado, fecha, hora_inicio, hora_fin, estado, motivo]
   );
-  return result;
+  return { id_dia_trabajo: result.insertId, updated: false };
 }
 
 /**
  * Modifica directamente el estado de un día registrado.
  */
 async function updateEstado(fecha, estado, motivo = null, idEmpleado = null) {
-  let query = 'UPDATE dias_trabajo SET estado = ?, motivo = ? WHERE fecha = ?';
-  const params = [estado, motivo, fecha];
-
-  if (idEmpleado) {
-    query += ' AND id_empleado = ?';
-    params.push(idEmpleado);
-  } else {
-    query += ' AND id_empleado IS NULL';
-  }
-
-  await pool.execute(query, params);
+  return upsert({ fecha, estado, motivo, id_empleado: idEmpleado });
 }
 
 /**
  * Modifica el horario de inicio y fin de una fecha específica.
  */
 async function updateHorario(fecha, hora_inicio, hora_fin, idEmpleado = null) {
-  let query = 'UPDATE dias_trabajo SET hora_inicio = ?, hora_fin = ? WHERE fecha = ?';
-  const params = [hora_inicio, hora_fin, fecha];
-
-  if (idEmpleado) {
-    query += ' AND id_empleado = ?';
-    params.push(idEmpleado);
-  } else {
-    query += ' AND id_empleado IS NULL';
-  }
-
-  await pool.execute(query, params);
+  return upsert({ fecha, hora_inicio, hora_fin, id_empleado: idEmpleado });
 }
 
 module.exports = {

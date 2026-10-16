@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Container,
   Typography,
@@ -16,40 +16,88 @@ import {
   Alert,
   Stack,
   LinearProgress,
+  CircularProgress,
 } from '@mui/material';
 import {
   Warning as WarningIcon,
   Payment as PaymentIcon,
   Info as InfoIcon,
   ErrorOutline as ErrorIcon,
+  CheckCircle as CheckCircleIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../../context/AuthContext';
 import { useData } from '../../context/DataContext';
+import { pagoService } from '../../services/pagoService';
 import { MercadoPagoModal } from '../../components/fines/MercadoPagoModal';
 import { BRAND_COLORS, withAlpha } from '../../theme';
 
+const fromApi = (m) => ({
+  id: m.id_multa,
+  amount: Number(m.monto),
+  reason: m.motivo,
+  status: m.estado_pago === 'PAGADO' ? 'Pagada' : 'Pendiente',
+  issueDate: m.fecha_emision_corta || m.fecha_emision,
+  paymentDate: m.fecha_pago_corta || m.fecha_pago,
+  paymentMethod: m.metodo_pago,
+});
+
 export const ClientFinesPage = () => {
   const { user } = useAuth();
-  const { fines } = useData();
+  const contextData = useData();
 
-  // Estados locales en inglés (según apuntes de React)
+  // Estados remotos cargados desde MySQL (/api/pagos/multas)
+  const [fines, setFines] = useState([]);
+  const [clientInfo, setClientInfo] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // Estados de modal de checkout
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedFine, setSelectedFine] = useState(null);
 
-  // Filtrar multas del usuario actual
-  const myFines = fines.filter(
-    (fine) =>
-      String(fine.clientId) === String(user?.id) ||
-      fine.clientEmail === user?.email
-  );
+  const fetchFines = async () => {
+    try {
+      setLoading(true);
+      const data = await pagoService.getMisMultas();
+      if (data) {
+        setFines((data.multas || []).map(fromApi));
+        setClientInfo(data.cliente || null);
+      }
+    } catch {
+      // Fallback a contextData si falla o en offline
+      setFines((contextData.fines || []).map((f) => ({
+        id: f.id,
+        amount: f.amount,
+        reason: f.reason,
+        status: f.status,
+        issueDate: f.issueDate,
+        paymentDate: f.paymentDate,
+        paymentMethod: f.paymentMethod,
+      })));
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const currentStrikes = user?.strikes || 0;
-  const pendingFine = myFines.find((fine) => fine.status === 'Pendiente');
+  useEffect(() => {
+    fetchFines();
+  }, []);
+
+  const currentStrikes = clientInfo?.contador_strikes ?? user?.strikes ?? 0;
+  const currentEstado = clientInfo?.estado ?? user?.estado ?? 'ACTIVO';
+  const pendingFine = fines.find((fine) => fine.status === 'Pendiente');
 
   const handleOpenPayment = (fine) => {
     setSelectedFine(fine);
     setIsModalOpen(true);
   };
+
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+        <CircularProgress color="primary" />
+      </Box>
+    );
+  }
 
   return (
     <Container maxWidth="lg" sx={{ py: { xs: 3, sm: 6 } }}>
@@ -73,14 +121,14 @@ export const ClientFinesPage = () => {
               </Typography>
             </Stack>
             <Typography variant="body1" color="text.secondary">
-              Consulta tu historial de inasistencias, penalizaciones y regulariza pagos pendientes a través de Mercado Pago.
+              Consulta tu historial de inasistencias, penalizaciones y regulariza pagos pendientes a través de Mercado Pago (CUU4.1).
             </Typography>
           </Grid>
 
           <Grid item xs={12} md={4} sx={{ textAlign: { xs: 'left', md: 'right' } }}>
             <Chip
-              label={user?.estado === 'Multado' ? 'CUENTA MULTADA' : user?.estado?.toUpperCase()}
-              color={user?.estado === 'Multado' ? 'error' : 'success'}
+              label={currentEstado === 'MULTADO' || currentEstado === 'Multado' ? 'CUENTA MULTADA' : currentEstado.toUpperCase()}
+              color={currentEstado === 'MULTADO' || currentEstado === 'Multado' ? 'error' : 'success'}
               sx={{ fontWeight: 800, fontSize: '0.9rem', py: 1 }}
             />
           </Grid>
@@ -115,7 +163,7 @@ export const ClientFinesPage = () => {
               </Stack>
               <LinearProgress
                 variant="determinate"
-                value={(currentStrikes / 3) * 100}
+                value={Math.min((currentStrikes / 3) * 100, 100)}
                 color={currentStrikes >= 3 ? 'error' : currentStrikes > 0 ? 'warning' : 'success'}
                 sx={{ height: 10, borderRadius: 5 }}
               />
@@ -147,7 +195,7 @@ export const ClientFinesPage = () => {
               </Alert>
 
               <Alert severity="warning" icon={<WarningIcon fontSize="inherit" />}>
-                <strong>Cancelación tardía (&lt;24 hs):</strong> Sumará <strong>+1 Strike</strong> debido al tiempo de reserva perdido.
+                <strong>Cancelación tardía (&lt;24 hs):</strong> Sumará <strong>+1 Strike</strong> debido al tiempo de reserva perdido (Regla RN13).
               </Alert>
 
               <Alert severity="error" icon={<ErrorIcon fontSize="inherit" />}>
@@ -200,14 +248,14 @@ export const ClientFinesPage = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {myFines.length === 0 ? (
+            {fines.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} align="center" sx={{ py: 4, color: 'text.secondary' }}>
                   No posees multas registradas en tu historial. ¡Excelente conducta!
                 </TableCell>
               </TableRow>
             ) : (
-              myFines.map((fine) => {
+              fines.map((fine) => {
                 const fineDate = fine.issueDate;
                 const fineReason = fine.reason;
                 const fineAmount = fine.amount;
@@ -256,12 +304,13 @@ export const ClientFinesPage = () => {
         </Table>
       </TableContainer>
 
-      {/* Modal de simulación Mercado Pago */}
+      {/* Modal de checkout Mercado Pago */}
       <MercadoPagoModal
         open={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         fine={selectedFine}
         clientId={user?.id}
+        onPaymentSuccess={fetchFines}
       />
     </Container>
   );

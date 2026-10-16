@@ -74,6 +74,7 @@
     "lru.min": "^1.1.4",
     "math-intrinsics": "^1.1.0",
     "media-typer": "^1.1.1",
+    "mercadopago": "^3.6.1",
     "merge-descriptors": "^2.0.0",
     "mime-db": "^1.54.0",
     "mime-types": "^3.0.2",

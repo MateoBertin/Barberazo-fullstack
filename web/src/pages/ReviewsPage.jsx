@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Container,
   Typography,
@@ -14,19 +14,73 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  CircularProgress,
 } from '@mui/material';
 import {
   Star as StarIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
+import { resenaService } from '../services/resenaService';
+import { empleadoService } from '../services/empleadoService';
 import { BRAND_COLORS, withAlpha } from '../theme';
+
+const fromApi = (r) => ({
+  id: r.id_resena || r.id,
+  appointmentId: r.id_turno || r.appointmentId,
+  clientId: r.id_cliente || r.clientId,
+  clientName: r.cliente_nombre_completo || r.clientName,
+  employeeId: r.id_empleado || r.employeeId,
+  employeeName: r.empleado_nombre_completo || r.employeeName,
+  employeeEmail: r.empleado_email,
+  serviceName: r.servicio_nombre || r.serviceName,
+  rating: Number(r.calificacion ?? r.rating) || 5,
+  comment: r.comentario || r.comment || '',
+  date: r.fecha || r.date || '',
+});
 
 export const ReviewsPage = () => {
   const { user } = useAuth();
-  const { reviews, employees } = useData();
+  const contextData = useData();
 
-  const isOwner = user?.rol === 'dueno';
+  const [reviews, setReviews] = useState([]);
+  const [employees, setEmployees] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const isOwner = user?.rol === 'ADMIN' || user?.rol === 'dueno';
+
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      // 1. Cargar reseñas de MySQL
+      try {
+        const data = await resenaService.getAll();
+        setReviews((data || []).map(fromApi));
+      } catch {
+        setReviews(contextData.reviews || []);
+      }
+
+      // 2. Cargar empleados de MySQL
+      try {
+        const empData = await empleadoService.getAll();
+        setEmployees(
+          (empData || []).map((e) => ({
+            id: e.id_empleado || e.id,
+            name: `${e.nombre || ''} ${e.apellido || ''}`.trim() || e.name,
+            email: e.email,
+          }))
+        );
+      } catch {
+        setEmployees(contextData.employees || []);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadData();
+  }, []);
 
   // El empleado solo ve las reseñas de sus propios turnos (se ubica por email)
   const employeeRecord = !isOwner
@@ -35,7 +89,7 @@ export const ReviewsPage = () => {
 
   const visibleReviews = isOwner
     ? reviews
-    : reviews.filter((r) => employeeRecord && r.employeeId === employeeRecord.id);
+    : reviews.filter((r) => employeeRecord && (r.employeeId === employeeRecord.id || r.employeeEmail === user?.email));
 
   const averageRating = visibleReviews.length > 0
     ? visibleReviews.reduce((sum, r) => sum + r.rating, 0) / visibleReviews.length
@@ -44,13 +98,21 @@ export const ReviewsPage = () => {
   // Promedio por barbero (solo vista del dueño)
   const employeeAverages = isOwner
     ? employees.map((employee) => {
-        const employeeReviews = reviews.filter((r) => r.employeeId === employee.id);
-        const average = employeeReviews.length > 0
-          ? employeeReviews.reduce((sum, r) => sum + r.rating, 0) / employeeReviews.length
-          : 0;
-        return { ...employee, reviewCount: employeeReviews.length, average };
-      })
+      const employeeReviews = reviews.filter((r) => r.employeeId === employee.id);
+      const average = employeeReviews.length > 0
+        ? employeeReviews.reduce((sum, r) => sum + r.rating, 0) / employeeReviews.length
+        : 0;
+      return { ...employee, reviewCount: employeeReviews.length, average };
+    })
     : [];
+
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8 }}>
+        <CircularProgress color="primary" />
+      </Box>
+    );
+  }
 
   return (
     <Container maxWidth="lg" sx={{ py: { xs: 3, sm: 6 } }}>

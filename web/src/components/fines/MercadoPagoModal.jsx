@@ -21,11 +21,12 @@ import {
   CreditCard as CardIcon,
   AccountBalanceWallet as WalletIcon,
 } from '@mui/icons-material';
+import { pagoService } from '../../services/pagoService';
 import { useData } from '../../context/DataContext';
 import { useSnackbar } from 'notistack';
 import { BRAND_COLORS, withAlpha } from '../../theme';
 
-export const MercadoPagoModal = ({ open, onClose, fine, clientId }) => {
+export const MercadoPagoModal = ({ open, onClose, fine, clientId, onPaymentSuccess }) => {
   const { payFine } = useData();
   const { enqueueSnackbar } = useSnackbar();
 
@@ -34,19 +35,43 @@ export const MercadoPagoModal = ({ open, onClose, fine, clientId }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isPaymentApproved, setIsPaymentApproved] = useState(false);
 
-  // Manejador del submit de pago
-  const handlePay = () => {
+  // Manejador del submit de pago contra API de Mercado Pago (/api/pagos/confirmar)
+  const handlePay = async () => {
     setIsProcessing(true);
 
-    // Simulamos la latencia de la pasarela de pagos (1.5 segundos)
-    setTimeout(() => {
-      setIsProcessing(false);
+    try {
+      const methodLabel =
+        paymentMethod === 'account_money'
+          ? 'Dinero en cuenta Mercado Pago'
+          : 'Tarjeta de Débito (Mercado Pago)';
+
+      // 1. Confirmar pago en el backend MySQL
+      await pagoService.confirmarPago(fine.id, methodLabel);
+
+      // 2. Actualizar estado local si está disponible
+      if (payFine) {
+        try {
+          payFine(fine.id, clientId);
+        } catch {
+          // continuar
+        }
+      }
+
       setIsPaymentApproved(true);
-      payFine(fine.id, clientId);
       enqueueSnackbar('¡Pago procesado exitosamente! Tu cuenta ha sido rehabilitada.', {
         variant: 'success',
       });
-    }, 1500);
+
+      if (onPaymentSuccess) {
+        onPaymentSuccess();
+      }
+    } catch (error) {
+      enqueueSnackbar(error.message || 'Error al procesar el pago con Mercado Pago', {
+        variant: 'error',
+      });
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const handleClose = () => {

@@ -9,6 +9,7 @@ const empleadoRoutes = require('./routes/empleadoRoutes');
 const clienteRoutes = require('./routes/clienteRoutes');
 const turnoRoutes = require('./routes/turnoRoutes');
 const resenaRoutes = require('./routes/resenaRoutes');
+const pagoRoutes = require('./routes/pagoRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -28,6 +29,7 @@ app.use('/api/empleados', empleadoRoutes); // Módulo 2 - Mateo
 app.use('/api/clientes', clienteRoutes);   // Módulo 2 - Mateo
 app.use('/api/turnos', turnoRoutes);       // Módulo 3 - Lucas
 app.use('/api/resenas', resenaRoutes);     // Módulo 3 - Lucas
+app.use('/api/pagos', pagoRoutes);         // Módulo 3 - Lucas (CUU4.1)
 
 async function startServer() {
   try {

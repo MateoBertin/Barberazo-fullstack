@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Paper,
@@ -20,6 +20,7 @@ import {
   Divider,
   Stack,
   Avatar,
+  CircularProgress,
 } from '@mui/material';
 import {
   Cancel as CancelIcon,
@@ -31,11 +32,15 @@ import {
 } from '@mui/icons-material';
 import { useAuth } from '../../context/AuthContext';
 import { useData } from '../../context/DataContext';
+import { turnoService } from '../../services/turnoService';
+import { servicioService } from '../../services/servicioService';
+import { empleadoService } from '../../services/empleadoService';
+import { fechaService } from '../../services/fechaService';
 import { useSnackbar } from 'notistack';
 import { BRAND_COLORS, withAlpha } from '../../theme';
 
-// Franjas horarias de 1 hora para los turnos de atención
-// Regla de negocio: todos los turnos duran 1 hora y empiezan en punto
+// Franjas horarias estándar de 1 hora para los turnos de atención
+// Regla de negocio: todos los turnos duran 1 hora y empiezan en punto (xx:00)
 const AVAILABLE_TIME_SLOTS = [
   '08:00', '09:00', '10:00', '11:00',
   '14:00', '15:00', '16:00', '17:00', '18:00', '19:00',
@@ -43,12 +48,22 @@ const AVAILABLE_TIME_SLOTS = [
 
 const STEPS = ['Servicio', 'Fecha', 'Barbero', 'Horario', 'Confirmación'];
 
+const DAY_NAMES_ES = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+
 export const BookingWizard = () => {
   const { user } = useAuth();
-  const { services, employees, workingDays, appointments, addAppointment, cancelClientAppointment } = useData();
+  const contextData = useData();
   const { enqueueSnackbar } = useSnackbar();
 
-  // Estados del asistente (formulario controlado en inglés según apuntes de React)
+  // Estados remotos cargados desde el backend
+  const [services, setServices] = useState([]);
+  const [employees, setEmployees] = useState([]);
+  const [workingDays, setWorkingDays] = useState([]);
+  const [appointments, setAppointments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Estados del asistente (formulario controlado en 5 pasos)
   const [activeStep, setActiveStep] = useState(0);
   const [selectedService, setSelectedService] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
@@ -58,9 +73,108 @@ export const BookingWizard = () => {
   // Estado para el modal de confirmación de cancelación
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
 
+  // Carga remota de datos desde el backend
+  const loadData = async () => {
+    try {
+      setLoading(true);
+
+      // 1. Cargar servicios (Pedro) con fallback a contextData
+      try {
+        const srvData = await servicioService.getAll();
+        setServices(
+          (srvData || []).map((s) => ({
+            id: s.id_servicio || s.id,
+            name: s.nombre || s.name,
+            price: Number(s.precio ?? s.price) || 0,
+            durationMinutes: s.duracion_minutos || s.durationMinutes || 60,
+            description: s.descripcion || s.description || '',
+            status: s.estado === 'DESHABILITADO' ? 'Deshabilitado' : 'Habilitado',
+          }))
+        );
+      } catch {
+        setServices(contextData.services || []);
+      }
+
+      // 2. Cargar empleados (Mateo) con fallback a contextData
+      try {
+        const empData = await empleadoService.getAll();
+        setEmployees(
+          (empData || []).map((e) => ({
+            id: e.id_empleado || e.id,
+            name: `${e.nombre || ''} ${e.apellido || ''}`.trim() || e.name,
+            specialties: e.especialidades || (e.especialidad ? e.especialidad.split(', ') : []),
+            status: e.estado === 'INACTIVO' ? 'Inactivo' : 'Activo',
+            email: e.email,
+          }))
+        );
+      } catch {
+        setEmployees(contextData.employees || []);
+      }
+
+      // 3. Cargar días habilitados con fallback a contextData
+      try {
+        const fechaData = await fechaService.getAll();
+        if (fechaData && fechaData.length > 0) {
+          setWorkingDays(
+            fechaData.map((d) => {
+              const dateObj = new Date(`${d.fecha || d.date}T00:00:00`);
+              const dayOfWeek = DAY_NAMES_ES[dateObj.getDay()];
+              return {
+                id: d.id_dia_trabajo || d.id || `wd_${d.fecha}`,
+                date: d.fecha || d.date,
+                dayOfWeek,
+                startTime: (d.hora_inicio || d.startTime || '08:00').substring(0, 5),
+                endTime: (d.hora_fin || d.endTime || '20:00').substring(0, 5),
+                status: d.estado === 'DESHABILITADO' ? 'Deshabilitado' : 'Habilitado',
+              };
+            })
+          );
+        } else {
+          setWorkingDays(contextData.workingDays || []);
+        }
+      } catch {
+        setWorkingDays(contextData.workingDays || []);
+      }
+
+      // 4. Cargar turnos desde MySQL (/api/turnos)
+      try {
+        const turnosData = await turnoService.getAll();
+        setAppointments(
+          (turnosData || []).map((t) => ({
+            id: t.id_turno || t.id,
+            clientId: t.id_cliente || t.clientId,
+            clientName: t.cliente_nombre_completo || t.clientName,
+            clientEmail: t.cliente_email || t.clientEmail,
+            employeeId: t.id_empleado || t.employeeId,
+            employeeName: t.empleado_nombre_completo || t.employeeName,
+            serviceId: t.id_servicio || t.serviceId,
+            serviceName: t.servicio_nombre || t.serviceName,
+            servicePrice: Number(t.servicio_precio ?? t.servicePrice) || 0,
+            serviceDuration: t.servicio_duracion || t.serviceDuration || 60,
+            date: t.fecha || t.date,
+            time: (t.hora || t.time || '').substring(0, 5),
+            status: t.estado === 'SOLICITADO' ? 'Solicitado' : t.estado,
+          }))
+        );
+      } catch {
+        setAppointments(contextData.appointments || []);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
   // 1. Verificar si el usuario actual ya tiene un turno activo ('Solicitado')
   const activeAppointment = appointments.find(
-    (a) => String(a.clientId) === String(user?.id) && a.status === 'Solicitado'
+    (a) =>
+      a.status === 'Solicitado' &&
+      (String(a.clientId) === String(user?.id) ||
+        String(a.clientId) === String(user?.id_cliente) ||
+        a.clientEmail === user?.email)
   );
 
   // Filtrar solo los servicios habilitados
@@ -68,9 +182,9 @@ export const BookingWizard = () => {
 
   // Filtrar solo los días habilitados a partir de hoy
   const todayStr = new Date().toISOString().split('T')[0];
-  const availableDays = (workingDays || []).filter(
-    (d) => d.status === 'Habilitado' && d.date >= todayStr
-  ).slice(0, 14);
+  const availableDays = (workingDays || [])
+    .filter((d) => d.status === 'Habilitado' && d.date >= todayStr)
+    .slice(0, 14);
 
   // Filtrar solo empleados activos
   const activeEmployees = employees.filter((e) => e.status === 'Activo');
@@ -78,16 +192,14 @@ export const BookingWizard = () => {
   // Horarios ocupados para la fecha seleccionada y el barbero seleccionado
   const selectedDateStr = selectedDate?.date;
 
-  // Slots del día seleccionado según su horario (turnos de 1 hora en punto)
-  // Solo se ofrecen los horarios entre el inicio y el fin del día (el fin es exclusivo:
-  // un día de 09:00 a 13:00 ofrece 09, 10, 11 y 12)
   const dayTimeSlots = !selectedDateStr
     ? []
     : AVAILABLE_TIME_SLOTS.filter((slot) => {
-        const dayStart = selectedDate?.startTime || '08:00';
-        const dayEnd = selectedDate?.endTime || '20:00';
-        return slot >= dayStart && slot < dayEnd;
-      });
+      const dayStart = selectedDate?.startTime || '08:00';
+      const dayEnd = selectedDate?.endTime || '20:00';
+      return slot >= dayStart && slot < dayEnd;
+    });
+
   const occupiedTimeSlots = appointments
     .filter(
       (a) =>
@@ -97,7 +209,7 @@ export const BookingWizard = () => {
     )
     .map((a) => a.time);
 
-  // --- MANEJADORES DE EVENTOS EN INGLÉS ---
+  // --- MANEJADORES DE EVENTOS ---
 
   const handleSelectService = (service) => {
     setSelectedService(service);
@@ -135,57 +247,78 @@ export const BookingWizard = () => {
     setSelectedTime(null);
   };
 
-  // Confirmar y registrar el turno (CUU1.2)
-  const handleConfirmBooking = () => {
+  // Confirmar y registrar el turno contra MySQL (CUU1.2 - RN05 y RN06)
+  const handleConfirmBooking = async () => {
     if (!selectedService || !selectedDate || !selectedTime) {
       enqueueSnackbar('Por favor completa todos los pasos para reservar.', { variant: 'warning' });
       return;
     }
 
     const assignedEmployee = selectedEmployee || activeEmployees[0];
-
-    const newAppointment = {
-      clientId: user.id,
-      clientName: user.name || user.nombre,
-      clientEmail: user.email,
-      clientPhone: user.phone || user.telefono || 'Sin teléfono',
-      employeeId: assignedEmployee ? assignedEmployee.id : 'e1',
-      employeeName: assignedEmployee ? assignedEmployee.name : 'Barbero de Turno',
-      serviceId: selectedService.id,
-      serviceName: selectedService.name,
-      servicePrice: selectedService.price,
-      serviceDuration: selectedService.durationMinutes,
-      date: selectedDate.date,
-      time: selectedTime,
-    };
+    if (!assignedEmployee) {
+      enqueueSnackbar('No hay barberos disponibles en este momento.', { variant: 'error' });
+      return;
+    }
 
     try {
-      addAppointment(newAppointment);
+      setIsSubmitting(true);
+      await turnoService.create({
+        id_servicio: selectedService.id,
+        id_empleado: assignedEmployee.id,
+        fecha: selectedDate.date,
+        hora: selectedTime,
+      });
+
       enqueueSnackbar('¡Turno reservado con éxito!', { variant: 'success' });
       handleResetForm();
+      await loadData();
     } catch (error) {
-      enqueueSnackbar(error.message, { variant: 'error' });
+      enqueueSnackbar(error.message || 'Error al reservar el turno', { variant: 'error' });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  // Cancelar el turno activo del cliente (CUU1.5)
-  const handleConfirmCancelAppointment = () => {
+  // Cancelar el turno activo del cliente contra MySQL (CUU1.5 - RN13)
+  const handleConfirmCancelAppointment = async () => {
     if (!activeAppointment) return;
 
-    const result = cancelClientAppointment(activeAppointment.id, 'Cancelado por el cliente desde su panel');
-    setIsCancelDialogOpen(false);
+    try {
+      setIsSubmitting(true);
+      const res = await turnoService.updateStatus(
+        activeAppointment.id,
+        'CANCELADO',
+        'Cancelado por el cliente desde su panel'
+      );
+      setIsCancelDialogOpen(false);
 
-    if (result && result.isLessThan24Hours) {
-      enqueueSnackbar('Turno cancelado con menos de 24 hs de anticipación. Se te aplicó +1 Strike.', {
-        variant: 'warning',
-      });
-    } else {
-      enqueueSnackbar('Turno cancelado correctamente sin penalización.', { variant: 'info' });
+      if (res && res.strikeSumado) {
+        enqueueSnackbar('Turno cancelado con menos de 24 hs de anticipación. Se te aplicó +1 Strike.', {
+          variant: 'warning',
+          autoHideDuration: 6000,
+        });
+      } else {
+        enqueueSnackbar('Turno cancelado correctamente sin penalización.', { variant: 'info' });
+      }
+
+      await loadData();
+    } catch (error) {
+      enqueueSnackbar(error.message || 'Error al cancelar el turno', { variant: 'error' });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8 }}>
+        <CircularProgress color="primary" />
+      </Box>
+    );
+  }
+
   // ─── CASO 1: CLIENTE BLOQUEADO O MULTADO ───
-  if (user?.estado === 'Bloqueado') {
+  if (user?.estado === 'Bloqueado' || user?.estado === 'BLOQUEADO') {
     return (
       <Paper sx={{ p: { xs: 2.5, sm: 4 }, borderRadius: 3, background: BRAND_COLORS.darkPanel, border: `1px solid ${BRAND_COLORS.danger}` }}>
         <Stack direction="row" spacing={2} alignItems="center">
@@ -203,7 +336,7 @@ export const BookingWizard = () => {
     );
   }
 
-  if (user?.estado === 'Multado') {
+  if (user?.estado === 'Multado' || user?.estado === 'MULTADO') {
     return (
       <Paper sx={{ p: { xs: 2.5, sm: 4 }, borderRadius: 3, background: BRAND_COLORS.darkPanel, border: `1px solid ${BRAND_COLORS.warningAmber}` }}>
         <Stack direction="row" spacing={2} alignItems="center">
@@ -224,7 +357,7 @@ export const BookingWizard = () => {
     );
   }
 
-  // ─── CASO 2: CLIENTE YA TIENE TURNO ACTIVO ('Solicitado') ───
+  // ─── CASO 2: CLIENTE YA TIENE TURNO ACTIVO ('Solicitado' - RN06) ───
   if (activeAppointment) {
     const appointmentDateStr = activeAppointment.date;
     const appointmentTimeStr = activeAppointment.time || '10:00';
@@ -253,7 +386,7 @@ export const BookingWizard = () => {
           </Stack>
 
           <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-            Recuerda que según las reglas de la barbería, solo puedes tener 1 turno activo a la vez.
+            Recuerda que según las reglas de la barbería (**Regla RN06**), solo puedes tener 1 turno activo a la vez.
           </Typography>
 
           <Grid container spacing={3} sx={{ mb: 3 }}>
@@ -266,8 +399,7 @@ export const BookingWizard = () => {
                   {activeAppointment.serviceName}
                 </Typography>
                 <Typography variant="body2" sx={{ color: BRAND_COLORS.successGreen, fontWeight: 600 }}>
-                  ${activeAppointment.servicePrice?.toLocaleString()} (
-                  {activeAppointment.serviceDuration} min)
+                  ${activeAppointment.servicePrice?.toLocaleString()} ({activeAppointment.serviceDuration} min)
                 </Typography>
               </Paper>
             </Grid>
@@ -311,7 +443,7 @@ export const BookingWizard = () => {
           <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems="center" spacing={2}>
             <Alert severity={cancelWithPenalty ? 'warning' : 'info'} sx={{ flexGrow: 1 }}>
               {cancelWithPenalty
-                ? 'Atención: Si cancelas ahora faltan menos de 24 hs, por lo que se te aplicará 1 Strike.'
+                ? 'Atención: Si cancelas ahora faltan menos de 24 hs, por lo que se te aplicará 1 Strike (Regla RN13).'
                 : 'Faltan más de 24 hs para tu turno. Puedes cancelarlo libremente sin penalidad.'}
             </Alert>
 
@@ -319,6 +451,7 @@ export const BookingWizard = () => {
               variant="outlined"
               color="error"
               startIcon={<CancelIcon />}
+              disabled={isSubmitting}
               onClick={() => setIsCancelDialogOpen(true)}
               sx={{ whiteSpace: 'nowrap' }}
             >
@@ -338,11 +471,11 @@ export const BookingWizard = () => {
             </DialogContentText>
           </DialogContent>
           <DialogActions sx={{ p: 2 }}>
-            <Button onClick={() => setIsCancelDialogOpen(false)} color="inherit">
+            <Button onClick={() => setIsCancelDialogOpen(false)} color="inherit" disabled={isSubmitting}>
               Volver
             </Button>
-            <Button onClick={handleConfirmCancelAppointment} color="error" variant="contained">
-              Sí, Cancelar Turno
+            <Button onClick={handleConfirmCancelAppointment} color="error" variant="contained" disabled={isSubmitting}>
+              {isSubmitting ? 'Cancelando...' : 'Sí, Cancelar Turno'}
             </Button>
           </DialogActions>
         </Dialog>
@@ -431,7 +564,7 @@ export const BookingWizard = () => {
             2. Selecciona la Fecha
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            Atención disponible de Martes a Sábado (próximos días habilitados):
+            Atención disponible según calendario oficial:
           </Typography>
           <Grid container spacing={1.5}>
             {availableDays.map((day) => {
@@ -624,7 +757,7 @@ export const BookingWizard = () => {
           </Paper>
 
           <Alert severity="info" sx={{ mb: 3 }}>
-            <strong>Recordatorio de Cancelación:</strong> Si necesitas cancelar, hazlo con más de 24 hs de anticipación para no acumular strikes en tu cuenta.
+            <strong>Recordatorio de Cancelación:</strong> Si necesitas cancelar, hazlo con más de 24 hs de anticipación para no acumular strikes en tu cuenta (Regla RN13).
           </Alert>
 
           <Button
@@ -632,11 +765,12 @@ export const BookingWizard = () => {
             color="primary"
             size="large"
             fullWidth
+            disabled={isSubmitting}
             onClick={handleConfirmBooking}
             startIcon={<CheckIcon />}
             sx={{ py: 1.5, fontWeight: 700, fontSize: '1.1rem' }}
           >
-            Confirmar Reserva de Turno
+            {isSubmitting ? 'Confirmando Reserva...' : 'Confirmar Reserva de Turno'}
           </Button>
         </Box>
       )}
@@ -644,7 +778,7 @@ export const BookingWizard = () => {
       {/* Controles de Navegación de Pasos (Atrás / Siguiente) */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4, pt: 2, borderTop: `1px solid ${withAlpha(BRAND_COLORS.white, 0.08)}` }}>
         <Button
-          disabled={activeStep === 0}
+          disabled={activeStep === 0 || isSubmitting}
           onClick={handleBack}
           startIcon={<BackIcon />}
           color="inherit"
@@ -661,7 +795,8 @@ export const BookingWizard = () => {
             disabled={
               (activeStep === 0 && !selectedService) ||
               (activeStep === 1 && !selectedDate) ||
-              (activeStep === 3 && !selectedTime)
+              (activeStep === 3 && !selectedTime) ||
+              isSubmitting
             }
           >
             Siguiente

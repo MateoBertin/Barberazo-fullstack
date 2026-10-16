@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Box,
   Container,
@@ -34,6 +34,7 @@ import {
   Info as InfoIcon,
 } from '@mui/icons-material';
 import { useData } from '../../context/DataContext';
+import { fechaService } from '../../services/fechaService';
 import { useSnackbar } from 'notistack';
 import { BRAND_COLORS, withAlpha } from '../../theme';
 
@@ -188,34 +189,72 @@ export const DatesPage = () => {
     setIsEditingSchedule(false);
   };
 
-  // Habilitar / iniciar flujo de deshabilitar
-  const handleToggleDayStatus = () => {
+  // Sincronizar fechas configuradas desde MySQL al montar el componente
+  useEffect(() => {
+    const syncDbDates = async () => {
+      try {
+        const dbDates = await fechaService.getAll();
+        if (Array.isArray(dbDates) && dbDates.length > 0) {
+          dbDates.forEach((dbDay) => {
+            const dateStr = dbDay.fecha;
+            const status = dbDay.estado === 'HABILITADO' ? 'Habilitado' : 'Deshabilitado';
+            const startTime = dbDay.hora_inicio ? dbDay.hora_inicio.slice(0, 5) : '08:00';
+            const endTime = dbDay.hora_fin ? dbDay.hora_fin.slice(0, 5) : '20:00';
+            const current = workingDays.find((d) => d.date === dateStr);
+            if (current) {
+              if (current.status !== status) toggleDayStatus(dateStr);
+              if (current.startTime !== startTime || current.endTime !== endTime) {
+                updateDaySchedule(dateStr, startTime, endTime);
+              }
+            }
+          });
+        }
+      } catch (err) {
+        console.warn('Usando fechas locales por error de API:', err.message);
+      }
+    };
+    syncDbDates();
+  }, []);
+
+  // Habilitar / iniciar flujo de deshabilitar (CUU6.1 / CUU6.2)
+  const handleToggleDayStatus = async () => {
     if (!selectedDay) return;
     const currentStatus = selectedDayData?.status || 'Habilitado';
     if (currentStatus === 'Habilitado') {
       setIsConfirmOpen(true); // CUU6.2: pide confirmación antes de deshabilitar
     } else {
-      // CUU6.1: habilitar directamente
-      toggleDayStatus(selectedDay.dateStr);
-      enqueueSnackbar(
-        `Fecha ${selectedDay.dateStr} habilitada correctamente.`,
-        { variant: 'success' }
-      );
+      // CUU6.1: habilitar directamente contra MySQL
+      try {
+        await fechaService.toggleDate(selectedDay.dateStr);
+        toggleDayStatus(selectedDay.dateStr);
+        enqueueSnackbar(
+          `Fecha ${selectedDay.dateStr} habilitada correctamente en MySQL.`,
+          { variant: 'success' }
+        );
+      } catch (err) {
+        enqueueSnackbar(err.message || 'Error al habilitar fecha', { variant: 'error' });
+      }
     }
   };
 
-  // Confirmar deshabilitación (CUU6.2)
-  const handleConfirmDisableDay = () => {
-    toggleDayStatus(selectedDay.dateStr);
-    enqueueSnackbar(
-      `Fecha ${selectedDay.dateStr} deshabilitada.`,
-      { variant: 'warning' }
-    );
-    setIsConfirmOpen(false);
+  // Confirmar deshabilitación (CUU6.2) contra MySQL
+  const handleConfirmDisableDay = async () => {
+    try {
+      await fechaService.toggleDate(selectedDay.dateStr);
+      toggleDayStatus(selectedDay.dateStr);
+      enqueueSnackbar(
+        `Fecha ${selectedDay.dateStr} deshabilitada en MySQL.`,
+        { variant: 'warning' }
+      );
+    } catch (err) {
+      enqueueSnackbar(err.message || 'Error al deshabilitar fecha', { variant: 'error' });
+    } finally {
+      setIsConfirmOpen(false);
+    }
   };
 
-  // Guardar horario editado (solo horas en punto: turnos de 1 hora)
-  const handleSaveDaySchedule = () => {
+  // Guardar horario editado contra MySQL (solo horas en punto: turnos de 1 hora)
+  const handleSaveDaySchedule = async () => {
     if (!isOnTheHour(scheduleForm.startTime) || !isOnTheHour(scheduleForm.endTime)) {
       enqueueSnackbar('El horario debe ser en hora en punto (ej. 08:00 a 20:00).', { variant: 'error' });
       return;
@@ -224,9 +263,14 @@ export const DatesPage = () => {
       enqueueSnackbar('El horario de inicio debe ser menor al de fin.', { variant: 'error' });
       return;
     }
-    updateDaySchedule(selectedDay.dateStr, scheduleForm.startTime, scheduleForm.endTime);
-    enqueueSnackbar('Horario del día actualizado correctamente.', { variant: 'success' });
-    setIsEditingSchedule(false);
+    try {
+      await fechaService.updateSchedule(selectedDay.dateStr, scheduleForm.startTime, scheduleForm.endTime);
+      updateDaySchedule(selectedDay.dateStr, scheduleForm.startTime, scheduleForm.endTime);
+      enqueueSnackbar('Horario del día actualizado correctamente en MySQL.', { variant: 'success' });
+      setIsEditingSchedule(false);
+    } catch (err) {
+      enqueueSnackbar(err.message || 'Error al actualizar horario', { variant: 'error' });
+    }
   };
 
   return (

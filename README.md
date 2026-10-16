@@ -107,7 +107,7 @@ npm run dev
 
 El backend debe estar corriendo primero. Si no lo está, el login cae a `MOCK_USERS` locales (solo para desarrollo).
 
-Para probar, usar los usuarios seed de la tabla de abajo (clave `123456`). Si se registra un usuario nuevo, el código de confirmación no llega por mail: sin SMTP configurado se imprime en la consola del backend (`MAIL SIMULADO`), copiarlo de ahí antes de que venzan los 5 minutos.
+Para probar, usar los usuarios seed de la tabla de abajo (clave `123456`). Sin SMTP configurado los mails no se envían: el código de confirmación de registro se imprime en la consola del backend (`MAIL SIMULADO`); copiarlo de ahí antes de que venzan los 5 minutos. El recupero de contraseña (`/recuperar-contrasena`) es una simulación local sin backend.
 
 ---
 

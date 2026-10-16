@@ -4,22 +4,19 @@ const { authenticateToken } = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
-/**
- * Rutas de Turnos (Módulo 3 - Lucas)
- * Todas las rutas de turnos requieren autenticación previa con token JWT.
- * El servicio y controlador resuelven los permisos y restricciones según el rol del usuario.
- */
+/*Rutas de Turnos
+Todas las rutas de turnos requieren autenticación previa con token y el servicio y controlador resuelven los permisos y restricciones según el rol del usuario.*/
 
-// GET /api/turnos -> Listar turnos con filtros opcionales (?fecha=&empleadoId=&clienteId=&estado=)
+// GET Listar turnos con filtros opcionales
 router.get('/', authenticateToken, turnoController.getAll);
 
-// GET /api/turnos/:id -> Detalle de un turno
+// GET Detalle de un turno
 router.get('/:id', authenticateToken, turnoController.getById);
 
-// POST /api/turnos -> Reservar un nuevo turno (CUU1.2 con validación RN05 y RN06)
+// POST Reservar un nuevo turno 
 router.post('/', authenticateToken, turnoController.create);
 
-// PATCH /api/turnos/:id/estado -> Actualizar estado (ASISTIDO, NO ASISTIDO con strike/multa, CANCELADO)
+// PATCH Actualizar estado (ASISTIDO, NO ASISTIDO, CANCELADO)
 router.patch('/:id/estado', authenticateToken, turnoController.updateStatus);
 
 module.exports = router;

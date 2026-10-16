@@ -1,14 +1,8 @@
 const { pool } = require('../config/db');
 
-/**
- * Repositorio de Turnos (Acceso a Datos - SQL Puro)
- * Parte 3 - Lucas (DSW)
- */
+/*Repositorio de Turnos*/
 
-/**
- * Busca turnos aplicando filtros opcionales (fecha, id_empleado, id_cliente, estado)
- * Incluye datos enriquecidos de cliente, empleado y servicio para el frontend (TurnosManager).
- */
+/*Busca turnos aplicando filtros opcionales*/
 async function findWithFilters({ fecha, id_empleado, id_cliente, estado } = {}) {
   let query = `
     SELECT 
@@ -77,9 +71,7 @@ async function findWithFilters({ fecha, id_empleado, id_cliente, estado } = {}) 
   return rows;
 }
 
-/**
- * Busca un turno por su ID con todos los detalles asociados
- */
+/*Busca un turno por su ID con todos los detalles asociados*/
 async function findById(id) {
   const query = `
     SELECT 
@@ -123,9 +115,7 @@ async function findById(id) {
   return rows[0] || null;
 }
 
-/**
- * Inserta un nuevo turno
- */
+/*Inserta un nuevo turno*/
 async function create({ id_cliente, id_empleado, id_servicio, fecha_hora }, executor = pool) {
   const [result] = await executor.execute(
     `INSERT INTO turnos (id_cliente, id_empleado, id_servicio, fecha_hora, estado)
@@ -135,9 +125,7 @@ async function create({ id_cliente, id_empleado, id_servicio, fecha_hora }, exec
   return result.insertId;
 }
 
-/**
- * Actualiza el estado de un turno (y opcionalmente motivo y quién canceló)
- */
+/*Actualiza el estado de un turno*/
 async function updateStatus(id, estado, motivo = null, canceladoPor = null, executor = pool) {
   await executor.execute(
     `UPDATE turnos 
@@ -147,9 +135,7 @@ async function updateStatus(id, estado, motivo = null, canceladoPor = null, exec
   );
 }
 
-/**
- * Regla RN06: Cuenta turnos activos ('SOLICITADO') futuros o presentes de un cliente
- */
+/*Cuenta turnos activos de un cliente*/
 async function countActiveByClient(idCliente) {
   const [rows] = await pool.execute(
     `SELECT COUNT(*) AS total 
@@ -160,9 +146,7 @@ async function countActiveByClient(idCliente) {
   return rows[0].total;
 }
 
-/**
- * Regla RN05: Verifica si un empleado ya tiene un turno reservado en ese horario exacto
- */
+/*Verifica si un empleado ya tiene un turno reservado en ese horario exacto*/
 async function isSlotOccupied(idEmpleado, fechaHora) {
   const [rows] = await pool.execute(
     `SELECT id_turno 

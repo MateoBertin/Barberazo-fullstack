@@ -1,9 +1,6 @@
 import { apiRequest } from './api';
 
-/**
- * Servicio de API para Pagos y Multas con Mercado Pago (CUU4.1)
- * Módulo 3 - Lucas (DSW)
- */
+/* Servicio de API para Pagos y Multas con Mercado Pago (CUU4.1)*/
 export const pagoService = {
   /**
    * Obtiene el listado de multas y estado de strikes del cliente logueado
@@ -13,9 +10,7 @@ export const pagoService = {
     return res.data;
   },
 
-  /**
-   * Genera la preferencia de checkout de Mercado Pago
-   */
+  /* Genera la preferencia de checkout de Mercado Pago*/
   async crearPreferencia(idMulta) {
     const res = await apiRequest('/pagos/preferencia', {
       method: 'POST',
@@ -24,9 +19,7 @@ export const pagoService = {
     return res.data;
   },
 
-  /**
-   * Confirma el pago de la multa, resetea los strikes a 0 y rehabilita la cuenta
-   */
+  /* Confirma el pago de la multa, resetea los strikes a 0 y rehabilita la cuenta*/
   async confirmarPago(idMulta, paymentMethod = 'Mercado Pago') {
     const res = await apiRequest('/pagos/confirmar', {
       method: 'POST',

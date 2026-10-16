@@ -1,15 +1,8 @@
 const mercadoPagoService = require('../services/mercadoPagoService');
 
-/**
- * Controlador de Pagos y Multas (CUU4.1)
- * Integración con Mercado Pago
- * Parte 3 - Lucas (DSW)
- */
+/* Integración con Mercado Pago*/
 
-/**
- * GET /api/pagos/multas
- * Devuelve el historial de multas y estado del cliente logueado
- */
+/*Devuelve el historial de multas y estado del cliente logueado*/
 async function getMisMultas(req, res) {
   try {
     const data = await mercadoPagoService.getMisMultas(req.user);
@@ -27,10 +20,7 @@ async function getMisMultas(req, res) {
   }
 }
 
-/**
- * POST /api/pagos/preferencia
- * Crea una preferencia de pago en Mercado Pago para una multa
- */
+/*Crea una preferencia de pago en Mercado Pago para una multa*/
 async function crearPreferencia(req, res) {
   try {
     const idMulta = req.body.id_multa || req.body.idMulta || req.body.fineId;
@@ -56,11 +46,7 @@ async function crearPreferencia(req, res) {
   }
 }
 
-/**
- * POST /api/pagos/confirmar
- * Confirma el pago de la multa (vía Checkout o simulación aprobada de Mercado Pago),
- * resetea los strikes a 0 y rehabilita la cuenta del cliente a ACTIVO.
- */
+/*Confirma el pago de la multa (vía Checkout o simulación aprobada de Mercado Pago),resetea los strikes a 0 y rehabilita la cuenta del cliente a ACTIVO.*/
 async function confirmarPago(req, res) {
   try {
     const idMulta = req.body.id_multa || req.body.idMulta || req.body.fineId;

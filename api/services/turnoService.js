@@ -11,13 +11,11 @@ function createError(message, statusCode) {
   return error;
 }
 
-/**
- * Obtiene lista de turnos según filtros y rol de usuario
- */
+/*Obtiene lista de turnos según filtros y rol de usuario*/
 async function getAll(filters = {}, user) {
   const cleanFilters = { ...filters };
 
-  // Si el usuario es CLIENTE, restringir únicamente a sus propios turnos
+  // Si el usuario es cliente, restringe únicamente a sus propios turnos
   if (user && user.rol === 'CLIENTE') {
     const cliente = await clienteRepository.findByUserId(user.id);
     if (!cliente) throw createError('Perfil de cliente no encontrado', 404);
@@ -27,9 +25,7 @@ async function getAll(filters = {}, user) {
   return turnoRepository.findWithFilters(cleanFilters);
 }
 
-/**
- * Obtiene el detalle de un turno por ID validando permisos
- */
+/*Obtiene el detalle de un turno por ID validando permisos*/
 async function getById(id, user) {
   const turno = await turnoRepository.findById(id);
   if (!turno) {
@@ -47,16 +43,11 @@ async function getById(id, user) {
   return turno;
 }
 
-/**
- * CUU1.2 - Registrar Turno con validación de:
- * 1. Cliente activo (sin bloqueo ni multas)
- * 2. RN06: Máximo 1 turno activo ('SOLICITADO') por cliente
- * 3. RN05: No superposición de horarios para el mismo empleado
- */
+/*Registrar Turno con validación*/
 async function create({ id_cliente, id_empleado, id_servicio, fecha_hora }, user) {
   let resolvedClienteId = id_cliente;
 
-  // Si el usuario logueado es CLIENTE, resolver su id_cliente automáticamente
+  // Si el usuario logueado es cliente, da id automáticamente
   if (user && user.rol === 'CLIENTE') {
     const clienteLogueado = await clienteRepository.findByUserId(user.id);
     if (!clienteLogueado) throw createError('Perfil de cliente no encontrado', 404);
@@ -88,13 +79,13 @@ async function create({ id_cliente, id_empleado, id_servicio, fecha_hora }, user
     throw createError('La fecha y hora del turno debe ser futura', 400);
   }
 
-  // Regla RN06: Rechazar si el cliente ya tiene un turno en estado SOLICITADO
+  //Rechaza si el cliente ya tiene un turno en estado SOLICITADO
   const activeCount = await turnoRepository.countActiveByClient(resolvedClienteId);
   if (activeCount > 0) {
     throw createError('Ya posees un turno activo en estado Solicitado (Regla RN06). No podés reservar otro hasta asistir o cancelar el anterior.', 409);
   }
 
-  // Regla RN05: Rechazar si el empleado ya está ocupado en ese horario
+  //Rechaza si el empleado ya está ocupado en ese horario
   const isOccupied = await turnoRepository.isSlotOccupied(id_empleado, fecha_hora);
   if (isOccupied) {
     throw createError('El barbero seleccionado ya tiene un turno reservado en ese horario (Regla RN05). Por favor elegí otro horario o profesional.', 409);
@@ -111,12 +102,7 @@ async function create({ id_cliente, id_empleado, id_servicio, fecha_hora }, user
   return getById(idTurno, user);
 }
 
-/**
- * Transición de estado del turno (CUU1.3, CUU1.5, CUU1.6):
- * - ASISTIDO: Registra la asistencia efectiva.
- * - NO ASISTIDO: Registra inasistencia, suma +1 strike al cliente; si llega a 3 strikes, genera multa automática y pasa a MULTADO.
- * - CANCELADO: Si cancela el cliente con menos de 24 hs (RN13), suma +1 strike (y multa al 3er strike). Si cancela el local, no penaliza.
- */
+/*Transición de estado del turno*/
 async function updateStatus(id, { estado, motivo }, user) {
   const turno = await turnoRepository.findById(id);
   if (!turno) {
@@ -147,15 +133,15 @@ async function updateStatus(id, { estado, motivo }, user) {
     await connection.beginTransaction();
 
     if (cleanEstado === 'ASISTIDO') {
-      // CUU1.3: Asistencia confirmada
+      //Asistencia confirmada
       await turnoRepository.updateStatus(id, 'ASISTIDO', null, null, connection);
 
     } else if (cleanEstado === 'NO ASISTIDO') {
-      // CUU1.3: Inasistencia computada (+1 strike al cliente)
+      //Inasistencia confirmada
       const motivoInasistencia = motivo || 'Inasistencia sin previo aviso';
       await turnoRepository.updateStatus(id, 'NO ASISTIDO', motivoInasistencia, null, connection);
 
-      // Incrementar strike al cliente
+      //strike al cliente
       const [strikeResult] = await connection.execute(
         `UPDATE clientes 
          SET contador_strikes = contador_strikes + 1 
@@ -171,7 +157,7 @@ async function updateStatus(id, { estado, motivo }, user) {
       const strikesActuales = clientRows[0] ? clientRows[0].contador_strikes : 0;
       strikeSumado = true;
 
-      // Si llega a 3 o más strikes: pasa a MULTADO y se emite la multa automática
+      // Si llega a 3 o más strikes:,pasa a multado y se emite la multa automática
       if (strikesActuales >= 3) {
         await connection.execute(
           "UPDATE clientes SET estado = 'MULTADO' WHERE id_cliente = ?",
@@ -190,14 +176,14 @@ async function updateStatus(id, { estado, motivo }, user) {
       const canceladoPor = user && user.rol ? user.rol : 'ADMIN';
       const motivoCancelacion = motivo || (canceladoPor === 'CLIENTE' ? 'Cancelado por el cliente' : 'Cancelado por el local');
 
-      // Si quien cancela es el CLIENTE: evaluar Regla RN13 (< 24 horas de antelación)
+      // Si quien cancela es el cliente: evalua las 24 horas de antelación
       if (canceladoPor === 'CLIENTE') {
         const fechaTurnoMs = new Date(turno.fecha_hora).getTime();
         const ahoraMs = Date.now();
         const horasAnticipacion = (fechaTurnoMs - ahoraMs) / (1000 * 60 * 60);
 
         if (horasAnticipacion < 24) {
-          // RN13: Cancelación tardía computa +1 Strike
+          //Cancelación tardía 
           await connection.execute(
             `UPDATE clientes 
              SET contador_strikes = contador_strikes + 1 

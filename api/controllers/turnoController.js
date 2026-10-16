@@ -1,14 +1,8 @@
 const turnoService = require('../services/turnoService');
 
-/**
- * Controlador de Turnos (Manejo de HTTP req, res y códigos de estado)
- * Parte 3 - Lucas (DSW)
- */
+/*Controlador de Turnos*/
 
-/**
- * GET /api/turnos
- * Obtiene lista de turnos con filtros opcionales (fecha, id_empleado, id_cliente, estado)
- */
+/*GET Obtiene lista de turnos*/
 async function getAll(req, res) {
   try {
     const filters = {
@@ -35,9 +29,7 @@ async function getAll(req, res) {
 }
 
 /**
- * GET /api/turnos/:id
- * Obtiene un turno por su ID
- */
+ * GET Obtiene un turno por su ID*/
 async function getById(req, res) {
   try {
     const turno = await turnoService.getById(req.params.id, req.user);
@@ -56,10 +48,7 @@ async function getById(req, res) {
   }
 }
 
-/**
- * POST /api/turnos
- * CUU1.2 - Reserva de un nuevo turno
- */
+/*POST Reserva de un nuevo turno*/
 async function create(req, res) {
   try {
     const turnoData = {
@@ -85,11 +74,7 @@ async function create(req, res) {
   }
 }
 
-/**
- * PATCH /api/turnos/:id/estado
- * CUU1.3, CUU1.5, CUU1.6 - Cambio de estado de un turno
- * Estados: ASISTIDO | NO ASISTIDO | CANCELADO
- */
+/*PATCH Cambio de estado de un turno*/
 async function updateStatus(req, res) {
   try {
     const estado = req.body.estado || req.body.status;

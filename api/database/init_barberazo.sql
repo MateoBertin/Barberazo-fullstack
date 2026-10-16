@@ -1,12 +1,9 @@
--- =======================================================
--- SCRIPT DE INICIALIZACIÓN - SISTEMA BARBERAZO (BD: dsw)
--- Cátedra: Desarrollo de Software
--- =======================================================
+-- SISTEMA BARBERAZO 
 
 CREATE DATABASE IF NOT EXISTS `dsw` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
 USE `dsw`;
 
--- Deshabilitar chequeo de claves foráneas para recreación limpia si es necesario
+-- Deshabilitar chequeo de claves foráneas
 SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS `codigos_verificacion`;
 DROP TABLE IF EXISTS `resenas`;
@@ -155,7 +152,6 @@ CREATE TABLE `resenas` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- 10. TABLA CÓDIGOS DE VERIFICACIÓN
--- Soporta CUU2.1 (confirmar registro, RN09) y CUU3.1 (recuperar contraseña)
 CREATE TABLE `codigos_verificacion` (
   `id_codigo` int NOT NULL AUTO_INCREMENT,
   `id_usuario` int NOT NULL,
@@ -171,7 +167,7 @@ CREATE TABLE `codigos_verificacion` (
 
 
 -- =======================================================
--- DATOS INICIALES DE PRUEBA (SEED DATA)
+-- DATOS INICIALES DE PRUEBA 
 -- Contraseña para todos los usuarios de prueba: 123456
 -- Hash Bcrypt: $2b$10$SD9veVUALgiK6OK2n/5YQOQjBI2Ja8kVbEszpRI4DrXCkqP2LYwO2
 -- =======================================================

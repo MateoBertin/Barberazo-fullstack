@@ -1,9 +1,6 @@
 const resenaService = require('../services/resenaService');
 
-/**
- * Controlador de Reseñas (CUU1.4 y CUU8.1)
- * Parte 3 - Lucas (DSW)
- */
+/*Controlador de Reseñas*/
 
 async function getAll(req, res) {
   try {

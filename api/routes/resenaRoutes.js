@@ -4,12 +4,10 @@ const { authenticateToken } = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
-/**
- * Rutas de Reseñas (Módulo 3 - Lucas)
- * Endpoints:
- * GET  /api/resenas -> Consultar reseñas (CUU8.1)
- * POST /api/resenas -> Dejar calificación de un turno completado/asistido (CUU1.4)
- */
+/*Rutas de Reseñas 
+ Endpoints:
+ GET Consultar reseñas (CUU8.1)
+ POST Dejar calificación de un turno completado/asistido*/
 
 router.get('/', authenticateToken, resenaController.getAll);
 router.post('/', authenticateToken, resenaController.create);

@@ -1,13 +1,8 @@
 const { pool } = require('../config/db');
 
-/**
- * Repositorio de Multas (Acceso a Datos - SQL Puro)
- * Parte 3 - Lucas (DSW) / CUU4.1 - Pagar Multa
- */
+/*Repositorio de Multas*/
 
-/**
- * Busca todas las multas de un cliente con datos de turno y servicio
- */
+/*Busca todas las multas de un cliente con datos de turno y servicio*/
 async function findByClienteId(idCliente) {
   const query = `
     SELECT 
@@ -35,9 +30,7 @@ async function findByClienteId(idCliente) {
   return rows;
 }
 
-/**
- * Busca una multa por su ID con datos del cliente asociado
- */
+/*Busca una multa por su ID con datos del cliente asociado*/
 async function findById(idMulta) {
   const query = `
     SELECT 
@@ -65,9 +58,7 @@ async function findById(idMulta) {
   return rows[0] || null;
 }
 
-/**
- * Busca la multa pendiente de pago más reciente de un cliente
- */
+/*Busca la multa pendiente de pago más reciente de un cliente*/
 async function findPendingByClienteId(idCliente) {
   const query = `
     SELECT id_multa, id_cliente, id_turno, monto, motivo, estado_pago, fecha_emision
@@ -81,9 +72,7 @@ async function findPendingByClienteId(idCliente) {
   return rows[0] || null;
 }
 
-/**
- * Inserta una nueva multa
- */
+/*Inserta una nueva multa*/
 async function create({ id_cliente, id_turno, monto, motivo }, executor = pool) {
   const [result] = await executor.execute(
     `INSERT INTO multas (id_cliente, id_turno, monto, motivo, estado_pago)
@@ -93,9 +82,7 @@ async function create({ id_cliente, id_turno, monto, motivo }, executor = pool) 
   return result.insertId;
 }
 
-/**
- * Registra el pago de una multa
- */
+/*Registra el pago de una multa*/
 async function registrarPago(idMulta, { metodo_pago }, executor = pool) {
   await executor.execute(
     `UPDATE multas 
@@ -105,10 +92,7 @@ async function registrarPago(idMulta, { metodo_pago }, executor = pool) {
   );
 }
 
-/**
- * Restaura la cuenta del cliente tras el pago de la multa:
- * Resetea el contador de strikes a 0 y pasa su estado a ACTIVO.
- */
+/*Resetea el contador de strikes a 0 y pasa su estado a ACTIVO.*/
 async function rehabilitarCliente(idCliente, executor = pool) {
   await executor.execute(
     `UPDATE clientes 

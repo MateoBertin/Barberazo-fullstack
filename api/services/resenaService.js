@@ -8,14 +8,11 @@ function createError(message, statusCode) {
   return error;
 }
 
-/**
- * Obtiene todas las reseñas
- * Si el usuario logueado es EMPLEADO, puede filtrarse por su propio perfil si se desea
- */
+/*Obtiene todas las reseñas. Si el usuario logueado es EMPLEADO, puede filtrarse por su propio perfil*/
 async function getAll(user) {
   const reviews = await resenaRepository.findAll();
 
-  // Si es un EMPLEADO, filtrar solo las reseñas de sus turnos atendidos
+  // Si es un EMPLEADO, filtra solo las reseñas de sus turnos atendidos
   if (user && user.rol === 'EMPLEADO') {
     return reviews.filter((r) => r.empleado_email === user.email);
   }
@@ -23,14 +20,7 @@ async function getAll(user) {
   return reviews;
 }
 
-/**
- * CUU1.4 - Completar reseña de un turno
- * Reglas de negocio:
- * 1. La calificación debe ser un entero entre 1 y 5.
- * 2. El turno debe existir y estar en estado 'ASISTIDO'.
- * 3. El cliente debe ser el propietario del turno.
- * 4. El turno no debe haber sido calificado previamente.
- */
+/*Completar reseña de un turno*/
 async function create({ id_turno, appointmentId, calificacion, rating, comentario, comment }, user) {
   const resolvedTurnoId = id_turno || appointmentId;
   const resolvedCalificacion = Number(calificacion ?? rating);
@@ -50,7 +40,7 @@ async function create({ id_turno, appointmentId, calificacion, rating, comentari
     throw createError('El turno especificado no existe', 404);
   }
 
-  // Regla estricta: Solo se pueden reseñar turnos ASISTIDOS
+  //Solo se pueden reseñar turnos ASISTIDOS
   if (turno.estado !== 'ASISTIDO') {
     throw createError('Solo podés calificar turnos que hayan sido completados y asistidos', 400);
   }

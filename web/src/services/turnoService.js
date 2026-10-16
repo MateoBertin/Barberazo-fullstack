@@ -1,11 +1,9 @@
 import { apiRequest } from './api';
 
-/**
- * Servicio de API para Turnos y Agenda (Parte 3 - Lucas)
- */
+/*API para Turnos y Agenda*/
 export const turnoService = {
   async getAll(filters = {}) {
-    // Limpiar claves vacías o undefined
+    // Limpiar claves vacías o no definidas
     const cleanFilters = {};
     Object.entries(filters).forEach(([key, val]) => {
       if (val !== undefined && val !== null && val !== '' && val !== 'all') {

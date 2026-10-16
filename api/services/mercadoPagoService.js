@@ -9,24 +9,20 @@ function createError(message, statusCode) {
   return error;
 }
 
-/**
- * Inicializa cliente de Mercado Pago si existe token en el entorno
- */
+/* Inicializa cliente de Mercado Pago si existe token en el entorno*/
 function getMercadoPagoClient() {
   const token = process.env.MERCADOPAGO_ACCESS_TOKEN;
   if (!token) return null;
   return new MercadoPagoConfig({ accessToken: token });
 }
 
-/**
- * Obtiene las multas y el estado actual del cliente logueado
- */
+/*Obtiene las multas y el estado actual del cliente logueado*/
 async function getMisMultas(user) {
   let cliente;
   if (user.rol === 'CLIENTE') {
     cliente = await clienteRepository.findByUserId(user.id);
   } else {
-    // Si es ADMIN, puede consultar de prueba
+    // Si es admin, puede consultar de prueba
     cliente = await clienteRepository.findByUserId(user.id);
   }
 
@@ -50,9 +46,7 @@ async function getMisMultas(user) {
   };
 }
 
-/**
- * CUU4.1 - Crear preferencia de checkout en Mercado Pago
- */
+/*CUU4.1 - Crear preferencia de checkout en Mercado Pago*/
 async function crearPreferencia(idMulta, user) {
   const multa = await multaRepository.findById(idMulta);
   if (!multa) {
@@ -129,12 +123,9 @@ async function crearPreferencia(idMulta, user) {
   };
 }
 
-/**
- * CUU4.1 - Confirmar pago de multa y rehabilitar cuenta del cliente
- * Realiza una transacción atómica que:
- * 1. Marca la multa como PAGADA con fecha actual y medio de pago.
- * 2. Resetea los strikes a 0 y pasa el estado del cliente a ACTIVO.
- */
+/*Confirmar pago de multa y rehabilitar cuenta del cliente
+ 1. Marca la multa como PAGADA con fecha actual y medio de pago.
+ 2. Resetea los strikes a 0 y pasa el estado del cliente a ACTIVO.*/
 async function confirmarPago(idMulta, { paymentMethod }, user) {
   const multa = await multaRepository.findById(idMulta);
   if (!multa) {

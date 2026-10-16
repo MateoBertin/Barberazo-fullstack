@@ -1,7 +1,7 @@
 import { apiRequest } from './api';
 
 /**
- * Servicio de API para Servicios de Barbería (Parte 1 - Pedro)
+ * Servicio de API para Servicios de Barbería
  */
 export const servicioService = {
   async getAll() {

@@ -3,7 +3,7 @@ import { useAuth } from './AuthContext';
 
 const DataContext = createContext();
 
-// --- GENERADOR DE DÍAS LABORALES (CUU6.1 / CUU6.2) ---
+// --- Generador de días laborales ---
 // Genera todos los días Martes-Sábado del mes actual + 2 meses siguientes
 const DAY_NAMES_ES = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 
@@ -61,7 +61,7 @@ const normalizeWorkingDay = (day) => {
   };
 };
 
-// Servicios iniciales predeterminados (CUU7.1, CUU7.2)
+// Servicios iniciales predeterminados
 export const INITIAL_SERVICES = [
   {
     id: 's1',
@@ -122,7 +122,7 @@ const normalizeService = (service) => {
   };
 };
 
-// Empleados iniciales (CUU10.1, CUU10.2, CUU10.3, CUU6.3)
+// Empleados iniciales
 export const INITIAL_EMPLOYEES = [
   {
     id: 'e1',
@@ -184,7 +184,7 @@ const normalizeEmployee = (employee) => {
   };
 };
 
-// Clientes registrados en el sistema (CUU5.1, CUU5.2)
+// Clientes registrados en el sistema
 export const INITIAL_CLIENTS = [
   {
     id: 'c1',
@@ -232,7 +232,7 @@ const normalizeClient = (client) => {
   };
 };
 
-// Appointments iniciales de prueba (CUU1.2, CUU1.3, CUU1.5, CUU1.6)
+// Appointments iniciales de prueba
 export const INITIAL_APPOINTMENTS = [
   {
     id: 't_1',
@@ -320,7 +320,7 @@ const normalizeAppointment = (appointment) => {
   };
 };
 
-// Fines iniciales de prueba (CUU4.1)
+// Fines iniciales de prueba
 export const INITIAL_FINES = [
   {
     id: 'm_1',
@@ -354,7 +354,7 @@ const normalizeFine = (fine) => {
   };
 };
 
-// Reviews iniciales de prueba (CUU1.4, CUU8.1)
+// Reviews iniciales de prueba
 export const INITIAL_REVIEWS = [
   {
     id: 'r_1',
@@ -427,7 +427,7 @@ export const DataProvider = ({ children }) => {
 
   const { user, updateUserState } = useAuth();
 
-  // Appointments: Ciclo de vida de turnos y reservas (Fase 4)
+  // Appointments: ciclo de vida de turnos y reservas
   const [appointments, setAppointments] = useState(() => {
     const saved = localStorage.getItem('barberazo_appointments') || localStorage.getItem('barberazo_turnos');
     if (saved) {
@@ -437,7 +437,7 @@ export const DataProvider = ({ children }) => {
     return INITIAL_APPOINTMENTS;
   });
 
-  // Fines: Sanciones por acumulación de 3 strikes (Fase 4)
+  // Fines: sanciones por acumulación de 3 strikes
   const [fines, setFines] = useState(() => {
     const saved = localStorage.getItem('barberazo_fines') || localStorage.getItem('barberazo_multas');
     if (saved) {
@@ -447,7 +447,7 @@ export const DataProvider = ({ children }) => {
     return INITIAL_FINES;
   });
 
-  // Reviews: Calificaciones de turnos asistidos (Fase 5, CUU1.4)
+  // Reviews: calificaciones de turnos asistidos
   const [reviews, setReviews] = useState(() => {
     const saved = localStorage.getItem('barberazo_reviews');
     if (saved) {
@@ -485,7 +485,7 @@ export const DataProvider = ({ children }) => {
     localStorage.setItem('barberazo_reviews', JSON.stringify(reviews));
   }, [reviews]);
 
-  // --- CRUD SERVICIOS (CUU7.1, CUU7.2) ---
+  // --- CRUD servicios ---
   const addService = (newService) => {
     const service = normalizeService({
       ...newService,
@@ -513,7 +513,7 @@ export const DataProvider = ({ children }) => {
     );
   };
 
-  // --- CRUD EMPLEADOS (CUU10.1, CUU10.2, CUU10.3, CUU6.3) ---
+  // --- CRUD empleados ---
   const addEmployee = (newEmployee) => {
     const normalized = normalizeEmployee({
       ...newEmployee,
@@ -533,7 +533,7 @@ export const DataProvider = ({ children }) => {
     setEmployees((prev) => prev.filter((e) => e.id !== id));
   };
 
-  // --- EDICIÓN Y ELIMINACIÓN DE CLIENTES (CUU9.1, CUU9.2) ---
+  // --- Edición y eliminación de clientes ---
   const updateClient = (id, updatedData) => {
     setClients((prev) =>
       prev.map((c) => (String(c.id) === String(id) ? normalizeClient({ ...c, ...updatedData, id: c.id }) : c))
@@ -544,7 +544,7 @@ export const DataProvider = ({ children }) => {
     setClients((prev) => prev.filter((c) => String(c.id) !== String(id)));
   };
 
-  // --- GESTIÓN DE CLIENTES Y BLOQUEOS (CUU5.1, CUU5.2) ---
+  // --- Gestión de clientes y bloqueos ---
   const toggleClientBlock = (id) => {
     setClients((prev) =>
       prev.map((client) => {
@@ -558,9 +558,9 @@ export const DataProvider = ({ children }) => {
     );
   };
 
-  // --- GESTIÓN DE DÍAS LABORALES / CALENDARIO (CUU6.1, CUU6.2) ---
+  // --- Gestión de días laborales / calendario ---
 
-  // CUU6.1 Habilitar Fecha / CUU6.2 Deshabilitar Fecha
+  // Habilitar / deshabilitar fecha
   // Alterna el estado de un workingDay entre 'Habilitado' y 'Deshabilitado'
   const toggleDayStatus = (date) => {
     setWorkingDays((prev) =>
@@ -585,9 +585,9 @@ export const DataProvider = ({ children }) => {
 
 
 
-  // --- FASE 4: APPOINTMENTS, STRIKES & FINES ---
+  // --- Appointments, strikes & fines ---
 
-  // CUU1.2: Register new appointment
+  // Register new appointment
   const addAppointment = (newAppointment) => {
     const hasActiveAppointment = appointments.some(
       (a) =>
@@ -641,7 +641,7 @@ export const DataProvider = ({ children }) => {
     return appointment;
   };
 
-  // CUU1.5: Cancel client appointment (24h rule)
+  // Cancel client appointment (24h rule)
   const cancelClientAppointment = (appointmentId, reason = 'Cancelado por el cliente') => {
     const appointment = appointments.find((a) => a.id === appointmentId);
     if (!appointment) return;
@@ -679,7 +679,7 @@ export const DataProvider = ({ children }) => {
     return { isLessThan24Hours };
   };
 
-  // CUU1.3 and CUU1.6: Update appointment status (attended, absent, cancelled)
+  // Update appointment status (attended, absent, cancelled)
   const updateAppointmentStatus = (appointmentId, newStatus, reason = '') => {
     const appointment = appointments.find((a) => a.id === appointmentId);
     if (!appointment) return;
@@ -757,7 +757,7 @@ export const DataProvider = ({ children }) => {
     }
   };
 
-  // CUU4.1: Pay fine (Mercado Pago simulation)
+  // Pay fine (Mercado Pago simulation)
   const payFine = (fineId, clientId) => {
     const todayStr = new Date().toISOString().split('T')[0];
     const paidFine = fines.find((f) => f.id === fineId);
@@ -791,8 +791,8 @@ export const DataProvider = ({ children }) => {
     );
   };
 
-  // --- FASE 5: REVIEWS (CUU1.4) ---
-  // CUU1.4: Register review for an attended appointment (1 review per appointment)
+  // --- Reviews ---
+  // Register review for an attended appointment (1 review per appointment)
   const addReview = (newReview) => {
     const alreadyReviewed = reviews.some((r) => r.appointmentId === newReview.appointmentId);
     if (alreadyReviewed) {
@@ -831,7 +831,7 @@ export const DataProvider = ({ children }) => {
         toggleClientBlock,
         updateClient,
         removeClient,
-        // Días de trabajo / Calendario (Fase 3)
+        // Días de trabajo / calendario
         workingDays,
         toggleDayStatus,
         updateDaySchedule,
@@ -843,7 +843,7 @@ export const DataProvider = ({ children }) => {
         addStrike,
         fines,
         payFine,
-        // Reviews (Fase 5)
+        // Reviews
         reviews,
         addReview,
       }}

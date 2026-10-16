@@ -44,7 +44,7 @@ export const ClientProfilePage = () => {
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
-  // CUU9.1: Guardar cambios del perfil contra MySQL y sincronizar sesión local.
+  // Guardar cambios del perfil contra MySQL y sincronizar sesión local.
   const handleSaveProfile = async (e) => {
     e.preventDefault();
     if (!formData.name.trim()) {
@@ -66,7 +66,7 @@ export const ClientProfilePage = () => {
     }
   };
 
-  // CUU9.2: Eliminar la cuenta (doble confirmación). Si tiene turnos, el back
+  // Eliminar la cuenta (doble confirmación). Si tiene turnos, el back
   // responde 409 y no se cierra sesión.
   const handleConfirmDeleteAccount = async () => {
     try {
@@ -107,7 +107,7 @@ export const ClientProfilePage = () => {
         </Stack>
       </Paper>
 
-      {/* ─── CUU9.1: Edición de datos ─── */}
+      {/* ─── Edición de datos ─── */}
       <Paper sx={{ p: 3, borderRadius: 3, background: BRAND_COLORS.card, mb: 3 }}>
         <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
           Datos Personales
@@ -153,7 +153,7 @@ export const ClientProfilePage = () => {
         </form>
       </Paper>
 
-      {/* ─── CUU9.2: Zona de peligro ─── */}
+      {/* ─── Zona de peligro ─── */}
       <Paper sx={{ p: 3, borderRadius: 3, background: BRAND_COLORS.card, border: `1px solid ${withAlpha(BRAND_COLORS.danger, 0.4)}` }}>
         <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
           <WarningIcon sx={{ color: BRAND_COLORS.danger }} />

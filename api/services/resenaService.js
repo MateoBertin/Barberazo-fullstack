@@ -20,7 +20,6 @@ async function getAll(user) {
   return reviews;
 }
 
-/*Completar reseña de un turno*/
 async function create({ id_turno, appointmentId, calificacion, rating, comentario, comment }, user) {
   const resolvedTurnoId = id_turno || appointmentId;
   const resolvedCalificacion = Number(calificacion ?? rating);

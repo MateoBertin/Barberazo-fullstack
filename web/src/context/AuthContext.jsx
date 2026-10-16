@@ -115,9 +115,9 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Registro de Cliente (CUU2.1) - Inicia verificación por código (5 min)
+  // Registro de cliente: inicia verificación por código (5 min)
   const register = (userData) => {
-    // Generar código de 6 dígitos para la verificación del CUU2.1
+    // Generar código de 6 dígitos para la verificación
     const code = Math.floor(100000 + Math.random() * 900000).toString();
     const expiresAt = Date.now() + 5 * 60 * 1000; // 5 minutos
 
@@ -210,14 +210,14 @@ export const AuthProvider = ({ children }) => {
     });
   };
 
-  // CUU9.1: Editar datos del perfil (nombre y teléfono)
+  // Editar datos del perfil (nombre y teléfono)
   // Nota: AuthContext conserva claves en español (nombre, telefono) por compatibilidad
   // con el backend y los mocks; la página mapea sus campos en inglés a estas claves.
   const updateProfile = (updates) => {
     updateUserState(updates);
   };
 
-  // CUU9.2: Eliminar la cuenta del usuario actual
+  // Eliminar la cuenta del usuario actual
   const deleteAccount = () => {
     setUser(null);
     setToken(null);

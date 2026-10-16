@@ -33,7 +33,7 @@ async function getById(id) {
   return empleado;
 }
 
-// CUU10.1 - Alta atómica: usuarios (rol EMPLEADO) + empleados en una transacción.
+// Alta en dos tablas dentro de una transacción.
 async function create({ nombre, apellido, email, password, telefono, especialidades, especialidad }) {
   const cleanNombre = (nombre || '').trim();
   const cleanApellido = (apellido || '').trim();
@@ -76,7 +76,7 @@ async function create({ nombre, apellido, email, password, telefono, especialida
   return getById(idEmpleado);
 }
 
-// CUU10.2 - Edición (datos del empleado y opcionalmente su email).
+// Edición (datos del empleado y opcionalmente su email).
 async function update(id, { nombre, apellido, email, telefono, especialidades, especialidad, estado }) {
   const current = await getById(id);
 
@@ -113,8 +113,7 @@ async function update(id, { nombre, apellido, email, telefono, especialidades, e
   return getById(id);
 }
 
-// CUU10.3 - Baja lógica: pasa a INACTIVO, pero se bloquea si tiene turnos futuros.
-// Los turnos se resuelven primero en la consola de turnos (módulo de Lucas).
+// Baja lógica (pasa a INACTIVO), bloqueada si tiene turnos futuros sin resolver.
 async function remove(id) {
   const current = await getById(id);
   if (current.estado === 'INACTIVO') {

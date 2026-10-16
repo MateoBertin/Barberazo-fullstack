@@ -55,7 +55,7 @@ async function register(req, res) {
   }
 }
 
-// POST /api/auth/confirm - CUU2.1 paso 2: confirmar el registro con el código del mail
+// Confirmar el registro con el código del mail
 async function confirmRegistration(req, res) {
   try {
     const { email, codigo } = req.body;

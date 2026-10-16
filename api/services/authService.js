@@ -18,7 +18,7 @@ function generateCode() {
   return String(crypto.randomInt(0, 1000000)).padStart(6, '0');
 }
 
-// Guarda un código en la BD. RN09: válido por 5 minutos.
+// Guarda un código en la BD, válido por 5 minutos.
 // `executor` puede ser el pool o una conexión con transacción abierta.
 // El vencimiento se calcula en MySQL (NOW() + 5 min) para no depender de zonas horarias de Node.
 async function saveCode(executor, idUsuario, tipo) {
@@ -69,9 +69,8 @@ function sanitizeUser(user) {
   };
 }
 
-// CUU2.1 - Registrar cliente
-// El cliente queda en estado REGISTRADO (pendiente) hasta confirmar el código enviado por mail.
-// Ya no se devuelve token: primero debe confirmar y luego loguearse (CUU1.1).
+// Registrar cliente: queda en estado REGISTRADO hasta confirmar el código del mail.
+// Primero confirma y después se loguea (todavía no se devuelve token).
 async function register({ nombre, apellido, email, password, telefono }) {
   // Camino alternativo 1.a: el mail ya está registrado
   const existingUser = await findUserByEmail(email);
@@ -98,7 +97,7 @@ async function register({ nombre, apellido, email, password, telefono }) {
       [idUsuario, nombre, apellido, telefono || null, 'REGISTRADO']
     );
 
-    // RN09: código de confirmación válido por 5 minutos
+    // Código de confirmación válido por 5 minutos
     codigo = await saveCode(connection, idUsuario, 'CONFIRMACION');
 
     await connection.commit();
@@ -113,7 +112,7 @@ async function register({ nombre, apellido, email, password, telefono }) {
   await emailService.enviarCodigoConfirmacion(email, codigo);
 }
 
-// CUU2.1 (paso 2) - El cliente ingresa el código recibido y el sistema pasa su estado a ACTIVO
+// El cliente ingresa el código recibido y su estado pasa a ACTIVO
 async function confirmRegistration({ email, codigo }) {
   const user = await findUserByEmail(email);
   if (!user) {
@@ -179,12 +178,12 @@ async function login({ email, password }) {
 
   const profile = await findUserById(user.id_usuario);
 
-  // CUU1.1 camino 1.b: usuario bloqueado
+  // La cuenta está bloqueada por la administración.
   if (profile && profile.estado === 'BLOQUEADO') {
     throw createError('Tu cuenta ha sido bloqueada por la administración.', 403);
   }
 
-  // CUU1.1 camino 1.c: todavía no confirmó su registro
+  // Todavía no confirmó su registro con el código del mail.
   if (profile && profile.estado === 'REGISTRADO') {
     throw createError('Debés confirmar tu registro con el código enviado a tu mail para ingresar.', 403);
   }

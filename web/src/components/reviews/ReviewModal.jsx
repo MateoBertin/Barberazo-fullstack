@@ -38,7 +38,7 @@ export const ReviewModal = ({ open, onClose, appointment, onReviewSubmitted }) =
     onClose();
   };
 
-  // CUU1.4: Enviar calificación del turno asistido contra MySQL (/api/resenas)
+  // Enviar calificación del turno asistido contra MySQL (/api/resenas)
   const handleSubmitReview = async () => {
     try {
       setIsSubmitting(true);

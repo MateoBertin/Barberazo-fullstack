@@ -13,9 +13,8 @@ async function getAll(estado) {
   return clientes.filter((c) => c.estado === clean);
 }
 
-// CUU5.1 / CUU5.2 - Alterna ACTIVO <-> BLOQUEADO.
-// MULTADO lo gestiona el módulo de Turnos (Lucas) y no se pisa.
-// REGISTRADO es pendiente de confirmación y tampoco se bloquea.
+// Solo alterna ACTIVO <-> BLOQUEADO: el estado MULTADO lo gestiona el
+// módulo de turnos y no se pisa; REGISTRADO aún no confirmó su registro.
 async function toggleBlock(id) {
   const cliente = await clienteRepository.findById(id);
   if (!cliente) {
@@ -32,7 +31,6 @@ async function toggleBlock(id) {
   return clienteRepository.findById(id);
 }
 
-// CUU9.1 - El cliente edita su propio perfil (nombre/apellido/teléfono, email inmutable).
 async function updateProfile(idUsuario, { nombre, apellido, telefono }) {
   const cliente = await clienteRepository.findByUserId(idUsuario);
   if (!cliente) {
@@ -52,7 +50,6 @@ async function updateProfile(idUsuario, { nombre, apellido, telefono }) {
   return clienteRepository.findByUserId(idUsuario);
 }
 
-// CUU9.2 - El cliente elimina su propia cuenta (cascada a clientes).
 // Se bloquea si tiene turnos (pasados o futuros) para no romper el historial.
 async function deleteAccount(idUsuario) {
   const cliente = await clienteRepository.findByUserId(idUsuario);

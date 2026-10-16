@@ -1,7 +1,7 @@
 import { apiRequest } from './api';
 
 /**
- * Servicio de API para Fechas y Calendario (Parte 1 - Pedro)
+ * Servicio de API para Fechas y Calendario
  */
 export const fechaService = {
   async getAll() {

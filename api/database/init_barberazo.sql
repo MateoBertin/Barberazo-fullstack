@@ -157,7 +157,7 @@ CREATE TABLE `codigos_verificacion` (
   `id_usuario` int NOT NULL,
   `codigo` varchar(6) NOT NULL,
   `tipo` enum('CONFIRMACION','RECUPERACION') NOT NULL,
-  `expira_en` datetime NOT NULL, -- RN09: válido solo 5 minutos
+  `expira_en` datetime NOT NULL, -- válido solo 5 minutos
   `usado` tinyint(1) NOT NULL DEFAULT 0,
   `fecha_creacion` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id_codigo`),
@@ -204,16 +204,16 @@ INSERT INTO `dias_trabajo` (`id_dia_trabajo`, `id_empleado`, `fecha`, `hora_inic
 (2, NULL, CURDATE() + INTERVAL 2 DAY, '08:00:00', '20:00:00', 'HABILITADO'),
 (3, NULL, CURDATE() + INTERVAL 3 DAY, '08:00:00', '20:00:00', 'HABILITADO');
 
--- 6. Insertar Turnos Iniciales de Prueba (CUU1.2, CUU1.3, CUU1.5, CUU1.6)
+-- 6. Insertar Turnos Iniciales de Prueba
 INSERT INTO `turnos` (`id_turno`, `id_cliente`, `id_empleado`, `id_servicio`, `fecha_hora`, `estado`, `motivo_cancelacion`, `cancelado_por`) VALUES
 (1, 1, 1, 1, CONCAT(CURDATE() + INTERVAL 1 DAY, ' 11:00:00'), 'SOLICITADO', NULL, NULL),
 (2, 1, 2, 3, CONCAT(CURDATE() - INTERVAL 5 DAY, ' 16:00:00'), 'ASISTIDO', NULL, NULL),
 (3, 2, 1, 2, CONCAT(CURDATE() - INTERVAL 2 DAY, ' 17:00:00'), 'NO ASISTIDO', 'Inasistencia sin previo aviso', NULL);
 
--- 7. Insertar Multa Inicial para Cliente Multado (CUU4.1)
+-- 7. Insertar Multa Inicial para Cliente Multado
 INSERT INTO `multas` (`id_multa`, `id_cliente`, `id_turno`, `monto`, `motivo`, `estado_pago`) VALUES
 (1, 2, 3, 3000.00, 'Acumulación de 3 strikes por inasistencias o cancelaciones tardías', 'PENDIENTE');
 
--- 8. Insertar Reseña Inicial de Prueba (CUU1.4, CUU8.1)
+-- 8. Insertar Reseña Inicial de Prueba
 INSERT INTO `resenas` (`id_resena`, `id_cliente`, `id_turno`, `calificacion`, `comentario`) VALUES
 (1, 1, 2, 5, 'Excelente atención y muy buen acabado. Volveré seguro.');

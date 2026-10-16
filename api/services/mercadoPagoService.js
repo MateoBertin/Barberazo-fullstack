@@ -46,7 +46,6 @@ async function getMisMultas(user) {
   };
 }
 
-/*CUU4.1 - Crear preferencia de checkout en Mercado Pago*/
 async function crearPreferencia(idMulta, user) {
   const multa = await multaRepository.findById(idMulta);
   if (!multa) {

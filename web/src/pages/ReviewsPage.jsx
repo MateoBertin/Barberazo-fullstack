@@ -162,7 +162,7 @@ export const ReviewsPage = () => {
         </Grid>
       )}
 
-      {/* ─── Tabla de reseñas (CUU8.1) ─── */}
+      {/* ─── Tabla de reseñas ─── */}
       <TableContainer component={Paper} sx={{ borderRadius: 3, background: BRAND_COLORS.card, border: `1px solid ${withAlpha(BRAND_COLORS.white, 0.08)}` }}>
         <Table>
           <TableHead sx={{ background: BRAND_COLORS.appBar }}>

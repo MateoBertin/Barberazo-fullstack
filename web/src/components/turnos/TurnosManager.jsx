@@ -98,7 +98,7 @@ export const TurnosManager = ({ mode = null, modo = 'dueno' }) => {
   // Estados para Modal de Detalle (Requisito: Listado con Filtro + Detalle 2)
   const [selectedDetailAppointment, setSelectedDetailAppointment] = useState(null);
 
-  // Estados para diálogo de cancelación por el local (CUU1.6)
+  // Estados para diálogo de cancelación por el local
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
   const [appointmentToCancel, setAppointmentToCancel] = useState(null);
   const [cancellationReason, setCancellationReason] = useState('');
@@ -193,7 +193,7 @@ export const TurnosManager = ({ mode = null, modo = 'dueno' }) => {
 
   // --- MANEJADORES DE ACCIONES CONTRA MYSQL ---
 
-  // Confirmar Asistencia (CUU1.3)
+  // Confirmar asistencia
   const handleConfirmAttendance = async (appointment) => {
     try {
       setIsActionLoading(true);
@@ -207,7 +207,7 @@ export const TurnosManager = ({ mode = null, modo = 'dueno' }) => {
     }
   };
 
-  // Marcar Inasistencia (CUU1.3) -> Aplica +1 Strike / Multa si llega a 3
+  // Marcar inasistencia: aplica +1 strike (multa si llega a 3)
   const handleMarkAbsence = async (appointment) => {
     try {
       setIsActionLoading(true);
@@ -231,7 +231,7 @@ export const TurnosManager = ({ mode = null, modo = 'dueno' }) => {
     }
   };
 
-  // Abrir diálogo de cancelación (CUU1.6)
+  // Abrir diálogo de cancelación
   const handleOpenCancel = (appointment) => {
     setAppointmentToCancel(appointment);
     setCancellationReason('');
@@ -485,7 +485,7 @@ export const TurnosManager = ({ mode = null, modo = 'dueno' }) => {
 
                       <TableCell align="right">
                         <Stack direction="row" spacing={1} justifyContent="flex-end" alignItems="center">
-                          {/* Botón Ver Detalle (Requisito CUU Listado + Detalle) */}
+                          {/* Botón ver detalle */}
                           <Tooltip title="Ver detalle del turno">
                             <IconButton
                               size="small"
@@ -552,7 +552,7 @@ export const TurnosManager = ({ mode = null, modo = 'dueno' }) => {
         )}
       </TableContainer>
 
-      {/* ─── MODAL DE DETALLE DE TURNO (REQUISITO: Listado con Filtro + Detalle 2) ─── */}
+      {/* ─── Modal de detalle de turno ─── */}
       <Dialog
         open={Boolean(selectedDetailAppointment)}
         onClose={() => setSelectedDetailAppointment(null)}
@@ -682,7 +682,7 @@ export const TurnosManager = ({ mode = null, modo = 'dueno' }) => {
         </DialogActions>
       </Dialog>
 
-      {/* ─── MODAL DE CANCELACIÓN POR EL LOCAL (CUU1.6) ─── */}
+      {/* ─── Modal de cancelación por el local ─── */}
       <Dialog open={isCancelDialogOpen} onClose={() => setIsCancelDialogOpen(false)}>
         <DialogTitle sx={{ fontWeight: 700 }}>Cancelar Turno (Barbería)</DialogTitle>
         <DialogContent>

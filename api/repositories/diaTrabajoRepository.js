@@ -1,14 +1,9 @@
 const { pool } = require('../config/db');
 
 /**
- * Repositorio de Días de Trabajo y Calendario (SQL Puro)
- * Parte 1 - Pedro (DSW) - CRUD Simple 2 (CUU6.1 / CUU6.2)
+ * Repositorio de Días de Trabajo y Calendario (SQL puro).
  */
 
-/**
- * Obtiene todos los días registrados en la base de datos.
- * Opcionalmente filtra por rango de fechas (desde, hasta) y estado.
- */
 async function findAll({ desde, hasta, estado } = {}) {
   let query = `
     SELECT 

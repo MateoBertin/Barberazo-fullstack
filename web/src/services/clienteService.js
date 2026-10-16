@@ -1,7 +1,7 @@
 import { apiRequest } from './api';
 
 /**
- * Servicio de API para Gestión de Clientes (Parte 2 - Mateo)
+ * Servicio de API para Gestión de Clientes
  */
 export const clienteService = {
   async getAll() {

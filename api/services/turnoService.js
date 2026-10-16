@@ -11,7 +11,6 @@ function createError(message, statusCode) {
   return error;
 }
 
-/*Obtiene lista de turnos según filtros y rol de usuario*/
 async function getAll(filters = {}, user) {
   const cleanFilters = { ...filters };
 
@@ -25,7 +24,6 @@ async function getAll(filters = {}, user) {
   return turnoRepository.findWithFilters(cleanFilters);
 }
 
-/*Obtiene el detalle de un turno por ID validando permisos*/
 async function getById(id, user) {
   const turno = await turnoRepository.findById(id);
   if (!turno) {
@@ -43,7 +41,6 @@ async function getById(id, user) {
   return turno;
 }
 
-/*Registrar Turno con validación*/
 async function create({ id_cliente, id_empleado, id_servicio, fecha_hora }, user) {
   let resolvedClienteId = id_cliente;
 
@@ -82,13 +79,13 @@ async function create({ id_cliente, id_empleado, id_servicio, fecha_hora }, user
   //Rechaza si el cliente ya tiene un turno en estado SOLICITADO
   const activeCount = await turnoRepository.countActiveByClient(resolvedClienteId);
   if (activeCount > 0) {
-    throw createError('Ya posees un turno activo en estado Solicitado (Regla RN06). No podés reservar otro hasta asistir o cancelar el anterior.', 409);
+    throw createError('Ya posees un turno activo en estado Solicitado. No podés reservar otro hasta asistir o cancelar el anterior.', 409);
   }
 
   //Rechaza si el empleado ya está ocupado en ese horario
   const isOccupied = await turnoRepository.isSlotOccupied(id_empleado, fecha_hora);
   if (isOccupied) {
-    throw createError('El barbero seleccionado ya tiene un turno reservado en ese horario (Regla RN05). Por favor elegí otro horario o profesional.', 409);
+    throw createError('El barbero seleccionado ya tiene un turno reservado en ese horario. Por favor elegí otro horario o profesional.', 409);
   }
 
   // Inserción atómica del turno
@@ -102,7 +99,6 @@ async function create({ id_cliente, id_empleado, id_servicio, fecha_hora }, user
   return getById(idTurno, user);
 }
 
-/*Transición de estado del turno*/
 async function updateStatus(id, { estado, motivo }, user) {
   const turno = await turnoRepository.findById(id);
   if (!turno) {

@@ -23,13 +23,13 @@ app.get('/', (req, res) => {
 
 // Rutas de la API
 app.use('/api/auth', authRoutes);
-app.use('/api/servicios', servicioRoutes); // Módulo 1 - Pedro
-app.use('/api/fechas', fechaRoutes);       // Módulo 1 - Pedro
-app.use('/api/empleados', empleadoRoutes); // Módulo 2 - Mateo
-app.use('/api/clientes', clienteRoutes);   // Módulo 2 - Mateo
-app.use('/api/turnos', turnoRoutes);       // Módulo 3 - Lucas
-app.use('/api/resenas', resenaRoutes);     // Módulo 3 - Lucas
-app.use('/api/pagos', pagoRoutes);         // Módulo 3 - Lucas (CUU4.1)
+app.use('/api/servicios', servicioRoutes);
+app.use('/api/fechas', fechaRoutes);
+app.use('/api/empleados', empleadoRoutes);
+app.use('/api/clientes', clienteRoutes);
+app.use('/api/turnos', turnoRoutes);
+app.use('/api/resenas', resenaRoutes);
+app.use('/api/pagos', pagoRoutes);
 
 async function startServer() {
   try {

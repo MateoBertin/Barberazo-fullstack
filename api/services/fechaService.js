@@ -15,15 +15,12 @@ function validarFechaStr(fecha) {
   }
 }
 
-/**
- * Obtiene los días configurados en el sistema
- */
 async function getAll(filtros = {}) {
   return diaTrabajoRepository.findAll(filtros);
 }
 
 /**
- * CUU6.1 / CUU6.2 - Habilita / Deshabilita una fecha específica.
+ * Habilita / deshabilita una fecha específica.
  * Si la fecha ya estaba en la base de datos, alterna su estado.
  * Si no estaba, por defecto un día laboral es HABILITADO, por lo que el primer toggle lo DESHABILITA.
  */
@@ -53,9 +50,6 @@ async function toggleFecha(fecha, motivo = null) {
   return diaTrabajoRepository.findByFecha(fecha);
 }
 
-/**
- * Modifica el horario de apertura y cierre para un día específico
- */
 async function updateHorario(fecha, { startTime, endTime }) {
   validarFechaStr(fecha);
 

@@ -1,7 +1,6 @@
 const { pool } = require('../config/db');
 
 // Convierte "Corte, Barba" en ["Corte", "Barba"] para el front.
-// En DB es VARCHAR(100), no hay tabla intermedia (ver PLAN_MATEO_FASES.md).
 function toArray(especialidad) {
   if (!especialidad) return [];
   return especialidad.split(',').map((s) => s.trim()).filter(Boolean);
@@ -75,7 +74,7 @@ async function updateUsuarioEmail(idUsuario, email) {
   await pool.execute('UPDATE usuarios SET email = ? WHERE id_usuario = ?', [email, idUsuario]);
 }
 
-// Turnos futuros en estado SOLICITADO (solo lectura de la tabla de Lucas para CUU10.3).
+// Turnos futuros en estado SOLICITADO (solo lectura de la tabla de turnos).
 async function findFutureTurnos(idEmpleado) {
   const [rows] = await pool.execute(
     `SELECT t.id_turno, t.fecha_hora, t.id_cliente,

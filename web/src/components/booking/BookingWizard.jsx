@@ -78,7 +78,7 @@ export const BookingWizard = () => {
     try {
       setLoading(true);
 
-      // 1. Cargar servicios (Pedro) con fallback a contextData
+      // 1. Cargar servicios con fallback a contextData
       try {
         const srvData = await servicioService.getAll();
         setServices(
@@ -95,7 +95,7 @@ export const BookingWizard = () => {
         setServices(contextData.services || []);
       }
 
-      // 2. Cargar empleados (Mateo) con fallback a contextData
+      // 2. Cargar empleados con fallback a contextData
       try {
         const empData = await empleadoService.getAll();
         setEmployees(
@@ -247,7 +247,7 @@ export const BookingWizard = () => {
     setSelectedTime(null);
   };
 
-  // Confirmar y registrar el turno contra MySQL (CUU1.2 - RN05 y RN06)
+  // Confirmar y registrar el turno contra MySQL
   const handleConfirmBooking = async () => {
     if (!selectedService || !selectedDate || !selectedTime) {
       enqueueSnackbar('Por favor completa todos los pasos para reservar.', { variant: 'warning' });
@@ -279,7 +279,7 @@ export const BookingWizard = () => {
     }
   };
 
-  // Cancelar el turno activo del cliente contra MySQL (CUU1.5 - RN13)
+  // Cancelar el turno activo del cliente contra MySQL
   const handleConfirmCancelAppointment = async () => {
     if (!activeAppointment) return;
 
@@ -357,7 +357,7 @@ export const BookingWizard = () => {
     );
   }
 
-  // ─── CASO 2: CLIENTE YA TIENE TURNO ACTIVO ('Solicitado' - RN06) ───
+  // ─── Caso 2: el cliente ya tiene turno activo ('Solicitado') ───
   if (activeAppointment) {
     const appointmentDateStr = activeAppointment.date;
     const appointmentTimeStr = activeAppointment.time || '10:00';
@@ -386,7 +386,7 @@ export const BookingWizard = () => {
           </Stack>
 
           <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-            Recuerda que según las reglas de la barbería (**Regla RN06**), solo puedes tener 1 turno activo a la vez.
+            Recuerda que según las reglas de la barbería, solo puedes tener 1 turno activo a la vez.
           </Typography>
 
           <Grid container spacing={3} sx={{ mb: 3 }}>
@@ -443,7 +443,7 @@ export const BookingWizard = () => {
           <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems="center" spacing={2}>
             <Alert severity={cancelWithPenalty ? 'warning' : 'info'} sx={{ flexGrow: 1 }}>
               {cancelWithPenalty
-                ? 'Atención: Si cancelas ahora faltan menos de 24 hs, por lo que se te aplicará 1 Strike (Regla RN13).'
+                ? 'Atención: Si cancelas ahora faltan menos de 24 hs, por lo que se te aplicará 1 Strike.'
                 : 'Faltan más de 24 hs para tu turno. Puedes cancelarlo libremente sin penalidad.'}
             </Alert>
 
@@ -757,7 +757,7 @@ export const BookingWizard = () => {
           </Paper>
 
           <Alert severity="info" sx={{ mb: 3 }}>
-            <strong>Recordatorio de Cancelación:</strong> Si necesitas cancelar, hazlo con más de 24 hs de anticipación para no acumular strikes en tu cuenta (Regla RN13).
+            <strong>Recordatorio de Cancelación:</strong> Si necesitas cancelar, hazlo con más de 24 hs de anticipación para no acumular strikes en tu cuenta.
           </Alert>
 
           <Button

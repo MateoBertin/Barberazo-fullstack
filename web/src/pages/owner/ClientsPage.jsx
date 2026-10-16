@@ -56,7 +56,7 @@ export const ClientsPage = () => {
   const { user } = useAuth();
   const { enqueueSnackbar } = useSnackbar();
 
-  // Fase 6 (Mateo): clientes reales desde MySQL, no de localStorage.
+  // Clientes reales desde MySQL.
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
@@ -92,7 +92,7 @@ export const ClientsPage = () => {
     return matchesSearch && matchesStatus;
   });
 
-  // CUU5.1 / CUU5.2: bloqueo y desbloqueo contra MySQL (solo Dueño).
+  // Bloqueo y desbloqueo contra MySQL (solo Dueño).
   const handleToggleClientBlock = async (client) => {
     if (isEmpleado) return;
 
@@ -147,7 +147,7 @@ export const ClientsPage = () => {
               </Typography>
             </Stack>
             <Typography variant="body1" color="text.secondary">
-              Listado de clientes registrados, historial de strikes y control de bloqueos de cuenta (`CUU5.1` / `CUU5.2`).
+              Listado de clientes registrados, historial de strikes y control de bloqueos de cuenta.
             </Typography>
           </Grid>
         </Grid>

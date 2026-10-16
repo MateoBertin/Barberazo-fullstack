@@ -4,7 +4,7 @@ import { Navbar } from './components/common/Navbar';
 import { ProtectedRoute } from './components/common/ProtectedRoute';
 import { RoleGuard } from './components/common/RoleGuard';
 
-// Páginas de Fase 1
+// Páginas públicas
 import { LandingPage } from './pages/LandingPage';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
@@ -15,18 +15,15 @@ import { ClientDashboard } from './pages/client/ClientDashboard';
 import { OwnerDashboard } from './pages/owner/OwnerDashboard';
 import { EmployeeDashboard } from './pages/employee/EmployeeDashboard';
 
-// Páginas de Fase 2 (ABM Catálogos & Gestión)
+// Páginas de gestión (dueño)
 import { ServicesPage } from './pages/owner/ServicesPage';
 import { EmployeesPage } from './pages/owner/EmployeesPage';
 import { ClientsPage } from './pages/owner/ClientsPage';
 
-// Páginas de Fase 3 (Calendario & Configuración de Fechas)
 import { DatesPage } from './pages/owner/DatesPage';
 
-// Páginas de Fase 4 (Multas y Mercado Pago)
 import { ClientFinesPage } from './pages/client/ClientFinesPage';
 
-// Páginas de Fase 5 (Perfil y Reseñas)
 import { ClientProfilePage } from './pages/client/ClientProfilePage';
 import { ReviewsPage } from './pages/ReviewsPage';
 
@@ -35,7 +32,7 @@ export const App = () => {
     <Router>
       <Navbar />
       <Routes>
-        {/* Rutas Públicas (Fase 1) */}
+        {/* Rutas públicas */}
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/registro" element={<RegisterPage />} />

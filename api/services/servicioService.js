@@ -41,7 +41,6 @@ async function getAll(soloHabilitados = false) {
   return servicios.filter((s) => s.estado === 'HABILITADO');
 }
 
-// CUU7.1 - Alta de servicio.
 async function create(datos) {
   const limpio = validarDatos(datos);
 
@@ -54,7 +53,6 @@ async function create(datos) {
   return servicioRepository.findById(id);
 }
 
-// CUU7.2 - Modificación de servicio.
 async function update(id, datos) {
   const servicio = await servicioRepository.findById(id);
   if (!servicio) {

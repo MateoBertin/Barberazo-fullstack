@@ -121,7 +121,7 @@ export const ClientFinesPage = () => {
               </Typography>
             </Stack>
             <Typography variant="body1" color="text.secondary">
-              Consulta tu historial de inasistencias, penalizaciones y regulariza pagos pendientes a través de Mercado Pago (CUU4.1).
+              Consulta tu historial de inasistencias, penalizaciones y regulariza pagos pendientes a través de Mercado Pago.
             </Typography>
           </Grid>
 
@@ -195,7 +195,7 @@ export const ClientFinesPage = () => {
               </Alert>
 
               <Alert severity="warning" icon={<WarningIcon fontSize="inherit" />}>
-                <strong>Cancelación tardía (&lt;24 hs):</strong> Sumará <strong>+1 Strike</strong> debido al tiempo de reserva perdido (Regla RN13).
+                <strong>Cancelación tardía (&lt;24 hs):</strong> Sumará <strong>+1 Strike</strong> debido al tiempo de reserva perdido.
               </Alert>
 
               <Alert severity="error" icon={<ErrorIcon fontSize="inherit" />}>

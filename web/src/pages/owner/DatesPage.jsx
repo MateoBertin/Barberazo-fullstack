@@ -216,14 +216,14 @@ export const DatesPage = () => {
     syncDbDates();
   }, []);
 
-  // Habilitar / iniciar flujo de deshabilitar (CUU6.1 / CUU6.2)
+  // Habilitar / iniciar flujo de deshabilitar
   const handleToggleDayStatus = async () => {
     if (!selectedDay) return;
     const currentStatus = selectedDayData?.status || 'Habilitado';
     if (currentStatus === 'Habilitado') {
-      setIsConfirmOpen(true); // CUU6.2: pide confirmación antes de deshabilitar
+      setIsConfirmOpen(true); // pide confirmación antes de deshabilitar
     } else {
-      // CUU6.1: habilitar directamente contra MySQL
+      // habilitar directamente contra MySQL
       try {
         await fechaService.toggleDate(selectedDay.dateStr);
         toggleDayStatus(selectedDay.dateStr);
@@ -237,7 +237,7 @@ export const DatesPage = () => {
     }
   };
 
-  // Confirmar deshabilitación (CUU6.2) contra MySQL
+  // Confirmar deshabilitación contra MySQL
   const handleConfirmDisableDay = async () => {
     try {
       await fechaService.toggleDate(selectedDay.dateStr);
@@ -695,7 +695,7 @@ export const DatesPage = () => {
         )}
       </Grid>
 
-      {/* ─── Diálogo de confirmación de deshabilitación (CUU6.2) ─── */}
+      {/* ─── Diálogo de confirmación de deshabilitación ─── */}
       <Dialog
         open={isConfirmOpen}
         onClose={() => setIsConfirmOpen(false)}
@@ -723,8 +723,7 @@ export const DatesPage = () => {
               ?
             </strong>
             <br />
-            Si hay turnos agendados para este día, serán cancelados automáticamente
-            cuando se implemente el motor de reservas (Fase 4).
+            Si hay turnos agendados para este día, gestionarlos desde la consola de turnos.
           </Alert>
           <Typography variant="body2" color="text.secondary">
             Esta acción puede revertirse habilitando la fecha nuevamente.

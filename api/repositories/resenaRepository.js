@@ -1,8 +1,5 @@
 const { pool } = require('../config/db');
 
-/*Repositorio de Reseñas*/
-
-/*Obtiene todas las reseñas con datos de cliente, empleado y servicio*/
 async function findAll() {
   const query = `
     SELECT 
@@ -39,7 +36,6 @@ async function findAll() {
   return rows;
 }
 
-/*Busca una reseña por su ID*/
 async function findById(id) {
   const query = `
     SELECT 
@@ -66,7 +62,6 @@ async function findById(id) {
   return rows[0] || null;
 }
 
-/*Busca si ya existe una reseña para un turno en particular*/
 async function findByTurnoId(idTurno) {
   const [rows] = await pool.execute(
     'SELECT id_resena, id_cliente, id_turno, calificacion, comentario FROM resenas WHERE id_turno = ?',
@@ -75,7 +70,6 @@ async function findByTurnoId(idTurno) {
   return rows[0] || null;
 }
 
-/*nueva reseña*/
 async function create({ id_cliente, id_turno, calificacion, comentario }) {
   const [result] = await pool.execute(
     `INSERT INTO resenas (id_cliente, id_turno, calificacion, comentario)

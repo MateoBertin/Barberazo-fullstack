@@ -272,7 +272,7 @@ export const RegisterPage = () => {
         </Paper>
       </Container>
 
-      {/* Modal de Verificación de Código de 5 Minutos (CUU2.1) */}
+      {/* Modal de verificación de código de 5 minutos */}
       <Dialog
         open={openVerifyModal}
         onClose={() => {}}

@@ -19,7 +19,7 @@ export const ClientDashboard = () => {
     .filter((a) => String(a.clientId) === String(user?.id) && a.status !== 'Solicitado')
     .sort((a, b) => (b.date + b.time).localeCompare(a.date + a.time));
 
-  // Turno seleccionado para calificar (CUU1.4)
+  // Turno seleccionado para calificar
   const [selectedAppointment, setSelectedAppointment] = useState(null);
 
   const hasReview = (appointmentId) =>
@@ -68,12 +68,12 @@ export const ClientDashboard = () => {
         </Grid>
       </Paper>
 
-      {/* ─── ASISTENTE DE RESERVA / TURNO ACTIVO (CUU1.2 & CUU1.5) ─── */}
+      {/* ─── Asistente de reserva / turno activo ─── */}
       {/* Si la cuenta está multada, el propio BookingWizard muestra el aviso
           y bloquea la reserva: no se duplica el mensaje acá */}
       <BookingWizard />
 
-      {/* ─── HISTORIAL DE TURNOS + CALIFICACIÓN (CUU1.4) ─── */}
+      {/* ─── Historial de turnos + calificación ─── */}
       {pastAppointments.length > 0 && (
         <Paper sx={{ p: 3, borderRadius: 3, background: BRAND_COLORS.card, mt: 4 }}>
           <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}>
@@ -129,7 +129,7 @@ export const ClientDashboard = () => {
         </Paper>
       )}
 
-      {/* ─── MODAL DE CALIFICACIÓN (CUU1.4) ─── */}
+      {/* ─── Modal de calificación ─── */}
       <ReviewModal
         open={Boolean(selectedAppointment)}
         onClose={() => setSelectedAppointment(null)}

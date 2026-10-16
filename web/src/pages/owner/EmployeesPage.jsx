@@ -63,7 +63,7 @@ export const EmployeesPage = () => {
   const { services } = useData();
   const { enqueueSnackbar } = useSnackbar();
 
-  // Fase 6 (Mateo): empleados reales desde MySQL, no de localStorage.
+  // Empleados reales desde MySQL.
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
@@ -138,8 +138,7 @@ export const EmployeesPage = () => {
     setOpenModal(true);
   };
 
-  // CUU10.3: baja lógica en el back (pasa a INACTIVO). Si tiene turnos
-  // futuros, el back responde 409 y se muestra el motivo.
+  // La baja es lógica (pasa a INACTIVO); con turnos futuros el back responde 409.
   const handleDelete = async (employee) => {
     const employeeName = employee.name;
     if (!window.confirm(`¿Estás seguro de dar de baja al empleado ${employeeName}?`)) return;
@@ -178,7 +177,7 @@ export const EmployeesPage = () => {
     });
   };
 
-  // CUU10.1 / CUU10.2: alta y edición contra MySQL.
+  // Alta y edición contra MySQL.
   const handleSave = async (e) => {
     e.preventDefault();
     const nombre = formData.firstName.trim();

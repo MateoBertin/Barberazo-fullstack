@@ -37,7 +37,7 @@ async function enviarMail({ para, asunto, texto }) {
   });
 }
 
-// RN09: mail con el código de confirmación de registro (válido 5 minutos).
+// Mail con el código de confirmación de registro (válido 5 minutos).
 async function enviarCodigoConfirmacion(email, codigo) {
   await enviarMail({
     para: email,
@@ -46,7 +46,7 @@ async function enviarCodigoConfirmacion(email, codigo) {
   });
 }
 
-// CUU3.1: mail con el código para recuperar la contraseña.
+// Mail con el código para recuperar la contraseña.
 async function enviarCodigoRecuperacion(email, codigo) {
   await enviarMail({
     para: email,

@@ -1,7 +1,5 @@
 const resenaService = require('../services/resenaService');
 
-/*Controlador de Reseñas*/
-
 async function getAll(req, res) {
   try {
     const reviews = await resenaService.getAll(req.user);

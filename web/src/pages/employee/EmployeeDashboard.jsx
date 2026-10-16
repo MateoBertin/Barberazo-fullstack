@@ -39,7 +39,7 @@ export const EmployeeDashboard = () => {
         </Grid>
       </Paper>
 
-      {/* ─── CONSOLA DE GESTIÓN DE TURNOS (CUU1.3, CUU1.6) ─── */}
+      {/* ─── Consola de gestión de turnos ─── */}
       <TurnosManager modo="empleado" />
     </Container>
   );

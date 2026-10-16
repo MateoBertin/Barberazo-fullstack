@@ -1,7 +1,7 @@
 import { apiRequest } from './api';
 
 /**
- * Servicio de API para Reseñas y Calificaciones (Parte 3 - Lucas)
+ * Servicio de API para Reseñas y Calificaciones
  */
 export const resenaService = {
   async getAll() {

@@ -107,7 +107,7 @@ export const ServicesPage = () => {
     setOpenModal(true);
   };
 
-  // CUU7.1 Alta y CUU7.2 Modificación de Servicio contra MySQL
+  // Alta y modificación de servicio contra MySQL
   const handleSave = async (e) => {
     e.preventDefault();
     if (!formData.name.trim()) return;
@@ -206,7 +206,7 @@ export const ServicesPage = () => {
           icon={<LockIcon fontSize="inherit" />}
           sx={{ mb: 4, borderRadius: 3 }}
         >
-          <strong>Acceso de Empleado (CUU7.1 / CUU7.2):</strong> Tienes permisos únicamente para consultar el catálogo de servicios. Las acciones de alta, edición y deshabilitación son facultad exclusiva del Dueño.
+          <strong>Acceso de Empleado:</strong> Tienes permisos únicamente para consultar el catálogo de servicios. Las acciones de alta, edición y deshabilitación son facultad exclusiva del Dueño.
         </Alert>
       )}
 

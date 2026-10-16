@@ -1,6 +1,6 @@
 import { apiRequest } from './api';
 
-/* Servicio de API para Pagos y Multas con Mercado Pago (CUU4.1)*/
+/* Servicio de API para Pagos y Multas con Mercado Pago */
 export const pagoService = {
   /**
    * Obtiene el listado de multas y estado de strikes del cliente logueado

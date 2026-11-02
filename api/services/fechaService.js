@@ -1,3 +1,4 @@
+const { pool } = require('../config/db');
 const diaTrabajoRepository = require('../repositories/diaTrabajoRepository');
 
 function createError(message, statusCode) {
@@ -21,8 +22,8 @@ async function getAll(filtros = {}) {
 
 /**
  * Habilita / deshabilita una fecha específica.
- * Si la fecha ya estaba en la base de datos, alterna su estado.
- * Si no estaba, por defecto un día laboral es HABILITADO, por lo que el primer toggle lo DESHABILITA.
+ * Si pasa a DESHABILITADO, cancela automáticamente (por ADMIN, sin strikes)
+ * todos los turnos SOLICITADO que hubiera agendados para esa fecha.
  */
 async function toggleFecha(fecha, motivo = null) {
   validarFechaStr(fecha);
@@ -47,7 +48,21 @@ async function toggleFecha(fecha, motivo = null) {
     motivo: motivo || (nuevoEstado === 'DESHABILITADO' ? 'Día no laboral configurado por administración' : null),
   });
 
-  return diaTrabajoRepository.findByFecha(fecha);
+  let turnosCancelados = 0;
+  if (nuevoEstado === 'DESHABILITADO') {
+    const [result] = await pool.execute(
+      `UPDATE turnos
+       SET estado = 'CANCELADO',
+           cancelado_por = 'ADMIN',
+           motivo_cancelacion = 'Cancelado por el local (Fecha deshabilitada por administración)'
+       WHERE DATE(fecha_hora) = ? AND estado = 'SOLICITADO'`,
+      [fecha]
+    );
+    turnosCancelados = result.affectedRows || 0;
+  }
+
+  const diaActualizado = await diaTrabajoRepository.findByFecha(fecha);
+  return { ...diaActualizado, turnosCancelados };
 }
 
 async function updateHorario(fecha, { startTime, endTime }) {

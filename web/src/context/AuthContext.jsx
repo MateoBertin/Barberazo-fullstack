@@ -118,7 +118,7 @@ export const AuthProvider = ({ children }) => {
   // Registro de cliente: crea el usuario en el backend (estado REGISTRADO)
   // y guarda los datos para confirmar el código e iniciar sesión después.
   const register = async (userData) => {
-    await authService.register({
+    const codigo = await authService.register({
       nombre: (userData.nombre || '').trim(),
       apellido: (userData.apellido || '').trim(),
       email: userData.email,
@@ -130,6 +130,8 @@ export const AuthProvider = ({ children }) => {
       email: userData.email,
       password: userData.password,
     });
+
+    return codigo;
   };
 
   // Reenviar el código de confirmación (si venció o no llegó el mail).
@@ -137,7 +139,7 @@ export const AuthProvider = ({ children }) => {
     if (!pendingVerification) {
       throw new Error('No hay ninguna sesión de verificación activa.');
     }
-    await authService.resendCode(pendingVerification.email);
+    return await authService.resendCode(pendingVerification.email);
   };
 
   // Confirmar el código de verificación contra el backend y dejar la sesión iniciada.

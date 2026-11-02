@@ -43,7 +43,7 @@ export const authService = {
   async register(userData) {
     // Crea el usuario en estado REGISTRADO y genera el código de confirmación.
     // El backend no devuelve sesión: primero hay que confirmar y después loguearse.
-    await apiRequest('/auth/register', {
+    const res = await apiRequest('/auth/register', {
       method: 'POST',
       body: JSON.stringify({
         nombre: userData.nombre,
@@ -53,6 +53,7 @@ export const authService = {
         telefono: userData.telefono || null,
       }),
     });
+    return res.data?.codigo || null;
   },
 
   async confirm(email, codigo) {
@@ -63,10 +64,11 @@ export const authService = {
   },
 
   async resendCode(email) {
-    await apiRequest('/auth/resend-code', {
+    const res = await apiRequest('/auth/resend-code', {
       method: 'POST',
       body: JSON.stringify({ email }),
     });
+    return res.data?.codigo || null;
   },
 
   async getProfile() {

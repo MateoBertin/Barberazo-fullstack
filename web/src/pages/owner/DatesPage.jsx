@@ -163,10 +163,8 @@ export const DatesPage = () => {
   const stats = useMemo(() => {
     const year = viewDate.getFullYear();
     const month = viewDate.getMonth();
-    const monthDays = workingDays.filter((day) => {
-      const d = new Date(day.date);
-      return d.getFullYear() === year && d.getMonth() === month;
-    });
+    const monthPrefix = `${year}-${String(month + 1).padStart(2, '0')}`;
+    const monthDays = workingDays.filter((day) => day.date && day.date.startsWith(monthPrefix));
     return {
       enabledCount: monthDays.filter((d) => d.status === 'Habilitado').length,
       disabledCount: monthDays.filter((d) => d.status === 'Deshabilitado').length,
@@ -200,13 +198,8 @@ export const DatesPage = () => {
             const status = dbDay.estado === 'HABILITADO' ? 'Habilitado' : 'Deshabilitado';
             const startTime = dbDay.hora_inicio ? dbDay.hora_inicio.slice(0, 5) : '08:00';
             const endTime = dbDay.hora_fin ? dbDay.hora_fin.slice(0, 5) : '20:00';
-            const current = workingDays.find((d) => d.date === dateStr);
-            if (current) {
-              if (current.status !== status) toggleDayStatus(dateStr);
-              if (current.startTime !== startTime || current.endTime !== endTime) {
-                updateDaySchedule(dateStr, startTime, endTime);
-              }
-            }
+            toggleDayStatus(dateStr, status);
+            updateDaySchedule(dateStr, startTime, endTime);
           });
         }
       } catch (err) {
@@ -225,8 +218,9 @@ export const DatesPage = () => {
     } else {
       // habilitar directamente contra MySQL
       try {
-        await fechaService.toggleDate(selectedDay.dateStr);
-        toggleDayStatus(selectedDay.dateStr);
+        const updated = await fechaService.toggleDate(selectedDay.dateStr);
+        const nextStatus = updated?.estado === 'DESHABILITADO' ? 'Deshabilitado' : 'Habilitado';
+        toggleDayStatus(selectedDay.dateStr, nextStatus);
         enqueueSnackbar(
           `Fecha ${selectedDay.dateStr} habilitada correctamente en MySQL.`,
           { variant: 'success' }
@@ -240,8 +234,9 @@ export const DatesPage = () => {
   // Confirmar deshabilitación contra MySQL
   const handleConfirmDisableDay = async () => {
     try {
-      await fechaService.toggleDate(selectedDay.dateStr);
-      toggleDayStatus(selectedDay.dateStr);
+      const updated = await fechaService.toggleDate(selectedDay.dateStr);
+      const nextStatus = updated?.estado === 'HABILITADO' ? 'Habilitado' : 'Deshabilitado';
+      toggleDayStatus(selectedDay.dateStr, nextStatus);
       enqueueSnackbar(
         `Fecha ${selectedDay.dateStr} deshabilitada en MySQL.`,
         { variant: 'warning' }

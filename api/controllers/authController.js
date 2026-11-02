@@ -34,7 +34,7 @@ async function register(req, res) {
       });
     }
 
-    await authService.register({
+    const codigo = await authService.register({
       nombre,
       apellido,
       email,
@@ -45,6 +45,7 @@ async function register(req, res) {
     return res.status(201).json({
       success: true,
       message: 'Registro exitoso. Te enviamos un código de confirmación a tu mail (válido por 5 minutos).',
+      data: { codigo },
     });
   } catch (error) {
     const statusCode = error.statusCode || 500;
@@ -94,12 +95,13 @@ async function resendConfirmationCode(req, res) {
       });
     }
 
-    await authService.resendConfirmationCode({ email });
+    const codigo = await authService.resendConfirmationCode({ email });
 
     // Misma respuesta exista o no el mail, para no revelar qué cuentas están registradas
     return res.status(200).json({
       success: true,
       message: 'Si el mail corresponde a una cuenta pendiente, te enviamos un nuevo código.',
+      data: { codigo },
     });
   } catch (error) {
     const statusCode = error.statusCode || 500;

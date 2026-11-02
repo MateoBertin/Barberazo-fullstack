@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Container, Typography, Paper, Grid, Chip, Button, Stack, Rating } from '@mui/material';
+import { Box, Container, Typography, Paper, Grid, Chip, Button, Stack, Rating, Alert } from '@mui/material';
 import {
   Star as StarIcon,
   History as HistoryIcon,
@@ -35,6 +35,8 @@ const fromApi = (turno) => ({
   date: turno.fecha,
   time: turno.hora,
   status: mapStatus(turno.estado),
+  cancelledBy: turno.cancelado_por,
+  cancellationReason: turno.motivo_cancelacion,
 });
 
 export const ClientDashboard = () => {
@@ -77,6 +79,13 @@ export const ClientDashboard = () => {
     .filter((a) => apiAppointments || String(a.clientId) === String(user?.id))
     .filter((a) => a.status !== 'Solicitado')
     .sort((a, b) => (`${b.date} ${b.time}`).localeCompare(`${a.date} ${a.time}`));
+
+  // Si el último turno fue cancelado por el local (ADMIN/EMPLEADO/local), avisar al cliente
+  const latestCancelledByShop = pastAppointments.find(
+    (a) =>
+      a.status === 'Cancelado' &&
+      (a.cancelledBy === 'ADMIN' || a.cancelledBy === 'EMPLEADO' || a.cancelledBy === 'local')
+  );
 
   // Turno seleccionado para calificar
   const [selectedAppointment, setSelectedAppointment] = useState(null);
@@ -127,6 +136,16 @@ export const ClientDashboard = () => {
         </Grid>
       </Paper>
 
+      {/* ─── AVISO SI LA BARBERÍA CANCELÓ UN TURNO DEL CLIENTE (EJ. FECHA DESHABILITADA) ─── */}
+      {latestCancelledByShop && (
+        <Alert severity="warning" sx={{ mb: 3, borderRadius: 3 }}>
+          <strong>Aviso de la barbería:</strong> Tu turno del <strong>{latestCancelledByShop.date}</strong> a las{' '}
+          <strong>{latestCancelledByShop.time} hs</strong> ({latestCancelledByShop.serviceName}) fue cancelado por el local
+          {latestCancelledByShop.cancellationReason ? `: "${latestCancelledByShop.cancellationReason}"` : ''}.{' '}
+          <strong>No se te aplicó ningún strike</strong> y ya tenés habilitado el turnero para elegir una nueva fecha.
+        </Alert>
+      )}
+
       {/* ─── Asistente de reserva / turno activo ─── */}
       {/* Si la cuenta está multada, el propio BookingWizard muestra el aviso
           y bloquea la reserva: no se duplica el mensaje acá */}
@@ -162,6 +181,7 @@ export const ClientDashboard = () => {
                       </Typography>
                       <Typography variant="caption" color="text.secondary">
                         Con {appointment.employeeName} • {appointment.status}
+                        {appointment.cancellationReason ? ` (${appointment.cancellationReason})` : ''}
                       </Typography>
                     </Box>
                     {canReview ? (
@@ -198,4 +218,3 @@ export const ClientDashboard = () => {
     </Container>
   );
 };
-

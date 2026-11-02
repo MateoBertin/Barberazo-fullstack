@@ -416,13 +416,14 @@ export const DataProvider = ({ children }) => {
 
   // workingDays: Todos los días laborales Martes-Sábado de los próximos 3 meses
   const [workingDays, setWorkingDays] = useState(() => {
+    const generated = generateWorkingDays();
     const saved = localStorage.getItem('barberazo_workingDays') || localStorage.getItem('barberazo_diasTrabajo');
     if (saved) {
-      const parsed = JSON.parse(saved);
-      // Si los datos guardados son de una sesión muy antigua, regenerar
-      if (parsed.length > 0) return parsed.map(normalizeWorkingDay);
+      const parsed = JSON.parse(saved).map(normalizeWorkingDay);
+      const savedMap = new Map(parsed.map((d) => [d.date, d]));
+      return generated.map((d) => savedMap.get(d.date) || d);
     }
-    return generateWorkingDays();
+    return generated;
   });
 
   const { user, updateUserState } = useAuth();
@@ -562,16 +563,32 @@ export const DataProvider = ({ children }) => {
 
   // Habilitar / deshabilitar fecha
   // Alterna el estado de un workingDay entre 'Habilitado' y 'Deshabilitado'
-  const toggleDayStatus = (date) => {
-    setWorkingDays((prev) =>
-      prev.map((day) => {
+  const toggleDayStatus = (date, explicitStatus = null) => {
+    setWorkingDays((prev) => {
+      const exists = prev.some((day) => day.date === date);
+      if (!exists) {
+        const dObj = new Date(`${date}T00:00:00`);
+        const dayOfWeek = DAY_NAMES_ES[dObj.getDay()];
+        return [
+          ...prev,
+          {
+            id: `wd_${date}`,
+            date,
+            dayOfWeek,
+            status: explicitStatus || 'Deshabilitado',
+            startTime: '08:00',
+            endTime: '20:00',
+          },
+        ];
+      }
+      return prev.map((day) => {
         if (day.date === date) {
-          const nextStatus = day.status === 'Habilitado' ? 'Deshabilitado' : 'Habilitado';
+          const nextStatus = explicitStatus || (day.status === 'Habilitado' ? 'Deshabilitado' : 'Habilitado');
           return { ...day, status: nextStatus };
         }
         return day;
-      })
-    );
+      });
+    });
   };
 
   // Actualiza el horario de inicio/fin de un día específico

@@ -42,6 +42,7 @@ export const RegisterPage = () => {
   });
 
   const [error, setError] = useState('');
+  const [successCode, setSuccessCode] = useState('');
   const [openVerifyModal, setOpenVerifyModal] = useState(false);
   const [inputCode, setInputCode] = useState('');
   const [timeLeft, setTimeLeft] = useState(300); // 5 minutos = 300s
@@ -84,7 +85,7 @@ export const RegisterPage = () => {
 
     setLoading(true);
     try {
-      await register({
+      const code = await register({
         nombre: formData.nombre.trim(),
         apellido: formData.apellido.trim(),
         email: formData.email,
@@ -92,7 +93,8 @@ export const RegisterPage = () => {
         password: formData.password,
       });
 
-      setInputCode('');
+      setSuccessCode(code || '');
+      setInputCode(code || '');
       setTimeLeft(300);
       setVerifyError('');
       setOpenVerifyModal(true);
@@ -122,7 +124,11 @@ export const RegisterPage = () => {
   const handleResend = async () => {
     setVerifyError('');
     try {
-      await resendCode();
+      const newCode = await resendCode();
+      if (newCode) {
+        setSuccessCode(newCode);
+        setInputCode(newCode);
+      }
       setTimeLeft(300);
     } catch (err) {
       setVerifyError(err.message || 'Error al reenviar el código.');
@@ -330,9 +336,15 @@ export const RegisterPage = () => {
             Se ha enviado un código de confirmación a <strong>{formData.email}</strong>. El código expirará en 5 minutos.
           </Alert>
 
-          <Alert severity="warning" sx={{ mb: 2 }}>
-            En desarrollo el mail no llega: copiá el código de la consola del backend (línea MAIL SIMULADO).
-          </Alert>
+          {successCode ? (
+            <Alert severity="success" sx={{ mb: 2, background: withAlpha(BRAND_COLORS.successGreen, 0.15) }}>
+              Código de demostración generado: <strong>{successCode}</strong>
+            </Alert>
+          ) : (
+            <Alert severity="warning" sx={{ mb: 2 }}>
+              En desarrollo el mail no llega: copiá el código de la consola del backend (línea MAIL SIMULADO).
+            </Alert>
+          )}
 
           {verifyError && (
             <Alert severity="error" sx={{ mb: 2 }}>

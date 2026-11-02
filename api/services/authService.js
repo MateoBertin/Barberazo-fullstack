@@ -110,6 +110,7 @@ async function register({ nombre, apellido, email, password, telefono }) {
 
   // El mail se envía DESPUÉS del commit: si falla, el usuario ya existe y puede pedir reenvío.
   await emailService.enviarCodigoConfirmacion(email, codigo);
+  return codigo;
 }
 
 // El cliente ingresa el código recibido y su estado pasa a ACTIVO
@@ -158,7 +159,9 @@ async function resendConfirmationCode({ email }) {
   if (profile && profile.estado === 'REGISTRADO') {
     const codigo = await saveCode(pool, user.id_usuario, 'CONFIRMACION');
     await emailService.enviarCodigoConfirmacion(email, codigo);
+    return codigo;
   }
+  return null;
 }
 
 async function login({ email, password }) {

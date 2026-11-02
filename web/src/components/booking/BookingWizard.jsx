@@ -111,26 +111,33 @@ export const BookingWizard = () => {
         setEmployees(contextData.employees || []);
       }
 
-      // 3. Cargar días habilitados con fallback a contextData
+      // 3. Cargar días habilitados combinando el calendario base con las configuraciones de MySQL
       try {
         const fechaData = await fechaService.getAll();
+        const baseDays = contextData.workingDays || [];
         if (fechaData && fechaData.length > 0) {
-          setWorkingDays(
+          const dbMap = new Map(
             fechaData.map((d) => {
-              const dateObj = new Date(`${d.fecha || d.date}T00:00:00`);
+              const dateStr = d.fecha || d.date;
+              const dateObj = new Date(`${dateStr}T00:00:00`);
               const dayOfWeek = DAY_NAMES_ES[dateObj.getDay()];
-              return {
-                id: d.id_dia_trabajo || d.id || `wd_${d.fecha}`,
-                date: d.fecha || d.date,
-                dayOfWeek,
-                startTime: (d.hora_inicio || d.startTime || '08:00').substring(0, 5),
-                endTime: (d.hora_fin || d.endTime || '20:00').substring(0, 5),
-                status: d.estado === 'DESHABILITADO' ? 'Deshabilitado' : 'Habilitado',
-              };
+              return [
+                dateStr,
+                {
+                  id: d.id_dia_trabajo || d.id || `wd_${dateStr}`,
+                  date: dateStr,
+                  dayOfWeek,
+                  startTime: (d.hora_inicio || d.startTime || '08:00').substring(0, 5),
+                  endTime: (d.hora_fin || d.endTime || '20:00').substring(0, 5),
+                  status: d.estado === 'DESHABILITADO' ? 'Deshabilitado' : 'Habilitado',
+                },
+              ];
             })
           );
+          const merged = baseDays.map((day) => dbMap.get(day.date) || day);
+          setWorkingDays(merged);
         } else {
-          setWorkingDays(contextData.workingDays || []);
+          setWorkingDays(baseDays);
         }
       } catch {
         setWorkingDays(contextData.workingDays || []);

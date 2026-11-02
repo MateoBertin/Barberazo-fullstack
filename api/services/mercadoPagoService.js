@@ -30,8 +30,19 @@ async function getMisMultas(user) {
     throw createError('Perfil de cliente no encontrado', 404);
   }
 
-  const multas = await multaRepository.findByClienteId(cliente.id_cliente);
-  const pendingFine = await multaRepository.findPendingByClienteId(cliente.id_cliente);
+  let multas = await multaRepository.findByClienteId(cliente.id_cliente);
+  let pendingFine = await multaRepository.findPendingByClienteId(cliente.id_cliente);
+
+  if ((cliente.estado === 'MULTADO' || cliente.contador_strikes >= 3) && !pendingFine) {
+    await multaRepository.create({
+      id_cliente: cliente.id_cliente,
+      id_turno: null,
+      monto: 3000.00,
+      motivo: 'Acumulación de 3 strikes por inasistencias o cancelaciones tardías',
+    });
+    multas = await multaRepository.findByClienteId(cliente.id_cliente);
+    pendingFine = await multaRepository.findPendingByClienteId(cliente.id_cliente);
+  }
 
   return {
     cliente: {

@@ -21,14 +21,18 @@ import {
   CreditCard as CardIcon,
   AccountBalanceWallet as WalletIcon,
 } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 import { pagoService } from '../../services/pagoService';
 import { useData } from '../../context/DataContext';
+import { useAuth } from '../../context/AuthContext';
 import { useSnackbar } from 'notistack';
 import { BRAND_COLORS, withAlpha } from '../../theme';
 
 export const MercadoPagoModal = ({ open, onClose, fine, clientId, onPaymentSuccess }) => {
   const { payFine } = useData();
+  const { updateUserState } = useAuth();
   const { enqueueSnackbar } = useSnackbar();
+  const navigate = useNavigate();
 
   // Estados locales en inglés (según apuntes de React)
   const [paymentMethod, setPaymentMethod] = useState('account_money');
@@ -48,7 +52,12 @@ export const MercadoPagoModal = ({ open, onClose, fine, clientId, onPaymentSucce
       // 1. Confirmar pago en el backend MySQL
       await pagoService.confirmarPago(fine.id, methodLabel);
 
-      // 2. Actualizar estado local si está disponible
+      // 2. Actualizar sesión del usuario logueado inmediatamente (strikes = 0, estado = Activo)
+      if (updateUserState) {
+        updateUserState({ strikes: 0, contador_strikes: 0, estado: 'Activo' });
+      }
+
+      // 3. Actualizar estado local si está disponible
       if (payFine) {
         try {
           payFine(fine.id, clientId);
@@ -57,19 +66,19 @@ export const MercadoPagoModal = ({ open, onClose, fine, clientId, onPaymentSucce
         }
       }
 
-      setIsPaymentApproved(true);
       enqueueSnackbar('¡Pago procesado exitosamente! Tu cuenta ha sido rehabilitada.', {
         variant: 'success',
       });
 
-      if (onPaymentSuccess) {
-        onPaymentSuccess();
-      }
+      // 4. Cerrar el modal y redirigir al menú inicial de turnos para sacar un turno nuevo
+      setIsProcessing(false);
+      setIsPaymentApproved(false);
+      onClose();
+      navigate('/cliente/turnos');
     } catch (error) {
       enqueueSnackbar(error.message || 'Error al procesar el pago con Mercado Pago', {
         variant: 'error',
       });
-    } finally {
       setIsProcessing(false);
     }
   };
